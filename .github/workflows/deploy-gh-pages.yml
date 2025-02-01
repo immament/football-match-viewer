@@ -43,9 +43,6 @@ jobs:
         run: yarn test
       - name: Build
         run: yarn build-ghp
-      - shell: bash
-        run: |
-          mv assets/* dist/assets/
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
