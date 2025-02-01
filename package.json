@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "depc": "depcruise src --ts-config tsconfig.app.json"
+    "depc": "depcruise src --ts-config tsconfig.app.json",
+    "build-ghp": "tsc && vite build --base=/football-match-viewer"
   },
   "dependencies": {
     "@react-three/drei": "^9.121.4",
