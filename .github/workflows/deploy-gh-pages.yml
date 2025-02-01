@@ -43,6 +43,9 @@ jobs:
         run: yarn test
       - name: Build
         run: yarn build-ghp
+      - shell: bash
+        run: |
+          mv public/* dist/
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
