@@ -28,7 +28,7 @@ type GLTFResult = GLTF & {
   animations: [];
 };
 
-const MODEL_URL = "/models/stadium-transformed.glb";
+const MODEL_URL = "models/stadium-transformed.glb";
 
 export function Stadium(
   props: { hideStadium?: boolean } & JSX.IntrinsicElements["group"]

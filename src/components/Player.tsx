@@ -16,7 +16,7 @@ import { useMaterialClone } from "./useMaterialClone";
 import { ContainerContext } from "/app/Container.context";
 import { useAppSelector } from "/app/withTypes";
 
-const MODEL_URL = "/models/player-transformed.glb";
+const MODEL_URL = "models/player-transformed.glb";
 
 // let lastTransitionId = 0;
 
