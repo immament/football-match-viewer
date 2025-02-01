@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Match Viewer - React</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css"
+    />
+  </head>
+  <body style="background-color: #25292a">
+    <header class="container">
+      <h2>Match Viewer</h2>
+      <div class="debug-options">
+        <a href="?dbg" class="debug-mode">Debug</a>
+      </div>
+    </header>
+    <article id="main" class="container">
+      <div id="root">&nbsp;</div>
+    </article>
+
+    <footer class="container">
+      <div>Rotate camera - Left Mouse Button</div>
+      <div>Zoom - Mouse Scroll Wheel</div>
+      <div>
+        Move camera (not work in follow object mode) - Right Mouse Button / Ctrl
+        + Left Mouse Button
+      </div>
+      <div class="github">
+        <a href="https://github.com/immament/match-viewer" target="_blank">
+          <i class="bx bxl-github"></i>
+          https://github.com/immament/match-viewer
+        </a>
+      </div>
+    </footer>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

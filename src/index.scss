@@ -1,0 +1,102 @@
+html {
+  height: 100%;
+  scrollbar-color: #40494b #122b00;
+  scrollbar-width: thin;
+}
+body {
+  margin: 0;
+  font-size: 12px;
+  font-family: "Roboto", "Arial", sans-serif;
+  color: #c0c0c0;
+  box-sizing: border-box;
+  background-color: #25292a;
+  height: 100%;
+
+  &.debug {
+    a.debug-mode {
+      display: none;
+    }
+  }
+
+  & > header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .debug-options {
+      text-align: end;
+      a.debug-mode {
+        color: #999;
+        text-decoration: none;
+      }
+    }
+  }
+  & > footer {
+    padding: 0.5em;
+    & > div {
+      margin-bottom: 0.5em;
+    }
+
+    .github {
+      a {
+        color: #c0c0c0;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        column-gap: 8px;
+      }
+    }
+  }
+}
+
+$container-max-widths: (
+  0: calc(100% - 8px),
+  576px: 540px,
+  768px: 720px,
+  992px: 960px,
+  1200px: 1140px,
+  1400px: 1320px,
+);
+
+.container {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@each $breakpoint, $container-max-width in $container-max-widths {
+  @media (min-width: $breakpoint) {
+    .container {
+      width: $container-max-width;
+    }
+  }
+}
+
+article#main {
+  height: 80vh;
+  min-width: 240px;
+  position: relative;
+}
+
+body.debug {
+  article#main {
+    margin-left: 0;
+    // max-width: calc(100% - var(--lil-gui-width) - 20px);
+    // min-width: 400px;
+  }
+}
+div#root {
+  width: 100%;
+  height: 100%;
+  // overflow: hidden;
+  position: relative;
+  background-color: #122b00;
+}
+// div#world {
+//   width: 100%;
+//   height: 100%;
+//   background-color: #122b00;
+
+//   .label {
+//     background-color: #ffffff44;
+//     color: #444;
+//   }
+// }

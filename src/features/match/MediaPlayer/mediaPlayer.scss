@@ -1,0 +1,216 @@
+div.mv-control-bar {
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  overflow-x: clip;
+
+  background: none;
+  background-image: linear-gradient(0deg, #122b00, #0000);
+
+  display: flex;
+  flex-direction: column;
+
+  & {
+    // visible
+    opacity: 1;
+    transition:
+      visibility 0.1s,
+      opacity 0.1s;
+    visibility: visible;
+  }
+
+  .mv-progress-line {
+    display: flex;
+    align-items: center;
+    height: 30px;
+
+    .mv-time {
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      color: #000;
+    }
+
+    .mv-progress-control {
+      //height: 30px;
+      --progress-height: 0.4em;
+      position: relative;
+      width: 100%;
+      font-size: 1.3em;
+      // pointer-events: none;
+
+      margin: 0 8px;
+
+      cursor: pointer;
+      min-width: 4em;
+      touch-action: none;
+      user-select: none;
+
+      .mv-progress-holder {
+        height: var(--progress-height);
+        width: 100%;
+        transition: all 0.2s;
+        background-color: #73859f80;
+
+        .mv-play-progress {
+          position: absolute;
+          height: var(--progress-height);
+          margin: 0;
+          padding: 0;
+          width: 0;
+          border-right: 1px solid #222;
+          background-color: #bf3b4d;
+
+          .mv-time-tooltip {
+            right: 0;
+          }
+        }
+
+        .mv-hover-display {
+          position: absolute;
+          display: none;
+          height: var(--progress-height);
+          width: 1px;
+          z-index: 1;
+          pointer-events: none;
+          background-color: #000;
+          & .mv-time-tooltip {
+            background-color: #000c;
+            color: #fff;
+          }
+        }
+        .mv-time-tooltip {
+          background-color: #fffc;
+          border-radius: 0.3em;
+          color: #000;
+          float: right;
+          font-family: Arial, Helvetica, sans-serif;
+          padding: 6px 8px 8px;
+          pointer-events: none;
+          position: absolute;
+          top: -3.4em;
+          visibility: hidden;
+          z-index: 1;
+        }
+      }
+
+      // inactive
+      // .mv-mouse-display {
+      //     opacity: 0;
+      //     transition: visibility 1s, opacity 1s;
+      //     visibility: hidden;
+      // }
+
+      &:hover {
+        --progress-height: 0.5em;
+        &:before {
+          text-shadow: 0 0 1em #fff;
+        }
+
+        .mv-time-tooltip {
+          display: block;
+          font-size: 0.6em;
+          visibility: visible;
+        }
+        .mv-hover-display {
+          display: block;
+          opacity: 1;
+          transition:
+            visibility 1s,
+            opacity 1s;
+          visibility: visible;
+        }
+      }
+    }
+  }
+  .mv-buttons-line {
+    display: flex;
+    justify-content: space-between;
+    height: 35px;
+    margin-bottom: 2px;
+  }
+
+  .mv-buttons-group {
+    display: flex;
+  }
+
+  button {
+    appearance: none;
+    background: none;
+    border: none;
+    display: inline-block;
+    text-decoration: none;
+    text-transform: none;
+    transition: none;
+    // mv-control
+    height: 100%;
+    margin: 0;
+    padding: 0 0.5em;
+    position: relative;
+    text-align: center;
+    // width: 4em;
+
+    cursor: pointer;
+
+    i {
+      font-size: 1.75em;
+    }
+
+    &.mv-with-label {
+      display: inline-flex;
+      align-items: center;
+      column-gap: 0.2em;
+    }
+    &:focus-visible {
+      outline: #08240880 solid 1px;
+      border-radius: 4px;
+    }
+  }
+  input[type="checkbox"] {
+    accent-color: #82a568;
+    transform: scale(1.2);
+
+    &:not(:checked) {
+      opacity: 0.3;
+    }
+  }
+  .mv-popup-menu {
+    background-color: #122b00;
+    color: #aaa;
+    position: absolute;
+    bottom: 38px;
+    right: 0;
+    padding: 8px 0;
+    display: none;
+
+    font-size: 14px;
+
+    .mv-menuheader {
+      white-space: nowrap;
+      padding: 0.5em 1em;
+      border-bottom: 1px solid #ffffff20;
+    }
+    .mv-menucontent {
+      max-height: 60vh;
+      overflow-y: auto;
+      scrollbar-color: #25292a #122b00;
+      scrollbar-width: thin;
+    }
+    .mv-menuitem {
+      white-space: nowrap;
+      cursor: pointer;
+      padding: 0.5em 1em;
+      &.mv-menuitem-selected {
+        background-color: #82a568;
+        color: #122b00;
+      }
+      &:hover {
+        background-color: #95d16a;
+        color: #122b00;
+      }
+    }
+  }
+}
