@@ -19,7 +19,7 @@ type BallProps = unknown;
 export const Ball = forwardRef<Mesh, BallProps>(
   (_: BallProps, ref: ForwardedRef<Mesh>) => {
     const ballRef = useRef<Mesh | null>(null);
-    const texture = useTexture("/models/ball.jpg");
+    const texture = useTexture("models/ball.jpg");
     const updateMediaPlayerTime = useMediaPlayerZuStore(
       (state) => state.updateTime
     );
