@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Group, Mesh } from "three";
-import { fetchMatchById, selectStatus } from "../features/match/match.slice";
-import { Ball } from "./Ball";
-import { useMatchOrbitControls } from "./MatchOrbitControls";
-import { Player } from "./Player";
+import { useMatchOrbitControls } from "../../world/MatchOrbitControls";
+import { fetchMatchById, selectStatus } from "../match.slice";
 import { teams } from "./__mockData__/teams.data";
+import { Ball } from "./Ball";
+import { Player } from "./Player";
 import { useAppDispatch, useAppSelector } from "/app/withTypes";
 
 export const Match = () => {

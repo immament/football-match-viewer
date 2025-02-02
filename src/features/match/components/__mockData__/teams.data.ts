@@ -1,4 +1,4 @@
-import { PlayerModel, Team, TeamStyleModel } from "../teams.model";
+import { PlayerModel, Team, TeamStyleModel } from "../../teams.model";
 
 const teamStyles: [TeamStyleModel, TeamStyleModel] = [
   {

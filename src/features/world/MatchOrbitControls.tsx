@@ -6,7 +6,7 @@ import {
   FOLLOW_BALL_IDX,
   selectFollowedObjectId,
   selectViewFromObject,
-} from "../features/match/match.slice";
+} from "../match/match.slice";
 import { ViewFromTarget } from "./ViewFromTarget";
 import { useAppSelector } from "/app/withTypes";
 

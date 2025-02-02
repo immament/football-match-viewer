@@ -1,10 +1,10 @@
-import { PopumMenuItem, PopupMenu } from "./PopupMenu";
 import { useMemo, useState } from "react";
-import { useAppDispatch, useAppSelector } from "/app/withTypes";
 import {
-  changePlaybackSpeed as changePlaybackSpeed,
-  selectPlaybackSpeed
-} from "../match.slice";
+  changePlaybackSpeed,
+  selectPlaybackSpeed,
+} from "../../../match/match.slice";
+import { PopumMenuItem, PopupMenu } from "./PopupMenu";
+import { useAppDispatch, useAppSelector } from "/app/withTypes";
 
 export function PlaybackSpeedButton() {
   const playbackSpeed = useAppSelector(selectPlaybackSpeed);
@@ -22,7 +22,7 @@ export function PlaybackSpeedButton() {
         { title: "Normal", value: 1 },
         { title: "x2", value: 2 },
         { title: "x4", value: 4 },
-        { title: "x8", value: 8 }
+        { title: "x8", value: 8 },
       ] as const,
     []
   );

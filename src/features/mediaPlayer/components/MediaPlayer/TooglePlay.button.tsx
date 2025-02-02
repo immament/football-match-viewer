@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { selectPaused, tooglePlay } from "../match.slice";
+import { selectPaused, tooglePlay } from "../../../match/match.slice";
 import { useAppDispatch, useAppSelector } from "/app/withTypes";
 
 export function TooglePlayButton() {

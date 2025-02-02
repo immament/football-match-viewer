@@ -5,9 +5,9 @@ import { Suspense, useContext, useState } from "react";
 import "./App.scss";
 import { ContainerContext } from "./app/Container.context";
 import { round } from "./app/utils";
-import { World } from "./components/World";
-import { MediaHeaderComponent } from "./features/match/MediaHeader/MediaHeader.component";
-import { MediaPlayerComponent } from "./features/match/MediaPlayer/MediaPlayer.component";
+import { MediaHeaderComponent } from "./features/mediaPlayer/components/MediaHeader/MediaHeader.component";
+import { MediaPlayerComponent } from "./features/mediaPlayer/components/MediaPlayer/MediaPlayer.component";
+import { World } from "./features/world/World";
 
 function App() {
   const [dpr, setDpr] = useState(1.5);

@@ -1,6 +1,6 @@
 import { ContactShadows, Environment, Sky } from "@react-three/drei";
 import { useControls } from "leva";
-import { Match } from "./Match";
+import { Match } from "../match/components/Match";
 import { Stadium } from "./Stadium";
 
 export const World = () => {

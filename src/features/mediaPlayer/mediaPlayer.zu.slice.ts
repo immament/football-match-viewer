@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { formatTime } from "./formatTime";
+import { formatTime } from "../match/formatTime";
 
 //import { immer } from 'zustand/middleware/immer'
 

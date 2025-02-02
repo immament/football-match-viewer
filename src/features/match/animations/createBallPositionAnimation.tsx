@@ -4,10 +4,7 @@ import {
   LoopOnce,
   VectorKeyframeTrack,
 } from "three";
-import {
-  BallPositionsConfig,
-  MATCH_TIME_SCALE,
-} from "../features/match/animations/positions.utils";
+import { BallPositionsConfig, MATCH_TIME_SCALE } from "./positions.utils";
 import { logger } from "/app/logger";
 
 export function createBallPositionAnimation(

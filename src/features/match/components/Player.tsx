@@ -3,16 +3,16 @@ import { useFrame, useGraph } from "@react-three/fiber";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { ColorRepresentation, Group } from "three";
 import { SkeletonUtils } from "three-stdlib";
-import { setupPlayerAnimations } from "../features/match/animations/setupPlayer";
+import { setupPlayerAnimations } from "../animations/setupPlayer";
 import {
   selectMatchData,
   selectPaused,
   selectPlaybackSpeed,
   selectStartTime,
-} from "../features/match/match.slice";
-import { GLTFResult } from "./playerGltf.model";
+} from "../match.slice";
+import { GLTFResult } from "../playerGltf.model";
+import { useMaterialClone } from "../useMaterialClone";
 import { PlayerLabel } from "./PlayerLabel";
-import { useMaterialClone } from "./useMaterialClone";
 import { ContainerContext } from "/app/Container.context";
 import { useAppSelector } from "/app/withTypes";
 

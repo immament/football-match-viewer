@@ -5,7 +5,7 @@ import {
   FOLLOW_BALL_IDX,
   selectFollowedObjectId,
   selectViewFromObject,
-} from "../match.slice";
+} from "../../../match/match.slice";
 import { PopumMenuItem, PopupMenu } from "./PopupMenu";
 import { useAppDispatch, useAppSelector } from "/app/withTypes";
 

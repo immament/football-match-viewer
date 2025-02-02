@@ -1,9 +1,9 @@
 import { createContext } from "react";
 
 export type ContainerContextProps = {
-  world?: HTMLElement;
+  // world?: HTMLElement;
   mediaPlayer: HTMLElement;
-  root?: HTMLElement;
+  // root?: HTMLElement;
   debugMode: boolean;
 };
 

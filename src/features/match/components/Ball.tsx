@@ -2,14 +2,14 @@ import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { ForwardedRef, forwardRef, useEffect, useRef, useState } from "react";
 import { AnimationAction, AnimationMixer, Mesh, Vector3 } from "three";
+import { useMediaPlayerZuStore } from "../../mediaPlayer/mediaPlayer.zu.slice";
+import { createBallPositionAnimation } from "../animations/createBallPositionAnimation";
 import {
   selectMatchData,
   selectPaused,
   selectPlaybackSpeed,
   selectStartTime,
-} from "../features/match/match.slice";
-import { useMediaPlayerZuStore } from "../features/match/match.zu.slice";
-import { createBallPositionAnimation } from "./createBallPositionAnimation";
+} from "../match.slice";
 import { useAppSelector } from "/app/withTypes";
 
 export const BALL_RADIUS = 0.2;

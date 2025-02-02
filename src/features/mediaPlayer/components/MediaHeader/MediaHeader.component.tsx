@@ -3,8 +3,8 @@ import {
   selectAwayTeamName,
   selectHomeGoals,
   selectHomeTeamName,
-} from "../match.slice";
-import { useMediaPlayerZuStore } from "../match.zu.slice";
+} from "../../../match/match.slice";
+import { useMediaPlayerZuStore } from "../../mediaPlayer.zu.slice";
 import "./mediaHeader.scss";
 import { useAppSelector } from "/app/withTypes";
 

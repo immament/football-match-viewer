@@ -7,9 +7,9 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { formatTime } from "../formatTime";
-import { gotoPercent, selectDuration } from "../match.slice";
-import { useMediaPlayerZuStore } from "../match.zu.slice";
+import { formatTime } from "../../../match/formatTime";
+import { gotoPercent, selectDuration } from "../../../match/match.slice";
+import { useMediaPlayerZuStore } from "../../mediaPlayer.zu.slice";
 import { debounce } from "/app/utils";
 import { useAppDispatch, useAppSelector } from "/app/withTypes";
 
