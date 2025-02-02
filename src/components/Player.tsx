@@ -10,7 +10,7 @@ import {
   selectPlaybackSpeed,
   selectStartTime,
 } from "../features/match/match.slice";
-import { GLTFResult } from "./playerGltf";
+import { GLTFResult } from "./playerGltf.model";
 import { PlayerLabel } from "./PlayerLabel";
 import { useMaterialClone } from "./useMaterialClone";
 import { ContainerContext } from "/app/Container.context";

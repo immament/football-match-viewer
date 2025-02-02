@@ -1,5 +1,5 @@
 import { AnimationAction, AnimationMixer, Object3D } from "three";
-import { actionNames } from "../../../components/playerGltf";
+import { actionNames } from "../../../components/playerGltf.model";
 import { PlayerId } from "../PlayerId";
 import { createMoveActions } from "./actions.factory";
 import { PlayerActions } from "./PlayerActions";
