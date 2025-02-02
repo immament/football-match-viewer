@@ -16,9 +16,7 @@ div.mv-control-bar {
   & {
     // visible
     opacity: 1;
-    transition:
-      visibility 0.1s,
-      opacity 0.1s;
+    transition: visibility 0.1s, opacity 0.1s;
     visibility: visible;
   }
 
@@ -118,9 +116,7 @@ div.mv-control-bar {
         .mv-hover-display {
           display: block;
           opacity: 1;
-          transition:
-            visibility 1s,
-            opacity 1s;
+          transition: visibility 1s, opacity 1s;
           visibility: visible;
         }
       }
@@ -203,6 +199,8 @@ div.mv-control-bar {
       white-space: nowrap;
       cursor: pointer;
       padding: 0.5em 1em;
+      text-align: start;
+
       &.mv-menuitem-selected {
         background-color: #82a568;
         color: #122b00;
@@ -211,6 +209,9 @@ div.mv-control-bar {
         background-color: #95d16a;
         color: #122b00;
       }
+    }
+    .mv-menuitem-separator {
+      border-bottom: 1px solid #ffffff20;
     }
   }
 }

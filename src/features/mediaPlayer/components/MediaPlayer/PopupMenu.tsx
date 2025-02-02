@@ -1,10 +1,17 @@
 import { MouseEvent, useCallback, useEffect, useMemo, useRef } from "react";
 
-export type PopumMenuItem<T extends string | number = string> = {
+export type PopupMenuItem<T extends string | number = string> =
+  | PopupMenuLink<T>
+  | PopupMenuSeparator;
+
+export type PopupMenuLink<T extends string | number = string> = {
   title: string;
   value: T;
   selected?: boolean;
+  type?: undefined;
+  disabled?: boolean;
 };
+export type PopupMenuSeparator = { type: "separator" };
 
 export function PopupMenu<T extends string | number = string>({
   title,
@@ -16,7 +23,7 @@ export function PopupMenu<T extends string | number = string>({
 }: {
   title: string;
   currentValue: T;
-  items: PopumMenuItem<T>[];
+  items: PopupMenuItem<T>[];
   visible: boolean;
   onBlur: () => void;
   onItemSelected: (value: T) => void;
@@ -38,18 +45,23 @@ export function PopupMenu<T extends string | number = string>({
   const menuContent = useMemo(() => {
     return (
       <>
-        {items.map(({ title, value }) => (
-          <div
-            className={
-              "mv-menuitem" +
-              (currentValue === value ? " mv-menuitem-selected" : "")
-            }
-            key={value}
-            onClick={(ev) => itemClicked(ev, value)}
-          >
-            {title}
-          </div>
-        ))}
+        {items.map((item, index) =>
+          item.type === "separator" ? (
+            <div className="mv-menuitem-separator" key={"s-" + index} />
+          ) : (
+            <div
+              className={
+                "mv-menuitem" +
+                (currentValue === item.value ? " mv-menuitem-selected" : "") +
+                (item.disabled ? " mv-menuitem-disabled" : "")
+              }
+              key={item.value}
+              onClick={(ev) => !item.disabled && itemClicked(ev, item.value)}
+            >
+              {item.title}
+            </div>
+          )
+        )}
       </>
     );
   }, [currentValue, itemClicked, items]);

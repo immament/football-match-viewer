@@ -85,7 +85,7 @@ export function rotationAngle(direction: number, newDirection: number): number {
 
   return angle;
 }
-export type MatchPositions = {
+export type MatchMovement = {
   ball: BallPositionsConfig;
   players: PlayerPositions[][];
   poses: RawPoseEvents[][];

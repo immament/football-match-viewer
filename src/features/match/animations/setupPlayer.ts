@@ -7,13 +7,13 @@ import { PlayerPoses } from "./PlayerPoses";
 import { PoseTypes } from "./Pose.model";
 import { PoseAction } from "./PoseAction";
 import { IPoseAction } from "./PoseAction.model";
-import { MatchPositions } from "./positions.utils";
+import { MatchMovement } from "./positions.utils";
 import { logger } from "/app/logger";
 
 export function setupPlayerAnimations(
   playerId: PlayerId,
   model: Object3D,
-  positionsConfig: MatchPositions,
+  positionsConfig: MatchMovement,
   rawActions: Record<string, AnimationAction | null>
 ) {
   const mixer = new AnimationMixer(model);

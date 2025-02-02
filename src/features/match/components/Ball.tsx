@@ -59,7 +59,7 @@ export const Ball = forwardRef<Mesh, BallProps>(
     }, [mixer, playbackSpeed]);
 
     const [prevDelta, setPrevDelta] = useState(0);
-    const _prevPosition = useRef<Vector3>(new Vector3(0, 0, 0));
+    const prevPosition = useRef<Vector3>(new Vector3(0, 0, 0));
 
     useFrame((_, delta) => {
       if (matchPaused) return;
@@ -67,24 +67,31 @@ export const Ball = forwardRef<Mesh, BallProps>(
       if (mixer && positionAnimation) {
         mixer.update(delta);
 
-        if (prevDelta && ballRef.current) {
-          // ball rotation (calculated for previous movement)
-          ballRef.current.rotation.x +=
-            (ballRef.current.position.z - _prevPosition.current.z) *
-            60 *
-            prevDelta;
-          ballRef.current.rotation.z +=
-            (_prevPosition.current.x - ballRef.current.position.x) *
-            60 *
-            prevDelta;
-          _prevPosition.current.copy(ballRef.current.position);
-        }
-        setPrevDelta(delta);
+        if (ballRef.current) animateBallRotation(delta, ballRef.current);
 
         updateMediaPlayerTime(Math.floor(mixer.time));
         // dispatch(updateTimeThunk(Math.floor(mixer.time)));
       }
     });
+    // ball rotation (calculated for previous movement)
+    function animateBallRotation(delta: number, ball: Mesh) {
+      if (prevDelta) {
+        ball.rotation.z -= rotation("x");
+        ball.rotation.x += rotation("z");
+        prevPosition.current.copy(ball.position);
+      }
+      setPrevDelta(delta);
+
+      function rotation(axe: "x" | "z") {
+        return Math.max(-0.2, Math.min(0.2, rawRotation(axe)));
+      }
+
+      function rawRotation(axe: "x" | "z") {
+        return (
+          (ball.position[axe] - prevPosition.current[axe]) * 30 * prevDelta
+        );
+      }
+    }
 
     return (
       <mesh

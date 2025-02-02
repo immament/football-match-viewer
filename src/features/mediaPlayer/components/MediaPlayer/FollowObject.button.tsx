@@ -1,24 +1,44 @@
-import { ChangeEvent, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import {
   changeFollowedObjectId,
   changeViewFromObject,
   FOLLOW_BALL_IDX,
+  selectAwayTeamSquadPlayers,
   selectFollowedObjectId,
+  selectHomeTeamSquadPlayers,
   selectViewFromObject,
 } from "../../../match/match.slice";
-import { PopumMenuItem, PopupMenu } from "./PopupMenu";
+import { MatchPlayer } from "../../../match/MatchData.model";
+import { PopupMenu, PopupMenuLink, PopupMenuSeparator } from "./PopupMenu";
 import { useAppDispatch, useAppSelector } from "/app/withTypes";
+
+type FollowObjectMenuLink = PopupMenuLink<number> & {
+  shortTitle: string;
+  allowViewFromObject?: boolean;
+};
+
+type FollowObjectMenuItem = FollowObjectMenuLink | PopupMenuSeparator;
 
 export function FollowObjectButton() {
   const dispatch = useAppDispatch();
-  const menuItems = useMemo(() => createMenuItems(), []);
+
+  const [menuItems, setMenuItems] = useState<FollowObjectMenuItem[]>();
+
   const followedObjectId = useAppSelector(selectFollowedObjectId);
   const viewFromObject = useAppSelector(selectViewFromObject);
+  const homeTeamSquadPlayers = useAppSelector(selectHomeTeamSquadPlayers);
+  const awayTeamSquadPlayers = useAppSelector(selectAwayTeamSquadPlayers);
+
+  useEffect(() => {
+    setMenuItems(createMenuItems(homeTeamSquadPlayers, awayTeamSquadPlayers));
+  }, [homeTeamSquadPlayers, awayTeamSquadPlayers]);
 
   const [popupMenuVisible, setPopupMenuVisible] = useState(false);
 
   const { labelText, viewFromObjectStyle } = useMemo(() => {
-    const selected = menuItems.find(({ value }) => value === followedObjectId);
+    const selected = menuItems?.find(
+      (item) => !item.type && item.value === followedObjectId
+    ) as FollowObjectMenuLink;
     return {
       labelText: selected?.shortTitle ?? "",
       viewFromObjectStyle: {
@@ -47,6 +67,7 @@ export function FollowObjectButton() {
     if (newValue !== viewFromObject) dispatch(changeViewFromObject(newValue));
   };
 
+  if (!menuItems) return null;
   return (
     <>
       <button
@@ -75,15 +96,15 @@ export function FollowObjectButton() {
     </>
   );
 
-  function createMenuItems() {
-    const items: (PopumMenuItem<number> & {
-      shortTitle: string;
-      allowViewFromObject?: boolean;
-    })[] = [];
-
-    initPlayerItems();
-
-    items.push(
+  function createMenuItems(
+    homePlayers: MatchPlayer[],
+    awayPlayers: MatchPlayer[]
+  ) {
+    const items: FollowObjectMenuItem[] = [
+      ...initPlayerItems(homePlayers, 1),
+      { type: "separator" },
+      ...initPlayerItems(awayPlayers, 12),
+      { type: "separator" },
       { title: "None", value: 0, shortTitle: "" },
       {
         title: "Ball",
@@ -91,20 +112,18 @@ export function FollowObjectButton() {
         shortTitle: "ball",
         selected: true,
         allowViewFromObject: true,
-      }
-    );
+      },
+    ];
 
     return items;
 
-    function initPlayerItems() {
-      for (let pl = 1; pl <= 22; pl++) {
-        items.push({
-          title: "Player " + pl,
-          value: pl,
-          shortTitle: pl.toString(),
-          allowViewFromObject: true,
-        });
-      }
+    function initPlayerItems(players: MatchPlayer[], startIdx: number) {
+      return players.map((pl, index) => ({
+        title: `${pl.shirtNumber}. ${pl.name}`,
+        value: startIdx + index,
+        shortTitle: pl.shirtNumber,
+        allowViewFromObject: true,
+      }));
     }
   }
 }

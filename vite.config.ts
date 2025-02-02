@@ -21,34 +21,16 @@ export default defineConfig({
     },
   },
   resolve: { alias: { "/app": "/src/app" } },
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://nd.footstar.org/match/get_data_nviewer.asp",
+        changeOrigin: true,
+        rewrite: (path) => {
+          // console.log("path", path, path.replace(/^\/api\//, "?jogo_id="));
+          return path.replace(/^\/api\//, "?jogo_id=");
+        },
+      },
+    },
+  },
 });
-
-// function manualChunks(id: string) {
-//   if (id.includes("node_modules")) {
-//     id = id.replace(/.+?\/node_modules\/(.+?)\/.*/, "$1");
-//     switch (id) {
-//       case "three":
-//       case "three-stdlib":
-//       case "@react-three":
-//         return id;
-//       case "react-dom":
-//       case "react-reconciler":
-//         return "react";
-//       case "@reduxjs":
-//       case "redux":
-//         return "redux";
-//       default:
-//         return "vendor";
-//     }
-//     // // if (id.includes("/@react-three")) return "react-three";
-//     // if (!patterns[id]) {
-//     //   console.log(id);
-//     //   patterns[id] = "ok";
-//     // }
-//     // if (id) return id;
-
-//     // return "vendor";
-//   }
-
-//   return null;
-// }

@@ -17,6 +17,7 @@
     "@react-three/fiber": "^8.17.12",
     "@reduxjs/toolkit": "^2.5.1",
     "fast-xml-parser": "^4.5.1",
+    "he": "^1.2.0",
     "leva": "^0.10.0",
     "loglevel": "^1.9.2",
     "loglevel-plugin-prefix": "^0.8.4",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/he": "^1.2.3",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.1",
     "@types/three": "^0.172.0",

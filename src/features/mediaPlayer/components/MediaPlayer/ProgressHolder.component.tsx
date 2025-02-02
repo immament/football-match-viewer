@@ -33,19 +33,15 @@ export function ProgressHolderComponent() {
     x?: string;
     visibility: "visible" | "hidden";
     text?: string;
-    offsetX?: string;
   }>({ visibility: "hidden" });
 
+  const [hoverTooltipOffsetX, setHoverTooltipOffsetX] = useState<string>();
   const [timeTooltipOffsetX, setTimeTooltipOffsetX] = useState<string>();
 
   useLayoutEffect(() => {
     const offsetX = fixTooltipPosition2(hoverTooltipRef.current);
-    if (offsetX === undefined) return;
-    setHoverTooltip({
-      ...hoverTooltip,
-      offsetX: `${offsetX}px`,
-    });
-  }, [hoverTooltip, hoverTooltip.x]);
+    if (offsetX) setHoverTooltipOffsetX(`${offsetX}px`);
+  }, [hoverTooltip.x]);
 
   const onProgressResize: ResizeObserverCallback = useCallback(() => {
     if (!timeTooltipRef.current) return;
@@ -81,12 +77,11 @@ export function ProgressHolderComponent() {
         if (offsetX >= 0 && offsetX <= progressWidth) {
           const displayTime = percentToDisplayTime(offsetX / progressWidth);
           if (displayTime) {
-            setHoverTooltip((state) => ({
+            setHoverTooltip({
               visibility: "visible",
               x: `${offsetX.toFixed()}px`,
               text: displayTime,
-              offsetX: state.offsetX,
-            }));
+            });
             return;
           }
         }
@@ -124,7 +119,7 @@ export function ProgressHolderComponent() {
               aria-hidden="true"
               style={{
                 visibility: hoverTooltip.visibility,
-                right: hoverTooltip.offsetX,
+                right: hoverTooltipOffsetX,
               }}
               ref={hoverTooltipRef}
             >

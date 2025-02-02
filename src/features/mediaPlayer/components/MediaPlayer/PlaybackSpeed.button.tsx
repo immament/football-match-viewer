@@ -3,7 +3,7 @@ import {
   changePlaybackSpeed,
   selectPlaybackSpeed,
 } from "../../../match/match.slice";
-import { PopumMenuItem, PopupMenu } from "./PopupMenu";
+import { PopupMenu, PopupMenuItem } from "./PopupMenu";
 import { useAppDispatch, useAppSelector } from "/app/withTypes";
 
 export function PlaybackSpeedButton() {
@@ -16,7 +16,7 @@ export function PlaybackSpeedButton() {
     return playbackSpeed !== 1 ? `x${playbackSpeed}` : "";
   }, [playbackSpeed]);
 
-  const items: PopumMenuItem<number>[] = useMemo(
+  const items: PopupMenuItem<number>[] = useMemo(
     () =>
       [
         { title: "Normal", value: 1 },

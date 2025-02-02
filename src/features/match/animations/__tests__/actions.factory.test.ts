@@ -8,7 +8,7 @@ import {
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { PlayerId } from "../../PlayerId";
 import { createMoveActions } from "../actions.factory";
-import { MatchPositions } from "../positions.utils";
+import { MatchMovement } from "../positions.utils";
 import { getPlayers as getAwayPlayers } from "./__testData__/awayPlayersPosition.big.mock";
 import { getBallPositions } from "./__testData__/ball.mock";
 import { getPlayers as getHomePlayers } from "./__testData__/homePlayersPosition.big.mock";
@@ -19,7 +19,7 @@ vi.mock("three");
 describe("actions factory", () => {
   let _mixer: AnimationMixer;
   const _playerId: PlayerId = { teamIdx: 0, playerIdx: 1 };
-  let positionsConfig: MatchPositions;
+  let positionsConfig: MatchMovement;
 
   beforeEach(() => {
     _mixer = new AnimationMixer({} as Object3D);

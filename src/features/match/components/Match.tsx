@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Group, Mesh } from "three";
 import { useMatchOrbitControls } from "../../world/MatchOrbitControls";
-import { fetchMatchById, selectStatus } from "../match.slice";
+import { fetchMatchById, selectMatchData, selectStatus } from "../match.slice";
 import { teams } from "./__mockData__/teams.data";
 import { Ball } from "./Ball";
 import { Player } from "./Player";
@@ -14,6 +14,13 @@ export const Match = () => {
 
   const dispatch = useAppDispatch();
   const matchStatus = useAppSelector(selectStatus);
+  const matchData = useAppSelector(selectMatchData);
+
+  useEffect(() => {
+    if (matchData) {
+      console.log(matchData);
+    }
+  }, [matchData]);
 
   useEffect(() => {
     if (matchStatus === "idle") {
@@ -41,3 +48,26 @@ export const Match = () => {
     </group>
   );
 };
+
+// function preapareTeams(matchData: MatchData) {
+//   const { homeTeam, awayTeam } = matchData;
+
+//   const homeTeamPlayers = Object.keys(homeTeam).map((teamIdx) => {
+//     return {
+//       team: Number(teamIdx),
+//       idx: 0,
+//       style: homeTeam[teamIdx],
+//     };
+//   });
+//   const awayTeamPlayers = Object.keys(awayTeam).map((teamIdx) => {
+//     return {
+//       team: Number(teamIdx),
+//       idx: 0,
+//       style: awayTeam[teamIdx],
+//     };
+//   });
+//   return {
+//     homeTeam: homeTeamPlayers,
+//     awayTeam: awayTeamPlayers,
+//   };
+// }

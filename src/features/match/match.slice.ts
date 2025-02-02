@@ -1,6 +1,7 @@
 import { PayloadAction } from "@reduxjs/toolkit";
-import { convertFsMatch, fetchFootstarMatchData } from "./fsApi/footstar.api";
-import { MatchData } from "./MatchData.model";
+import { fetchFootstarMatchData } from "./fsApi/footstar.api";
+import { mapFsMatch } from "./fsApi/footstar.mapper";
+import { MatchData, MatchPlayer, MatchTeam } from "./MatchData.model";
 import { createAppSlice } from "/app/createAppSlice";
 import { createAppAsyncThunk } from "/app/withTypes";
 
@@ -31,6 +32,7 @@ type MatchDataState = MatchData;
 interface TeamState {
   name: string;
   goals: number;
+  squadPlayers: MatchPlayer[];
 }
 
 const initialState: MatchSliceState = {
@@ -48,8 +50,8 @@ const initialState: MatchSliceState = {
     viewFromObject: false,
   },
   // TODO: move to different place
-  homeTeam: { name: "-", goals: 0 },
-  awayTeam: { name: "-", goals: 0 },
+  homeTeam: { name: "-", goals: 0, squadPlayers: [] },
+  awayTeam: { name: "-", goals: 0, squadPlayers: [] },
 };
 
 // If you are not using async thunks you can use the standalone `createSlice`.
@@ -92,15 +94,18 @@ export const matchSlice = createAppSlice({
       .addCase(fetchMatchById.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.matchData = { ...action.payload };
-        state.homeTeam = {
-          name: state.matchData.homeTeam.name,
-          goals: 0,
-        };
-        state.awayTeam = {
-          name: state.matchData.awayTeam.name,
-          goals: 0,
-        };
+        state.homeTeam = mapTeam(action.payload.homeTeam);
+        state.awayTeam = mapTeam(action.payload.awayTeam);
+        // TODO
         state.mediaPlayer.duration = 90 * 60;
+
+        function mapTeam(team: MatchTeam) {
+          return {
+            name: team.name,
+            goals: 0,
+            squadPlayers: [...team.squadPlayers],
+          };
+        }
       })
       .addCase(fetchMatchById.rejected, (state, action) => {
         state.status = "failed";
@@ -115,6 +120,8 @@ export const matchSlice = createAppSlice({
     selectAwayTeamName: (match) => match.awayTeam.name,
     selectHomeGoals: (match) => match.homeTeam.goals,
     selectAwayGoals: (match) => match.awayTeam.goals,
+    selectHomeTeamSquadPlayers: (match) => match.homeTeam.squadPlayers,
+    selectAwayTeamSquadPlayers: (match) => match.homeTeam.squadPlayers,
     //
     selectMatchData: (state) => state.matchData,
     // mediaPlayer
@@ -149,6 +156,8 @@ export const {
   selectAwayTeamName,
   selectHomeGoals,
   selectAwayGoals,
+  selectHomeTeamSquadPlayers,
+  selectAwayTeamSquadPlayers,
   //
   selectMatchData,
   // mediaPlayer
@@ -166,7 +175,7 @@ export const fetchMatchById = createAppAsyncThunk(
   "match/fetchMatchById",
   async (matchId: number) => {
     const fsMatch = await fetchFootstarMatchData(matchId || 1663808);
-    return convertFsMatch(fsMatch);
+    return mapFsMatch(fsMatch);
   },
   {
     condition(matchId, thunkApi) {
