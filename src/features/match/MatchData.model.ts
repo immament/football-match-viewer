@@ -1,13 +1,24 @@
 import { MatchMovement } from "./animations/positions.utils";
+import { MatchEventsMap } from "./matchEvents";
 
 export interface MatchData {
   positions: MatchMovement;
   homeTeam: MatchTeam;
   awayTeam: MatchTeam;
+  eventsMap: MatchEventsMap;
 }
+export type TeamColors = {
+  text: string;
+  shirt: string;
+  shorts: string;
+  socks: string;
+};
+
 export interface MatchTeam {
+  id: number;
   name: string;
   squadPlayers: MatchPlayer[];
+  colors: TeamColors;
 }
 
 export interface MatchPlayer {
@@ -21,20 +32,24 @@ export interface MatchPlayer {
   shoesColor: string; // @_cb
 }
 
-// export class MatchData {
-//   public get homeTeam(): Team {
-//     return this._homeTeam;
-//   }
-//   public get awayTeam(): Team {
-//     return this._awayTeam;
-//   }
-//   public get positions(): MatchPositions {
-//     return this._positions;
-//   }
-
-//   constructor(
-//     private _positions: MatchPositions,
-//     private _homeTeam: Team,
-//     private _awayTeam: Team
-//   ) {}
-// }
+export type GameEvent = { time: number } & (
+  | {
+      type:
+        | "gstart"
+        | "halftime"
+        | "gend"
+        | "extratime1"
+        | "extratime2"
+        | "penalties";
+    }
+  | {
+      type: "subst";
+      playerInId: number;
+      playerOutId: number;
+    }
+  | {
+      type: "goal" | "yellow";
+      teamId: number;
+      playerId: number;
+    }
+);

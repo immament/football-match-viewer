@@ -1,4 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
+import { getMatchData } from "./__mocks__/match.1663808.data";
 import { FootstarMatchData, FootstarMatchResponse } from "./footstar.api.model";
 import { logger } from "/app/logger";
 
@@ -17,10 +18,12 @@ export async function fetchFootstarMatchData(
   matchId: number,
   srcType: FetchSource = "devFs"
 ): Promise<FootstarMatchData> {
+  if (!matchId) {
+    return getMatchData(1);
+  }
   const url = apiUrl(matchId, srcType);
   fsLogger.info("fetch", matchId, url);
   const xml = await makeFetch(url);
-  // console.log(xml);
   const parser = createXmlParser();
   const matchResp = parser.parse(xml) as FootstarMatchResponse;
 

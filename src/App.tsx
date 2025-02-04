@@ -27,8 +27,8 @@ function App() {
       >
         <Canvas
           dpr={dpr}
-          shadows
-          camera={{ position: [0, 30, 30], fov: 65, near: 0.01, far: 200 }}
+          // shadows
+          camera={{ position: [0, 30, 30], fov: 65, near: 0.01, far: 500 }}
         >
           <World />
           <PerformanceMonitor

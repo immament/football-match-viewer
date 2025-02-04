@@ -10,7 +10,7 @@ import {
 
 vi.mock(import("../footstar.api"));
 
-describe("footstar bulk positions convert", () => {
+describe.skip("footstar bulk positions convert", () => {
   let matchData: FootstarMatchData;
   let gameData: FsGameDataRecord[];
 

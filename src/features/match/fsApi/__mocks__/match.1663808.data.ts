@@ -36,7 +36,7 @@ const match: FootstarMatchData = {
         _id: "away",
         _text: "ffffff",
         _shirt: "800000",
-        _shorts: "ffffff",
+        _shorts: "FF0000",
         _socks: "800000",
         _text2: "FFFFFF",
         _shirt2: "000000",

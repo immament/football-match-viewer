@@ -1,4 +1,4 @@
-import { useAnimations, useGLTF } from "@react-three/drei";
+import { Billboard, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { useFrame, useGraph } from "@react-three/fiber";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { ColorRepresentation, Group } from "three";
@@ -12,17 +12,16 @@ import {
 } from "../match.slice";
 import { GLTFResult } from "../playerGltf.model";
 import { useMaterialClone } from "../useMaterialClone";
-import { PlayerLabel } from "./PlayerLabel";
 import { ContainerContext } from "/app/Container.context";
+import { round } from "/app/utils";
 import { useAppSelector } from "/app/withTypes";
 
 const MODEL_URL = "models/player-transformed.glb";
 
-// let lastTransitionId = 0;
-
 type PlayerProps = {
   shirtColor: ColorRepresentation;
   shortsColor: ColorRepresentation;
+  bodyColor: ColorRepresentation;
   teamIdx: 0 | 1;
   playerIdx: number;
 };
@@ -30,6 +29,7 @@ type PlayerProps = {
 export function Player({
   shirtColor,
   shortsColor,
+  bodyColor,
   teamIdx,
   playerIdx,
   ...props
@@ -46,7 +46,10 @@ export function Player({
   const { nodes, materials } = useGraph(sceneClone) as GLTFResult;
 
   const shirtMaterial = useMaterialClone(materials.Ch38_body, shirtColor);
+  const bodyMaterial = useMaterialClone(materials.Ch38_body, bodyColor);
   const shortsMaterial = useMaterialClone(materials.Ch38_body, shortsColor);
+  const socksMaterial = useMaterialClone(materials.Ch38_body, shirtColor);
+  const shoesMaterial = useMaterialClone(materials.Ch38_body, shortsColor);
 
   const matchData = useAppSelector(selectMatchData);
   const matchPaused = useAppSelector(selectPaused);
@@ -66,7 +69,6 @@ export function Player({
         animationsResult.actions
       );
       setConfig(result);
-      // result.playerPoses.forceUpdatePose = true;
       result.playerPoses.forceIdle();
       result.positionAction.play();
       result.rotateAction.play();
@@ -79,15 +81,6 @@ export function Player({
     }
   }, [config?.mixer, startTime]);
 
-  useFrame((_, delta) => {
-    if (matchPaused) return;
-    if (config) {
-      // if (paused && !config.playerPoses.forceUpdatePose) return;
-      config.playerPoses.updatePose(delta);
-      config.mixer.update(delta);
-    }
-  });
-
   useEffect(() => {
     animationsResult.mixer.timeScale = matchPaused ? 0 : playbackSpeed;
   }, [matchPaused, animationsResult.mixer, playbackSpeed]);
@@ -99,6 +92,18 @@ export function Player({
   }, [config, animationsResult, playbackSpeed]);
 
   const ctx = useContext(ContainerContext);
+
+  useFrame((_, delta) => {
+    if (matchPaused) return;
+    if (config) {
+      // if (paused && !config.playerPoses.forceUpdatePose) return;
+      config.playerPoses.updatePose(delta);
+      config.mixer.update(delta);
+      updateLabel(config);
+    }
+  });
+
+  const labelRef = React.useRef<{ text: string }>(null);
   return (
     <group
       name={`Player`}
@@ -108,7 +113,20 @@ export function Player({
       visible={!!config}
     >
       {ctx?.debugMode && (
-        <PlayerLabel teamIdx={teamIdx} playerIdx={playerIdx} />
+        <>
+          <Billboard>
+            <Text
+              color="black"
+              anchorX="center"
+              anchorY="bottom"
+              position={[0, 2, 0]}
+              fontSize={0.3}
+              ref={labelRef}
+            >
+              {" "}
+            </Text>
+          </Billboard>
+        </>
       )}
       <group
         name={`Player-${teamIdx}-${playerIdx}`}
@@ -122,7 +140,7 @@ export function Player({
         <skinnedMesh
           name="Ch38_Body"
           geometry={nodes.Ch38_Body.geometry}
-          material={materials.Ch38_body}
+          material={bodyMaterial}
           skeleton={nodes.Ch38_Body.skeleton}
         ></skinnedMesh>
         <skinnedMesh
@@ -140,18 +158,26 @@ export function Player({
         <skinnedMesh
           name="Ch38_Socks"
           geometry={nodes.Ch38_Socks.geometry}
-          material={shirtMaterial}
+          material={socksMaterial}
           skeleton={nodes.Ch38_Socks.skeleton}
         />
         <skinnedMesh
           name="Ch38_Shoes"
           geometry={nodes.Ch38_Shoes.geometry}
-          material={materials.Ch38_body}
+          material={shoesMaterial}
           skeleton={nodes.Ch38_Shoes.skeleton}
         />
       </group>
     </group>
   );
+
+  function updateLabel(config: ReturnType<typeof setupPlayerAnimations>) {
+    if (labelRef.current) {
+      labelRef.current.text =
+        `${teamIdx === 0 ? "Home" : "Away"} Player ${playerIdx + 1}` +
+        (config.mixer.time > 0 && ` (${round(config.mixer.time, 1)})`);
+    }
+  }
 }
 
 useGLTF.preload(MODEL_URL);

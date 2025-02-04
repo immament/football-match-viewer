@@ -1,5 +1,5 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 // const patterns: Record<string, string> = {};
 
@@ -20,7 +20,7 @@ export default defineConfig({
       },
     },
   },
-  resolve: { alias: { "/app": "/src/app" } },
+  resolve: { alias: { "/app": "/src/app", "/src": "/src" } },
   server: {
     proxy: {
       "/api": {

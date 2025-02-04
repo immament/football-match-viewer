@@ -1,5 +1,23 @@
 export type FootstarMatchResponse = { xml: { general: FootstarMatchData } };
 
+export type FsTeamColors = {
+  _id: "home" | "away" | "0" | "1" | "2" | "3" | "4";
+  _text: string;
+  _shirt: string;
+  _shorts: string;
+  _socks: string;
+};
+
+type FsTeamColorsExt = {
+  // rest can be ignored
+  // always white
+  _text2?: string;
+  // rest always black
+  _shirt2: string;
+  _shorts2: string;
+  _socks2: string;
+};
+
 export type FootstarMatchData = {
   matchId?: number;
   gconfig: {
@@ -16,17 +34,13 @@ export type FootstarMatchData = {
     dbug: { _op: string };
   };
   colors: {
-    clr: {
-      _id: string;
-      _text: string;
-      _shirt: string;
-      _shorts: string;
-      _socks: string;
-      _text2?: string;
-      _shirt2: string;
-      _shorts2: string;
-      _socks2: string;
-    }[];
+    clr: (FsTeamColors & FsTeamColorsExt)[];
+    // static items
+    // <clr id="0" text="FFFFFF" shirt="ae2d00" shorts="ffffff" socks="ae2d00" shirt2="000000" shorts2="000000" socks2="000000" />
+    // <clr id="1" text="FFFFFF" shirt="56c0ca" shorts="004bb0" socks="001ab6" shirt2="000000" shorts2="000000" socks2="000000" />
+    // <clr id="2" text="FFFFFF" shirt="e0f569" shorts="107400" socks="ffffff" shirt2="000000" shorts2="000000" socks2="000000" />
+    // <clr id="3" text="000000" shirt="ffffff" shorts="000000" socks="ffffff" shirt2="000000" shorts2="000000" socks2="000000" />
+    // <clr id="4" text="FFFFFF" shirt="054d00" shorts="000000" socks="054d00" shirt2="000000" shorts2="000000" socks2="000000" />
   };
   mm: { m: { _p: string; _t1: string; _t2: string }[] };
   game_info: {
@@ -99,10 +113,12 @@ export type FsSquadPlayer = {
 };
 
 export type FsGameEvent = { _m: string } & (
-  | { _tipo: "gstart" | "halftime" | "gend" }
+  | { _tipo: "gstart" | "halftime" | "extratime1" | "extratime2" | "penalties" }
   | { _tipo: "subst"; _id_player1: string; _id_player2: string }
   | { _tipo: "amarelo" | "goal"; _eqmarca: string; _jogmarca: string }
 );
+
+export type FsGameEventTypes = FsGameEvent["_tipo"];
 
 export type FsGameDataRecord = {
   // record index

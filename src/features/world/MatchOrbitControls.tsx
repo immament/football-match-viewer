@@ -26,7 +26,7 @@ export function useMatchOrbitControls(
       ctls.listenToKeyEvents(document.body);
       ctls.maxPolarAngle = Math.PI / 2 - 0.01;
       ctls.minDistance = 0.4;
-      ctls.maxDistance = 150;
+      ctls.maxDistance = 120;
       ctls.zoomSpeed = 2;
       setControls(ctls);
       // return ctls;

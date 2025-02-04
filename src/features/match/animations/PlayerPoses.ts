@@ -10,7 +10,7 @@ import {
   PoseRecord,
   PoseTransitionProps,
 } from "./PoseAction.model";
-import { timeToStep } from "./positions.utils";
+import { secondsToStep } from "./positions.utils";
 import { logger } from "/app/logger";
 import { round } from "/app/utils";
 
@@ -92,7 +92,7 @@ export class PlayerPoses extends EventTarget {
   public updatePose(mixerUpdateDelta: number): void {
     if (!mixerUpdateDelta && !this._forceUpdatePose) return;
 
-    if (this.pause) return;
+    if (this.pause && !this._forceUpdatePose) return;
 
     const poseTime = this._mixer.time + mixerUpdateDelta;
     const newPose = this.poseForTime(poseTime);
@@ -160,7 +160,7 @@ export class PlayerPoses extends EventTarget {
   }
 
   private poseForTime(time: number): PoseRecord {
-    let roundedTime = timeToStep(time);
+    let roundedTime = secondsToStep(time);
     if (roundedTime >= this._poses.length) roundedTime = this._poses.length - 1;
     return this._poses[roundedTime];
   }

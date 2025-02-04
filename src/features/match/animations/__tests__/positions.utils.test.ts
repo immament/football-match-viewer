@@ -7,9 +7,9 @@ import {
   Point2,
   Point3,
   rotationAngle,
-  timeToStep,
+  secondsToStep,
   xToPitch,
-  zToPitch
+  zToPitch,
 } from "../positions.utils";
 
 describe("positions utils", () => {
@@ -59,7 +59,7 @@ describe("positions utils", () => {
 
   test("should convert time to step", () => {
     const time = 1;
-    const result = timeToStep(time);
+    const result = secondsToStep(time);
     expect(result).toBe(2);
   });
 

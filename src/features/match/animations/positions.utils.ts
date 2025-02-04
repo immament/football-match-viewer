@@ -54,8 +54,12 @@ export function onOut(position: Point3) {
   return position.z < PITCH_SIDE_MIN_Z || position.z > PITCH_SIDE_MAX_Z;
 }
 
-export function timeToStep(time: number): number {
-  return Math.floor(time / MATCH_TIME_SCALE);
+export function minuteToStep(minute: number) {
+  return secondsToStep(minute * 60);
+}
+
+export function secondsToStep(seconds: number): number {
+  return Math.floor(seconds / MATCH_TIME_SCALE);
 }
 
 export interface Point2 {

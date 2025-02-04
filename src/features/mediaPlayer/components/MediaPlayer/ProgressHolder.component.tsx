@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { formatTime } from "../../../match/formatTime";
 import { gotoPercent, selectDuration } from "../../../match/match.slice";
-import { useMediaPlayerZuStore } from "../../mediaPlayer.zu.slice";
 import { debounce } from "/app/utils";
 import { useAppDispatch, useAppSelector } from "/app/withTypes";
 
@@ -17,8 +16,12 @@ export function ProgressHolderComponent() {
   // const time = useAppSelector(selectTime);
   // const startTime = useAppSelector(selectStartTime);
   const duration = useAppSelector(selectDuration);
-  const time = useMediaPlayerZuStore((state) => state.time);
-  const displayTime = useMediaPlayerZuStore((state) => state.displayTime);
+  // const time = useMediaPlayerZuStore((state) => state.time);
+  // const displayTime = useMediaPlayerZuStore((state) => state.displayTime);
+  const time = useAppSelector((state) => state.match.matchState.time);
+  const displayTime = useAppSelector(
+    (state) => state.match.matchState.displayTime
+  );
   // const displayTime = useAppSelector(selectTime);
 
   const dispatch = useAppDispatch();

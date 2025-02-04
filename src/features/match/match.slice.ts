@@ -1,8 +1,18 @@
 import { PayloadAction } from "@reduxjs/toolkit";
+import { secondsToStep } from "./animations/positions.utils";
+import { formatTime } from "./formatTime";
 import { fetchFootstarMatchData } from "./fsApi/footstar.api";
 import { mapFsMatch } from "./fsApi/footstar.mapper";
-import { MatchData, MatchPlayer, MatchTeam } from "./MatchData.model";
+import {
+  MatchData,
+  MatchPlayer,
+  MatchTeam,
+  TeamColors,
+} from "./MatchData.model";
+import { fixSimilarColors } from "./validateColors";
 import { createAppSlice } from "/app/createAppSlice";
+import { logger } from "/app/logger";
+import { AppThunk } from "/app/store";
 import { createAppAsyncThunk } from "/app/withTypes";
 
 export const FOLLOW_BALL_IDX = 23;
@@ -19,45 +29,58 @@ export interface MatchSliceState {
     duration: number;
     paused: boolean;
     playbackSpeed: number;
+    // from zu
+  };
+  matchState: {
+    time: number;
+    step: number;
+    displayTime: string;
+    lastEventStep: number;
+    nextEventStep: number;
   };
   camera: {
     followedObjectId: number;
     viewFromObject: boolean;
   };
-  homeTeam: TeamState;
-  awayTeam: TeamState;
+  teams: { homeTeam: TeamState; awayTeam: TeamState };
 }
 
-type MatchDataState = MatchData;
-interface TeamState {
+export type MatchDataState = MatchData;
+
+export interface TeamState {
+  id: number;
+  teamIdx: 0 | 1;
   name: string;
   goals: number;
   squadPlayers: MatchPlayer[];
+  colors: TeamColors;
 }
 
-const initialState: MatchSliceState = {
-  status: "idle",
-  mediaPlayer: {
-    // time: 0,
-    // displayTime: formatTime(0),
-    startTime: 0,
-    duration: 0,
-    playbackSpeed: 2,
-    paused: true,
-  },
-  camera: {
-    followedObjectId: FOLLOW_BALL_IDX,
-    viewFromObject: false,
-  },
-  // TODO: move to different place
-  homeTeam: { name: "-", goals: 0, squadPlayers: [] },
-  awayTeam: { name: "-", goals: 0, squadPlayers: [] },
+export const getInitialState = (): MatchSliceState => {
+  return {
+    status: "idle",
+    mediaPlayer: {
+      startTime: 0,
+      duration: 0,
+      playbackSpeed: 2,
+      paused: true,
+    },
+    matchState: {
+      time: 0,
+      step: 0,
+      displayTime: "00:00",
+      lastEventStep: -1,
+      nextEventStep: 0,
+    },
+    camera: { followedObjectId: FOLLOW_BALL_IDX, viewFromObject: false },
+    teams: { homeTeam: emptyTeam(0), awayTeam: emptyTeam(1) },
+  };
 };
 
 // If you are not using async thunks you can use the standalone `createSlice`.
 export const matchSlice = createAppSlice({
   name: "match",
-  initialState,
+  initialState: getInitialState(),
   reducers: {
     // mediaPlayer
     gotoPercent: (state, action: PayloadAction<number>) => {
@@ -66,12 +89,6 @@ export const matchSlice = createAppSlice({
           action.payload * state.mediaPlayer.duration;
       }
     },
-    // updateTime: (state, action: PayloadAction<number>) => {
-    //   if (action.payload >= 0 && action.payload <= state.mediaPlayer.duration) {
-    //     state.mediaPlayer.time = action.payload;
-    //     state.mediaPlayer.displayTime = formatTime(state.mediaPlayer.time);
-    //   }
-    // },
     tooglePlay: (state) => {
       state.mediaPlayer.paused = !state.mediaPlayer.paused;
     },
@@ -85,6 +102,45 @@ export const matchSlice = createAppSlice({
     changeViewFromObject: (state, action: PayloadAction<boolean>) => {
       state.camera.viewFromObject = action.payload;
     },
+    teamGoal: (state, action: PayloadAction<number>) => {
+      const team = matchSlice
+        .getSelectors()
+        .selectTeamById(state, action.payload);
+      if (team) {
+        team.goals++;
+      }
+    },
+    // matchState
+    updateStep: (match, action: PayloadAction<number>) => {
+      const newStep = action.payload;
+      const newTime = Math.floor(newStep / 2);
+
+      if (match.matchData && match.matchState.nextEventStep !== -1) {
+        while (newStep >= match.matchState.nextEventStep) {
+          const stepEvents =
+            match.matchData.eventsMap[match.matchState.nextEventStep];
+          if (stepEvents) {
+            stepEvents.events.forEach((ev) => {
+              if (ev.type === "goal") {
+                const team = selectTeamById({ match }, ev.teamId);
+                if (team) {
+                  // TODO: instead add goals, calculate result during converting events
+                  team.goals++;
+                }
+                // const team = selectTeamById({ match: state }, ev.teamId);
+              }
+            });
+            match.matchState.nextEventStep = stepEvents.nextEventStep;
+          }
+        }
+      }
+      match.matchState = {
+        ...match.matchState,
+        step: newStep,
+        time: newTime,
+        displayTime: formatTime(newTime),
+      };
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -94,39 +150,68 @@ export const matchSlice = createAppSlice({
       .addCase(fetchMatchById.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.matchData = { ...action.payload };
-        state.homeTeam = mapTeam(action.payload.homeTeam);
-        state.awayTeam = mapTeam(action.payload.awayTeam);
+        logger.info("matchData:", action.payload);
+        logger.info(
+          "matchData:",
+          Object.entries(action.payload.eventsMap).flatMap(([step, value]) =>
+            value.events.map((ev) => ({ ...ev, key: step }))
+          )
+        );
+        const teams = {
+          homeTeam: mapTeam(action.payload.homeTeam, 0),
+          awayTeam: mapTeam(action.payload.awayTeam, 1),
+        };
+        fixSimilarColors(teams);
+        state.teams = teams;
+
         // TODO
         state.mediaPlayer.duration = 90 * 60;
 
-        function mapTeam(team: MatchTeam) {
+        function mapTeam(team: MatchTeam, teamIdx: 0 | 1): TeamState {
           return {
+            id: team.id,
+            teamIdx,
             name: team.name,
             goals: 0,
             squadPlayers: [...team.squadPlayers],
+            colors: team.colors,
           };
         }
       })
       .addCase(fetchMatchById.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message ?? "Unknown Error";
+        logger.warn("fetchMatchById error", action.error);
       });
   },
   // You can define your selectors here. These selectors receive the slice
   // state as their first argument.
   selectors: {
     selectStatus: (match) => match.status,
-    selectHomeTeamName: (match) => match.homeTeam.name,
-    selectAwayTeamName: (match) => match.awayTeam.name,
-    selectHomeGoals: (match) => match.homeTeam.goals,
-    selectAwayGoals: (match) => match.awayTeam.goals,
-    selectHomeTeamSquadPlayers: (match) => match.homeTeam.squadPlayers,
-    selectAwayTeamSquadPlayers: (match) => match.homeTeam.squadPlayers,
-    //
+    // # Teams
+    selectTeams: ({ teams }) => teams,
+    selectTeamById: (
+      { teams: { homeTeam, awayTeam } },
+      id: number
+    ): TeamState | undefined => {
+      if (homeTeam.id === id) return homeTeam;
+      if (awayTeam.id === id) return awayTeam;
+    },
+    // home team
+    selectHomeTeam: ({ teams }) => teams.homeTeam,
+    selectHomeTeamName: ({ teams }) => teams.homeTeam.name,
+    selectHomeGoals: ({ teams }) => teams.homeTeam.goals,
+    selectHomeTeamSquadPlayers: (state): MatchPlayer[] =>
+      matchSlice.getSelectors().selectHomeTeam(state).squadPlayers,
+    // away team
+    selectAwayTeam: ({ teams }) => teams.awayTeam,
+    selectAwayTeamName: ({ teams }) => teams.awayTeam.name,
+    selectAwayGoals: ({ teams }) => teams.awayTeam.goals,
+    selectAwayTeamSquadPlayers: ({ teams }) => teams.awayTeam.squadPlayers,
+
+    // matchData
     selectMatchData: (state) => state.matchData,
     // mediaPlayer
-    // selectTime: (match) => match.mediaPlayer.time,
-    // selectDisplayTime: (match) => match.mediaPlayer.displayTime,
     selectStartTime: (match) => match.mediaPlayer.startTime,
     selectMatchStatus: (match) => match.status,
     selectDuration: (match) => match.mediaPlayer.duration,
@@ -147,16 +232,27 @@ export const {
   // camera
   changeFollowedObjectId,
   changeViewFromObject,
+  // teams
+  teamGoal,
+  // matchState
+  updateStep,
 } = matchSlice.actions;
 
 // Selectors returned by `slice.selectors` take the root state as their first argument.
 export const {
   selectStatus,
+  //# Teams
+  selectTeams,
+  selectTeamById,
+  // home team
+  selectHomeTeam,
   selectHomeTeamName,
-  selectAwayTeamName,
   selectHomeGoals,
-  selectAwayGoals,
   selectHomeTeamSquadPlayers,
+  // away team
+  selectAwayTeam,
+  selectAwayTeamName,
+  selectAwayGoals,
   selectAwayTeamSquadPlayers,
   //
   selectMatchData,
@@ -174,7 +270,7 @@ export const {
 export const fetchMatchById = createAppAsyncThunk(
   "match/fetchMatchById",
   async (matchId: number) => {
-    const fsMatch = await fetchFootstarMatchData(matchId || 1663808);
+    const fsMatch = await fetchFootstarMatchData(matchId);
     return mapFsMatch(fsMatch);
   },
   {
@@ -185,3 +281,24 @@ export const fetchMatchById = createAppAsyncThunk(
     },
   }
 );
+
+export const updateMatchStepThunk =
+  (matchTimeInSeconds: number): AppThunk<void> =>
+  async (dispatch, getState) => {
+    const newStep = secondsToStep(matchTimeInSeconds);
+
+    if (getState().match.matchState.step === newStep) return;
+
+    dispatch(updateStep(newStep));
+  };
+
+function emptyTeam(teamIdx: 0 | 1): TeamState {
+  return {
+    id: 0,
+    teamIdx,
+    name: "-",
+    goals: 0,
+    squadPlayers: [],
+    colors: { shirt: "", shorts: "", socks: "", text: "" },
+  };
+}
