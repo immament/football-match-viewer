@@ -1,53 +1,27 @@
 import { useEffect, useRef } from "react";
 import { Group, Mesh } from "three";
-
 import { useMatchOrbitControls } from "../../world/MatchOrbitControls";
-import {
-  fetchMatchById,
-  selectStatus,
-  selectTeams,
-  TeamState,
-} from "../match.slice";
 import { Ball } from "./Ball";
 import { Player } from "./Player";
-import { useAppDispatch, useAppSelector } from "/app/withTypes";
+import { useAppZuStore } from "/app/app.zu.store";
+import { TeamState } from "/app/TeamsSlice";
 
 export const Match = () => {
   const ballRef = useRef<Mesh | null>(null);
   const matchRef = useRef<Group | null>(null);
   useMatchOrbitControls(ballRef, matchRef);
 
-  const dispatch = useAppDispatch();
-  const matchStatus = useAppSelector(selectStatus);
-  const teams = useAppSelector(selectTeams);
-  // const matchData = useAppSelector(selectMatchData);
-  // const matchep = useAppSelector((state) => state.match.matchState.step);
-
-  // // const matchStep = useMediaPlayerZuStore((state) => state.step);
-
-  // const lastStep = useRef<number>(0);
-
-  // useEffect(() => {
-  //   if (matchData && lastStep.current !== matchStep) {
-  //     lastStep.current = matchStep;
-  //     const item = matchData.eventsMap[matchStep];
-  //     if (item) {
-  //       item.events.forEach((ev) => {
-  //         if (ev.type === "goal") {
-  //           dispatch(teamGoal(ev.teamId));
-  //         }
-  //       });
-  //     }
-  //   }
-  // }, [matchData, matchStep, teams, dispatch]);
+  const matchFetch = useAppZuStore((state) => state.matchFetch);
+  const matchStatus = useAppZuStore((state) => state.status);
+  const teams = useAppZuStore((state) => state.teams);
 
   useEffect(() => {
     if (matchStatus === "idle") {
       const urlParams = new URLSearchParams(window.location.search);
       const matchId = Number(urlParams.get("id"));
-      dispatch(fetchMatchById(matchId));
+      matchFetch(matchId);
     }
-  }, [matchStatus, dispatch]);
+  }, [matchStatus, matchFetch]);
 
   return (
     <group ref={matchRef} dispose={null}>
@@ -70,10 +44,3 @@ function Players({ team, teamIdx }: { team: TeamState; teamIdx: 0 | 1 }) {
     />
   ));
 }
-// function teamById(
-//   { homeTeam, awayTeam }: { homeTeam: TeamState; awayTeam: TeamState },
-//   id: number
-// ): TeamState | undefined {
-//   if (homeTeam.id === id) return homeTeam;
-//   if (awayTeam.id === id) return awayTeam;
-// }

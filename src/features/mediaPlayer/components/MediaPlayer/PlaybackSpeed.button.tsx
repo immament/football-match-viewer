@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
-import {
-  changePlaybackSpeed,
-  selectPlaybackSpeed,
-} from "../../../match/match.slice";
 import { PopupMenu, PopupMenuItem } from "./PopupMenu";
-import { useAppDispatch, useAppSelector } from "/app/withTypes";
+import { useAppZuStore } from "/app/app.zu.store";
 
 export function PlaybackSpeedButton() {
-  const playbackSpeed = useAppSelector(selectPlaybackSpeed);
-  const dispatch = useAppDispatch();
+  const playbackSpeed = useAppZuStore(
+    (state) => state.mediaPlayer.playbackSpeed
+  );
+  const changePlaybackSpeed = useAppZuStore(
+    (state) => state.mediaPlayer.changePlaybackSpeed
+  );
 
   const [popupMenuVisible, setPopupMenuVisible] = useState(false);
 
@@ -40,7 +40,7 @@ export function PlaybackSpeedButton() {
   function onPopupMenuClicked(value: number): void {
     const speed = Number(value);
     if (speed > 0) {
-      dispatch(changePlaybackSpeed(speed));
+      changePlaybackSpeed(speed);
     }
 
     setPopupMenuVisible(false);

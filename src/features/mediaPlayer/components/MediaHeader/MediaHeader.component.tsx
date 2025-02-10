@@ -1,21 +1,12 @@
-import {
-  selectAwayGoals,
-  selectAwayTeamName,
-  selectHomeGoals,
-  selectHomeTeamName,
-} from "../../../match/match.slice";
 import "./mediaHeader.scss";
-import { useAppSelector } from "/app/withTypes";
+import { useAppZuStore } from "/app/app.zu.store";
 
 export function MediaHeaderComponent() {
-  const homeTeamName = useAppSelector(selectHomeTeamName);
-  const awayTeamName = useAppSelector(selectAwayTeamName);
-  const homeTeamGoals = useAppSelector(selectHomeGoals);
-  const awayTeamGoals = useAppSelector(selectAwayGoals);
-  // const displayTime = useMediaPlayerZuStore((state) => state.displayTime);
-  const displayTime = useAppSelector(
-    (state) => state.match.matchState.displayTime
-  );
+  const homeTeamName = useAppZuStore(({ teams }) => teams.homeTeam.name);
+  const awayTeamName = useAppZuStore(({ teams }) => teams.awayTeam.name);
+  const homeTeamGoals = useAppZuStore(({ teams }) => teams.homeTeam.goals);
+  const awayTeamGoals = useAppZuStore(({ teams }) => teams.awayTeam.goals);
+  const displayTime = useAppZuStore((state) => state.displayTime);
 
   return (
     <div className="mv-media-header">

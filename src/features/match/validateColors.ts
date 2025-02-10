@@ -1,7 +1,7 @@
 import { Color } from "./Color";
 import { KitColorsVo } from "./KitColorsVo";
-import { TeamState } from "./match.slice";
 import { TeamColors } from "./MatchData.model";
+import { TeamState } from "/app/TeamsSlice";
 
 export function fixSimilarColors({
   homeTeam,

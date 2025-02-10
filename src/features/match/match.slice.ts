@@ -1,3 +1,4 @@
+/*
 import { PayloadAction } from "@reduxjs/toolkit";
 import { secondsToStep } from "./animations/positions.utils";
 import { formatTime } from "./formatTime";
@@ -102,6 +103,7 @@ export const matchSlice = createAppSlice({
     changeViewFromObject: (state, action: PayloadAction<boolean>) => {
       state.camera.viewFromObject = action.payload;
     },
+    // ??
     teamGoal: (state, action: PayloadAction<number>) => {
       const team = matchSlice
         .getSelectors()
@@ -295,3 +297,6 @@ function emptyTeam(teamIdx: 0 | 1): TeamState {
     colors: { shirt: "", shorts: "", socks: "", text: "" },
   };
 }
+
+
+*/

@@ -1,16 +1,8 @@
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import {
-  changeFollowedObjectId,
-  changeViewFromObject,
-  FOLLOW_BALL_IDX,
-  selectAwayTeamSquadPlayers,
-  selectFollowedObjectId,
-  selectHomeTeamSquadPlayers,
-  selectViewFromObject,
-} from "../../../match/match.slice";
 import { MatchPlayer } from "../../../match/MatchData.model";
 import { PopupMenu, PopupMenuLink, PopupMenuSeparator } from "./PopupMenu";
-import { useAppDispatch, useAppSelector } from "/app/withTypes";
+import { useAppZuStore } from "/app/app.zu.store";
+import { FOLLOW_BALL_IDX } from "/app/Camera.slice";
 
 type FollowObjectMenuLink = PopupMenuLink<number> & {
   shortTitle: string;
@@ -20,14 +12,22 @@ type FollowObjectMenuLink = PopupMenuLink<number> & {
 type FollowObjectMenuItem = FollowObjectMenuLink | PopupMenuSeparator;
 
 export function FollowObjectButton() {
-  const dispatch = useAppDispatch();
-
   const [menuItems, setMenuItems] = useState<FollowObjectMenuItem[]>();
 
-  const followedObjectId = useAppSelector(selectFollowedObjectId);
-  const viewFromObject = useAppSelector(selectViewFromObject);
-  const homeTeamSquadPlayers = useAppSelector(selectHomeTeamSquadPlayers);
-  const awayTeamSquadPlayers = useAppSelector(selectAwayTeamSquadPlayers);
+  const followedObjectId = useAppZuStore((st) => st.camera.followedObjectId);
+  const viewFromObject = useAppZuStore((state) => state.camera.viewFromObject);
+  const homeTeamSquadPlayers = useAppZuStore(
+    (st) => st.teams.homeTeam.squadPlayers
+  );
+  const awayTeamSquadPlayers = useAppZuStore(
+    (st) => st.teams.awayTeam.squadPlayers
+  );
+  const changeFollowedObjectId = useAppZuStore(
+    (st) => st.camera.changeFollowedObjectId
+  );
+  const changeViewFromObject = useAppZuStore(
+    (st) => st.camera.changeViewFromObject
+  );
 
   useEffect(() => {
     setMenuItems(createMenuItems(homeTeamSquadPlayers, awayTeamSquadPlayers));
@@ -58,13 +58,13 @@ export function FollowObjectButton() {
   }
 
   function onPopupMenuClicked(value: number): void {
-    dispatch(changeFollowedObjectId(value));
+    changeFollowedObjectId(value);
     setPopupMenuVisible(false);
   }
 
   const onViewFromObjectChange = (ev: ChangeEvent<HTMLInputElement>) => {
     const newValue = ev.currentTarget.checked;
-    if (newValue !== viewFromObject) dispatch(changeViewFromObject(newValue));
+    if (newValue !== viewFromObject) changeViewFromObject(newValue);
   };
 
   if (!menuItems) return null;

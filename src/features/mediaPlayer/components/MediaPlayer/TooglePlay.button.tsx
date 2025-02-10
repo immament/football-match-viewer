@@ -1,17 +1,16 @@
 import { useMemo } from "react";
-import { selectPaused, tooglePlay } from "../../../match/match.slice";
-import { useAppDispatch, useAppSelector } from "/app/withTypes";
+import { useAppZuStore } from "/app/app.zu.store";
 
 export function TooglePlayButton() {
-  const paused = useAppSelector(selectPaused);
-  const dispatch = useAppDispatch();
+  const paused = useAppZuStore((state) => state.mediaPlayer.paused);
+  const tooglePlay = useAppZuStore((state) => state.mediaPlayer.tooglePlay);
 
   const iconCss = useMemo(() => {
     return paused ? "bx bx-play" : "bx bx-pause";
   }, [paused]);
 
   const onClick = () => {
-    dispatch(tooglePlay());
+    tooglePlay();
   };
 
   return (

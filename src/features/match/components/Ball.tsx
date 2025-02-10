@@ -10,16 +10,9 @@ import {
 } from "react";
 import { AnimationAction, AnimationMixer, Mesh, Vector3 } from "three";
 import { createBallPositionAnimation } from "../animations/createBallPositionAnimation";
-import {
-  selectMatchData,
-  selectPaused,
-  selectPlaybackSpeed,
-  selectStartTime,
-  updateMatchStepThunk,
-} from "../match.slice";
+import { useAppZuStore } from "/app/app.zu.store";
 import { ContainerContext } from "/app/Container.context";
 import { round } from "/app/utils";
-import { useAppDispatch, useAppSelector } from "/app/withTypes";
 
 export const BALL_RADIUS = 0.18;
 
@@ -29,16 +22,18 @@ export const Ball = forwardRef<Mesh, BallProps>(
   (_: BallProps, ref: ForwardedRef<Mesh>) => {
     const ballRef = useRef<Mesh | null>(null);
     const texture = useTexture("models/ball.jpg");
-    // const updateStep = useMediaPlayerZuStore((state) => state.updateStep);
-    const dispatch = useAppDispatch();
 
     const [positionAnimation, setPositionAnimation] =
       useState<AnimationAction>();
 
-    const matchData = useAppSelector(selectMatchData);
-    const matchPaused = useAppSelector(selectPaused);
-    const startTime = useAppSelector(selectStartTime);
-    const playbackSpeed = useAppSelector(selectPlaybackSpeed);
+    const matchData = useAppZuStore((state) => state.matchData);
+    const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
+    const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
+    const playbackSpeed = useAppZuStore(
+      (state) => state.mediaPlayer.playbackSpeed
+    );
+
+    const updateStep = useAppZuStore((state) => state.updateStep);
 
     const [mixer, setMixer] = useState<AnimationMixer>();
 
@@ -79,7 +74,8 @@ export const Ball = forwardRef<Mesh, BallProps>(
         mixer.update(delta);
 
         if (ballRef.current) animateBallRotation(delta, ballRef.current);
-        dispatch(updateMatchStepThunk(mixer.time));
+        // dispatch(updateMatchStepThunk(mixer.time));
+        updateStep(mixer.time);
       }
     });
     // ball rotation (calculated for previous movement)

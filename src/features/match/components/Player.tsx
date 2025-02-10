@@ -4,17 +4,11 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { ColorRepresentation, Group } from "three";
 import { SkeletonUtils } from "three-stdlib";
 import { setupPlayerAnimations } from "../animations/setupPlayer";
-import {
-  selectMatchData,
-  selectPaused,
-  selectPlaybackSpeed,
-  selectStartTime,
-} from "../match.slice";
 import { GLTFResult } from "../playerGltf.model";
 import { useMaterialClone } from "../useMaterialClone";
+import { useAppZuStore } from "/app/app.zu.store";
 import { ContainerContext } from "/app/Container.context";
 import { round } from "/app/utils";
-import { useAppSelector } from "/app/withTypes";
 
 const MODEL_URL = "models/player-transformed.glb";
 
@@ -51,10 +45,12 @@ export function Player({
   const socksMaterial = useMaterialClone(materials.Ch38_body, shirtColor);
   const shoesMaterial = useMaterialClone(materials.Ch38_body, shortsColor);
 
-  const matchData = useAppSelector(selectMatchData);
-  const matchPaused = useAppSelector(selectPaused);
-  const startTime = useAppSelector(selectStartTime);
-  const playbackSpeed = useAppSelector(selectPlaybackSpeed);
+  const matchData = useAppZuStore((state) => state.matchData);
+  const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
+  const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
+  const playbackSpeed = useAppZuStore(
+    (state) => state.mediaPlayer.playbackSpeed
+  );
 
   const [config, setConfig] =
     useState<ReturnType<typeof setupPlayerAnimations>>();

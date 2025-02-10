@@ -1,8 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
 import App from "./App.tsx";
-import { setupStore } from "./app/store.ts";
+
 import "./index.scss";
 import {
   ContainerContext,
@@ -28,15 +27,13 @@ function main() {
     mediaPlayer: getContainer(MEDIA_PLAYER_CONTAINER_ID),
     debugMode: DEBUG_MODE,
   };
-  const store = setupStore();
+  // const store = setupStore();
 
   createRoot(ctx.mediaPlayer).render(
     <StrictMode>
-      <Provider store={store}>
-        <ContainerContext.Provider value={ctx}>
-          <App />
-        </ContainerContext.Provider>
-      </Provider>
+      <ContainerContext.Provider value={ctx}>
+        <App />
+      </ContainerContext.Provider>
     </StrictMode>
   );
 }

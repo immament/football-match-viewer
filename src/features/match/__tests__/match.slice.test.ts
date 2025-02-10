@@ -1,23 +1,16 @@
 // match.slice.test.ts
-import { beforeEach, describe, expect, it } from "vitest";
-import {
-  changeFollowedObjectId,
-  changePlaybackSpeed,
-  changeViewFromObject,
-  fetchMatchById,
-  FOLLOW_BALL_IDX,
-  getInitialState,
-  gotoPercent,
-  matchSlice,
-  MatchSliceState,
-  updateStep,
-} from "../match.slice";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { MatchData } from "../MatchData.model";
+import { AppStoreState, useAppZuStore } from "/app/app.zu.store";
+import { FOLLOW_BALL_IDX } from "/app/Camera.slice";
+
+vi.mock("zustand");
 
 describe("matchSlice", () => {
-  let initialState: MatchSliceState;
+  let initialState: AppStoreState;
   beforeEach(() => {
-    initialState = getInitialState();
+    initialState = useAppZuStore.getState();
   });
   describe("Media player", () => {
     it("should return the initial state", () => {
@@ -32,43 +25,37 @@ describe("matchSlice", () => {
       initialState.mediaPlayer.duration = 120;
       const percentTime = 10;
 
-      const updatedState = matchSlice.reducer(
-        initialState,
-        gotoPercent(percentTime)
-      );
-      expect(updatedState.mediaPlayer.startTime).toBe(12);
+      initialState.mediaPlayer.gotoPercent(percentTime);
+
+      expect(useAppZuStore.getState().mediaPlayer.startTime).toBe(12);
     });
 
     it("should go to end if percent time is greater than 100", () => {
       initialState.mediaPlayer.duration = 50;
       const percentTime = 120;
 
-      const updatedState = matchSlice.reducer(
-        initialState,
-        gotoPercent(percentTime)
-      );
-      expect(updatedState.mediaPlayer.startTime).toBe(50);
+      initialState.mediaPlayer.gotoPercent(percentTime);
+
+      expect(useAppZuStore.getState().mediaPlayer.startTime).toBe(50);
     });
 
     it("should go to begining if percent time is lower than 0", () => {
       initialState.mediaPlayer.duration = 50;
       const percentTime = -10;
 
-      const updatedState = matchSlice.reducer(
-        initialState,
-        gotoPercent(percentTime)
-      );
-      expect(updatedState.mediaPlayer.startTime).toBe(0);
+      initialState.mediaPlayer.gotoPercent(percentTime);
+
+      expect(useAppZuStore.getState().mediaPlayer.startTime).toBe(0);
     });
 
     it("should change playback speed", () => {
       const newPlaybackSpeed = 10;
-      const updatedState = matchSlice.reducer(
-        initialState,
-        changePlaybackSpeed(newPlaybackSpeed)
-      );
 
-      expect(updatedState.mediaPlayer.playbackSpeed).toBe(newPlaybackSpeed);
+      initialState.mediaPlayer.changePlaybackSpeed(newPlaybackSpeed);
+
+      expect(useAppZuStore.getState().mediaPlayer.playbackSpeed).toBe(
+        newPlaybackSpeed
+      );
     });
   });
 
@@ -82,26 +69,19 @@ describe("matchSlice", () => {
 
     it("should change followed object", () => {
       const newObjectId = 10;
-      const updatedState = matchSlice.reducer(
-        initialState,
-        changeFollowedObjectId(newObjectId)
-      );
 
-      expect(updatedState.camera.followedObjectId).toBe(10);
+      initialState.camera.changeFollowedObjectId(newObjectId);
+
+      expect(useAppZuStore.getState().camera.followedObjectId).toBe(10);
     });
     it("should change view from object", () => {
-      let updatedState = matchSlice.reducer(
-        initialState,
-        changeViewFromObject(true)
-      );
+      initialState.camera.changeViewFromObject(true);
 
-      expect(updatedState.camera.viewFromObject).toBe(true);
-      updatedState = matchSlice.reducer(
-        updatedState,
-        changeViewFromObject(false)
-      );
+      expect(useAppZuStore.getState().camera.viewFromObject).toBe(true);
 
-      expect(updatedState.camera.viewFromObject).toBe(false);
+      useAppZuStore.getState().camera.changeViewFromObject(false);
+
+      expect(useAppZuStore.getState().camera.viewFromObject).toBe(false);
     });
   });
 
@@ -129,10 +109,10 @@ describe("matchSlice", () => {
           poses: [],
         },
       };
-      const updatedState = matchSlice.reducer(initialState, {
-        type: fetchMatchById.fulfilled.type,
-        payload,
-      });
+
+      initialState.matchFetchSuccess(payload);
+
+      const updatedState = useAppZuStore.getState();
 
       expect(updatedState.status).toBe("succeeded");
       expect(updatedState.matchData).toBeTruthy();
@@ -158,9 +138,9 @@ describe("matchSlice", () => {
   });
 
   it("should update the step", () => {
-    const newStep = 10;
-    const updatedState = matchSlice.reducer(initialState, updateStep(newStep));
-
-    expect(updatedState.matchState.step).toBe(newStep);
+    const newTimeInSeconds = 10;
+    initialState.updateStep(newTimeInSeconds);
+    const updatedState = useAppZuStore.getState();
+    expect(updatedState.step).toBe(20);
   });
 });

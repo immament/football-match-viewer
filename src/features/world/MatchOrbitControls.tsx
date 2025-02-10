@@ -2,13 +2,9 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { MutableRefObject, useEffect, useMemo, useState } from "react";
 import { Group, Mesh, Object3D } from "three";
 import { OrbitControls } from "three-stdlib";
-import {
-  FOLLOW_BALL_IDX,
-  selectFollowedObjectId,
-  selectViewFromObject,
-} from "../match/match.slice";
 import { ViewFromTarget } from "./ViewFromTarget";
-import { useAppSelector } from "/app/withTypes";
+import { useAppZuStore } from "/app/app.zu.store";
+import { FOLLOW_BALL_IDX } from "/app/Camera.slice";
 
 export function useMatchOrbitControls(
   ballRef: MutableRefObject<Mesh | null>,
@@ -32,8 +28,8 @@ export function useMatchOrbitControls(
     }
   }, [controls, defaultCamera, domElement]);
 
-  const followedObjectId = useAppSelector(selectFollowedObjectId);
-  const viewFromObject = useAppSelector(selectViewFromObject);
+  const followedObjectId = useAppZuStore((st) => st.camera.followedObjectId);
+  const viewFromObject = useAppZuStore((st) => st.camera.viewFromObject);
   const [followedObject, setFollowedObject] = useState<Object3D>();
   const viewfromTarget = useMemo<ViewFromTarget>(
     () => new ViewFromTarget(),

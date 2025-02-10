@@ -8,23 +8,14 @@ import React, {
   useState,
 } from "react";
 import { formatTime } from "../../../match/formatTime";
-import { gotoPercent, selectDuration } from "../../../match/match.slice";
+import { useAppZuStore } from "/app/app.zu.store";
 import { debounce } from "/app/utils";
-import { useAppDispatch, useAppSelector } from "/app/withTypes";
 
 export function ProgressHolderComponent() {
-  // const time = useAppSelector(selectTime);
-  // const startTime = useAppSelector(selectStartTime);
-  const duration = useAppSelector(selectDuration);
-  // const time = useMediaPlayerZuStore((state) => state.time);
-  // const displayTime = useMediaPlayerZuStore((state) => state.displayTime);
-  const time = useAppSelector((state) => state.match.matchState.time);
-  const displayTime = useAppSelector(
-    (state) => state.match.matchState.displayTime
-  );
-  // const displayTime = useAppSelector(selectTime);
-
-  const dispatch = useAppDispatch();
+  const duration = useAppZuStore((state) => state.mediaPlayer.duration);
+  const time = useAppZuStore((state) => state.time);
+  const displayTime = useAppZuStore((state) => state.displayTime);
+  const gotoPercent = useAppZuStore((state) => state.mediaPlayer.gotoPercent);
 
   const playProgressRef = useRef<HTMLDivElement>(null);
   const timeTooltipRef = useRef<HTMLDivElement>(null);
@@ -65,9 +56,7 @@ export function ProgressHolderComponent() {
   }, [resizer]);
 
   const progressControlClick: MouseEventHandler<HTMLDivElement> = (ev) => {
-    dispatch(
-      gotoPercent((ev.nativeEvent.offsetX / ev.currentTarget.offsetWidth) * 100)
-    );
+    gotoPercent((ev.nativeEvent.offsetX / ev.currentTarget.offsetWidth) * 100);
   };
 
   const onMouseMoveOverProgressControl = debounce(
