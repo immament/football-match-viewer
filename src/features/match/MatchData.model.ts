@@ -16,6 +16,7 @@ export type TeamColors = {
 
 export interface MatchTeam {
   id: number;
+  teamIdx: 0 | 1;
   name: string;
   squadPlayers: MatchPlayer[];
   colors: TeamColors;

@@ -9,8 +9,8 @@
     "build-ghp": "tsc && vite build --base=/football-match-viewer",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:browser": "vitest --workspace=vitest.workspace.ts",
+    "test": "vitest --project unit",
+    "test:browser": "vitest --workspace=vitest.workspace.ts --project browser",
     "coverage": "vitest run --coverage",
     "depc": "depcruise src --ts-config tsconfig.app.json"
   },

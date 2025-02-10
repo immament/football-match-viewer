@@ -32,7 +32,6 @@ export const Match = () => {
   //     lastStep.current = matchStep;
   //     const item = matchData.eventsMap[matchStep];
   //     if (item) {
-  //       console.log("aaa", matchStep);
   //       item.events.forEach((ev) => {
   //         if (ev.type === "goal") {
   //           dispatch(teamGoal(ev.teamId));

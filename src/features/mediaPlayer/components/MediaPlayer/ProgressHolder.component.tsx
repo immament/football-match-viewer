@@ -66,7 +66,7 @@ export function ProgressHolderComponent() {
 
   const progressControlClick: MouseEventHandler<HTMLDivElement> = (ev) => {
     dispatch(
-      gotoPercent(ev.nativeEvent.offsetX / ev.currentTarget.offsetWidth)
+      gotoPercent((ev.nativeEvent.offsetX / ev.currentTarget.offsetWidth) * 100)
     );
   };
 

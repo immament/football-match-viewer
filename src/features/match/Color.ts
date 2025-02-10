@@ -5,7 +5,7 @@ export class Color {
   private _hex: string;
 
   constructor(aHex: string) {
-    this._hex = aHex.replace("#", "");
+    this._hex = aHex.replace("#", "") || "FFFFFF";
   }
 
   hex() {

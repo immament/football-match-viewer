@@ -29,6 +29,7 @@ export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
   function mapHomeTeam(): MatchTeam {
     return {
       id: Number(fsMatch.game_info.home_team_name._id),
+      teamIdx: 0,
       name: fsMatch.game_info.home_team_name.text,
       squadPlayers: mapSquadPlayers(
         fsMatch.home_starting_eleven.home_player_se
@@ -40,6 +41,7 @@ export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
   function mapAwayTeam(): MatchTeam {
     return {
       id: Number(fsMatch.game_info.away_team_name._id),
+      teamIdx: 1,
       name: fsMatch.game_info.away_team_name.text,
       squadPlayers: mapSquadPlayers(
         fsMatch.away_starting_eleven.away_player_se

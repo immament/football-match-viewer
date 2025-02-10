@@ -27,7 +27,6 @@ export async function fetchFootstarMatchData(
   const parser = createXmlParser();
   const matchResp = parser.parse(xml) as FootstarMatchResponse;
 
-  // console.log(matchResp.xml.general.home_starting_eleven);
   const data = matchResp.xml.general;
   if (!data.matchId) data.matchId = matchId;
   fsLogger.info("matchData", data);

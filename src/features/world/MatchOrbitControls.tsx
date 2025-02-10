@@ -20,7 +20,6 @@ export function useMatchOrbitControls(
   const [controls, setControls] = useState<OrbitControls>();
   useEffect(() => {
     if (defaultCamera && domElement && !controls) {
-      // console.log("create controls");
       const ctls = new OrbitControls(defaultCamera, domElement);
       ctls.enableDamping = true;
       ctls.listenToKeyEvents(document.body);

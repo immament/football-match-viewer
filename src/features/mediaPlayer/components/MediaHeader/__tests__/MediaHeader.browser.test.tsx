@@ -1,3 +1,4 @@
+import "@vitest/browser/providers/playwright";
 import { describe, expect, test } from "vitest";
 import { getInitialState, updateStep } from "../../../../match/match.slice";
 import { MediaHeaderComponent } from "../MediaHeader.component";

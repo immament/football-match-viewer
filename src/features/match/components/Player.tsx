@@ -61,7 +61,6 @@ export function Player({
 
   useEffect(() => {
     if (matchData?.positions && group.current && !config) {
-      // console.log("configuring player");
       const result = setupPlayerAnimations(
         playerId,
         group.current,

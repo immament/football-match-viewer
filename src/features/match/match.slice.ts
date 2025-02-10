@@ -83,11 +83,11 @@ export const matchSlice = createAppSlice({
   initialState: getInitialState(),
   reducers: {
     // mediaPlayer
+
     gotoPercent: (state, action: PayloadAction<number>) => {
-      if (action.payload >= 0 && action.payload <= 100) {
-        state.mediaPlayer.startTime =
-          action.payload * state.mediaPlayer.duration;
-      }
+      const percentTime = Math.min(100, Math.max(0, action.payload));
+      state.mediaPlayer.startTime =
+        (percentTime / 100) * state.mediaPlayer.duration;
     },
     tooglePlay: (state) => {
       state.mediaPlayer.paused = !state.mediaPlayer.paused;
@@ -147,35 +147,28 @@ export const matchSlice = createAppSlice({
       .addCase(fetchMatchById.pending, (state) => {
         state.status = "pending";
       })
-      .addCase(fetchMatchById.fulfilled, (state, action) => {
+      .addCase(fetchMatchById.fulfilled, (state, { payload }) => {
         state.status = "succeeded";
-        state.matchData = { ...action.payload };
-        logger.info("matchData:", action.payload);
-        logger.info(
-          "matchData:",
-          Object.entries(action.payload.eventsMap).flatMap(([step, value]) =>
-            value.events.map((ev) => ({ ...ev, key: step }))
-          )
-        );
-        const teams = {
-          homeTeam: mapTeam(action.payload.homeTeam, 0),
-          awayTeam: mapTeam(action.payload.awayTeam, 1),
+        logger.info("matchData:", payload);
+        state.matchData = { ...payload };
+        // logger.info(
+        //   "matchData:",
+        //   Object.entries(payload.eventsMap).flatMap(([step, value]) =>
+        //     value.events.map((ev) => ({ ...ev, key: step }))
+        //   )
+        // );
+        state.teams = {
+          homeTeam: mapTeam(payload.homeTeam),
+          awayTeam: mapTeam(payload.awayTeam),
         };
-        fixSimilarColors(teams);
-        state.teams = teams;
+
+        fixSimilarColors(state.teams);
 
         // TODO
         state.mediaPlayer.duration = 90 * 60;
 
-        function mapTeam(team: MatchTeam, teamIdx: 0 | 1): TeamState {
-          return {
-            id: team.id,
-            teamIdx,
-            name: team.name,
-            goals: 0,
-            squadPlayers: [...team.squadPlayers],
-            colors: team.colors,
-          };
+        function mapTeam(team: MatchTeam): TeamState {
+          return { ...team, goals: 0 };
         }
       })
       .addCase(fetchMatchById.rejected, (state, action) => {

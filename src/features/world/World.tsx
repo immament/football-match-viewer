@@ -12,8 +12,6 @@ export const World = () => {
   const dirLight = useRef<DirectionalLight>(null);
   const ctx = useContext(ContainerContext);
 
-  // useEffect(() => console.log("World:", Math.random() * 10000), []);
-
   return (
     <>
       {envCtl.visible && (

@@ -26,10 +26,7 @@ export default defineConfig({
       "/api": {
         target: "https://nd.footstar.org/match/get_data_nviewer.asp",
         changeOrigin: true,
-        rewrite: (path) => {
-          // console.log("path", path, path.replace(/^\/api\//, "?jogo_id="));
-          return path.replace(/^\/api\//, "?jogo_id=");
-        },
+        rewrite: (path) => path.replace(/^\/api\//, "?jogo_id="),
       },
     },
   },
