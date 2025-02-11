@@ -1,6 +1,6 @@
 import { AnimationClip, Bone, MeshStandardMaterial, SkinnedMesh } from "three";
 import { GLTF } from "three-stdlib";
-import { PoseTypes } from "./animations/Pose.model";
+import { PoseTypes } from "../animations/Pose.model";
 
 type ActionName =
   | "pl.t_pose"

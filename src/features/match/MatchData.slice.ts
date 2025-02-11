@@ -1,9 +1,9 @@
 import { StateCreator } from "zustand";
 import { AppStoreState } from "../../app/app.zu.store";
+import { fixSimilarColors } from "./colors/validateColors";
 import { fetchFootstarMatchData } from "./fsApi/footstar.api";
 import { mapFsMatch } from "./fsApi/footstar.mapper";
 import { MatchData, MatchTeam } from "./MatchData.model";
-import { fixSimilarColors } from "./validateColors";
 import { TeamState } from "/app/TeamsSlice";
 
 export interface MatchDataSlice {

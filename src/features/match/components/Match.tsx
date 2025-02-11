@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Group, Mesh } from "three";
-import { useMatchOrbitControls } from "../../world/MatchOrbitControls";
 import { Ball } from "./Ball";
+import { useMatchOrbitControls } from "./MatchOrbitControls";
 import { Player } from "./Player";
 import { useAppZuStore } from "/app/app.zu.store";
 import { TeamState } from "/app/TeamsSlice";

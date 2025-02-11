@@ -2,7 +2,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { MutableRefObject, useEffect, useMemo, useState } from "react";
 import { Group, Mesh, Object3D } from "three";
 import { OrbitControls } from "three-stdlib";
-import { ViewFromTarget } from "./ViewFromTarget";
+import { ViewFromTarget } from "../ViewFromTarget";
 import { useAppZuStore } from "/app/app.zu.store";
 import { FOLLOW_BALL_IDX } from "/app/Camera.slice";
 
