@@ -14,7 +14,7 @@ describe("matchSlice", () => {
   });
   describe("Media player", () => {
     it("should return the initial state", () => {
-      expect(initialState.status).toBe("idle");
+      expect(initialState.matchData.status).toBe("idle");
       expect(initialState.mediaPlayer.startTime).toBe(0);
       expect(initialState.mediaPlayer.duration).toBe(0);
       expect(initialState.mediaPlayer.playbackSpeed).toBe(2);
@@ -110,12 +110,12 @@ describe("matchSlice", () => {
         },
       };
 
-      initialState.matchFetchSuccess(payload);
+      initialState.matchData.matchFetchSuccess(payload);
 
       const updatedState = useAppZuStore.getState();
 
-      expect(updatedState.status).toBe("succeeded");
-      expect(updatedState.matchData).toBeTruthy();
+      expect(updatedState.matchData.status).toBe("succeeded");
+      expect(updatedState.matchData.data).toBeTruthy();
       expect(updatedState.teams.homeTeam).toMatchObject({
         id: 1,
         teamIdx: 0,
@@ -139,8 +139,8 @@ describe("matchSlice", () => {
 
   it("should update the step", () => {
     const newTimeInSeconds = 10;
-    initialState.updateStep(newTimeInSeconds);
+    initialState.matchTimer.updateStep(newTimeInSeconds);
     const updatedState = useAppZuStore.getState();
-    expect(updatedState.step).toBe(20);
+    expect(updatedState.matchTimer.step).toBe(20);
   });
 });

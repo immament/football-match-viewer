@@ -13,14 +13,13 @@ import { debounce } from "/app/utils";
 
 export function ProgressHolderComponent() {
   const duration = useAppZuStore((state) => state.mediaPlayer.duration);
-  const time = useAppZuStore((state) => state.time);
-  const displayTime = useAppZuStore((state) => state.displayTime);
+  const time = useAppZuStore((state) => state.matchTimer.time);
+  const displayTime = useAppZuStore((state) => state.matchTimer.displayTime);
   const gotoPercent = useAppZuStore((state) => state.mediaPlayer.gotoPercent);
 
   const playProgressRef = useRef<HTMLDivElement>(null);
   const timeTooltipRef = useRef<HTMLDivElement>(null);
   const progressHolderRef = useRef<HTMLDivElement>(null);
-  // const progressControlRef = useRef<HTMLDivElement>(null);
   const hoverTooltipRef = useRef<HTMLDivElement>(null);
 
   const [hoverTooltip, setHoverTooltip] = useState<{
@@ -61,7 +60,6 @@ export function ProgressHolderComponent() {
 
   const onMouseMoveOverProgressControl = debounce(
     (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      // const tooltipParent = tooltipEl.offsetParent as HTMLElement;
       const progressWidth = progressHolderRef.current?.clientWidth;
       if (progressWidth) {
         const offsetX = ev.nativeEvent.offsetX;

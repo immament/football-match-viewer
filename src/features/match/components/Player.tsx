@@ -45,7 +45,7 @@ export function Player({
   const socksMaterial = useMaterialClone(materials.Ch38_body, shirtColor);
   const shoesMaterial = useMaterialClone(materials.Ch38_body, shortsColor);
 
-  const matchData = useAppZuStore((state) => state.matchData);
+  const matchData = useAppZuStore((state) => state.matchData.data);
   const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
   const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
   const playbackSpeed = useAppZuStore(

@@ -1,36 +1,38 @@
 import { StateCreator } from "zustand";
 import { AppStoreState } from "../../app/app.zu.store";
-import { secondsToStep } from "../match/animations/positions.utils";
-import { formatTime } from "../match/formatTime";
+import { secondsToStep } from "./animations/positions.utils";
+import { formatTime } from "./formatTime";
 
-//  & CameraSlice
-// & StatusSlice;
-export interface MediaPlayerSlice {
-  step: number;
-  time: number;
-  displayTime: string;
-  updateStep: (newStep: number) => void;
+export interface MatchTimerSlice {
+  matchTimer: {
+    step: number;
+    time: number;
+    displayTime: string;
+    updateStep: (newStep: number) => void;
+  };
 }
 
 export const createMediaPlayerSlice: StateCreator<
   AppStoreState,
   [["zustand/immer", never]],
   [],
-  MediaPlayerSlice
+  MatchTimerSlice
 > = (set) => ({
-  time: 0,
-  step: 0,
-  displayTime: "00:00",
-  updateStep: (matchTimeInSeconds: number) => {
-    const newStep = secondsToStep(matchTimeInSeconds);
-    set((state) => {
-      if (state.step === newStep) return;
-      const newTime = Math.floor(newStep / 2);
+  matchTimer: {
+    time: 0,
+    step: 0,
+    displayTime: "00:00",
+    updateStep: (matchTimeInSeconds: number) => {
+      const newStep = secondsToStep(matchTimeInSeconds);
+      set(({ matchTimer }) => {
+        if (matchTimer.step === newStep) return;
+        const newTime = Math.floor(newStep / 2);
 
-      state.step = newStep;
-      state.time = newTime;
-      state.displayTime = formatTime(newTime);
-    });
+        matchTimer.step = newStep;
+        matchTimer.time = newTime;
+        matchTimer.displayTime = formatTime(newTime);
+      });
+    },
   },
 });
 /*

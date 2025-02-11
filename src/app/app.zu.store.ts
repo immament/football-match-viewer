@@ -9,8 +9,8 @@ import {
 } from "../features/match/MatchData.slice";
 import {
   createMediaPlayerSlice,
-  type MediaPlayerSlice,
-} from "../features/mediaPlayer/MediaPlayer.slice";
+  type MatchTimerSlice,
+} from "../features/match/MatchTimer.slice";
 import {
   createMediaPlayer2Slice,
   type MediaPlayer2Slice,
@@ -21,7 +21,7 @@ import { createTeamsSlice, type TeamsSlice } from "./TeamsSlice";
 
 import { immer } from "zustand/middleware/immer";
 
-export type AppStoreState = MediaPlayerSlice &
+export type AppStoreState = MatchTimerSlice &
   MediaPlayer2Slice &
   MatchDataSlice &
   MatchSlice &

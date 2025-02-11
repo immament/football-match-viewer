@@ -6,7 +6,7 @@ export function MediaHeaderComponent() {
   const awayTeamName = useAppZuStore(({ teams }) => teams.awayTeam.name);
   const homeTeamGoals = useAppZuStore(({ teams }) => teams.homeTeam.goals);
   const awayTeamGoals = useAppZuStore(({ teams }) => teams.awayTeam.goals);
-  const displayTime = useAppZuStore((state) => state.displayTime);
+  const displayTime = useAppZuStore((state) => state.matchTimer.displayTime);
 
   return (
     <div className="mv-media-header">

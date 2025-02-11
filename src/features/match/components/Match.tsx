@@ -11,8 +11,8 @@ export const Match = () => {
   const matchRef = useRef<Group | null>(null);
   useMatchOrbitControls(ballRef, matchRef);
 
-  const matchFetch = useAppZuStore((state) => state.matchFetch);
-  const matchStatus = useAppZuStore((state) => state.status);
+  const matchFetch = useAppZuStore((state) => state.matchData.matchFetch);
+  const matchStatus = useAppZuStore((state) => state.matchData.status);
   const teams = useAppZuStore((state) => state.teams);
 
   useEffect(() => {

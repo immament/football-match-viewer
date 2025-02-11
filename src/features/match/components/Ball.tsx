@@ -26,14 +26,14 @@ export const Ball = forwardRef<Mesh, BallProps>(
     const [positionAnimation, setPositionAnimation] =
       useState<AnimationAction>();
 
-    const matchData = useAppZuStore((state) => state.matchData);
+    const matchData = useAppZuStore((state) => state.matchData.data);
     const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
     const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
     const playbackSpeed = useAppZuStore(
       (state) => state.mediaPlayer.playbackSpeed
     );
 
-    const updateStep = useAppZuStore((state) => state.updateStep);
+    const updateStep = useAppZuStore((state) => state.matchTimer.updateStep);
 
     const [mixer, setMixer] = useState<AnimationMixer>();
 
