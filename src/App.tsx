@@ -5,6 +5,8 @@ import { Suspense, useContext, useState } from "react";
 import "./App.scss";
 import { ContainerContext } from "./app/Container.context";
 import { round } from "./app/utils";
+import { CommentsBox } from "./features/mediaPlayer/components/CommentsBox";
+import { EventInfoBox } from "./features/mediaPlayer/components/EventInfoBox";
 import { MediaHeaderComponent } from "./features/mediaPlayer/components/MediaHeader/MediaHeader.component";
 import { MediaPlayerComponent } from "./features/mediaPlayer/components/MediaPlayer/MediaPlayer.component";
 import { World } from "./features/world/World";
@@ -43,6 +45,8 @@ function App() {
       </Suspense>
       <MediaHeaderComponent />
       <MediaPlayerComponent />
+      <EventInfoBox />
+      <CommentsBox />
       <Leva collapsed hidden={!ctx?.debugMode} />
     </>
   );

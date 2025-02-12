@@ -17,10 +17,10 @@ export function FollowObjectButton() {
   const followedObjectId = useAppZuStore((st) => st.camera.followedObjectId);
   const viewFromObject = useAppZuStore((state) => state.camera.viewFromObject);
   const homeTeamSquadPlayers = useAppZuStore(
-    (st) => st.teams.homeTeam.squadPlayers
+    (st) => st.teams.teamsArray[0].squadPlayers
   );
   const awayTeamSquadPlayers = useAppZuStore(
-    (st) => st.teams.awayTeam.squadPlayers
+    (st) => st.teams.teamsArray[1].squadPlayers
   );
   const changeFollowedObjectId = useAppZuStore(
     (st) => st.camera.changeFollowedObjectId

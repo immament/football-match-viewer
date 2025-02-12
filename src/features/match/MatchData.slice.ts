@@ -1,10 +1,11 @@
 import { StateCreator } from "zustand";
 import { AppStoreState } from "../../app/app.zu.store";
+import { MATCH_TIME_SCALE } from "./animations/positions.utils";
 import { fixSimilarColors } from "./colors/validateColors";
 import { fetchFootstarMatchData } from "./fsApi/footstar.api";
 import { mapFsMatch } from "./fsApi/footstar.mapper";
 import { MatchData, MatchTeam } from "./MatchData.model";
-import { TeamState } from "/app/TeamsSlice";
+import { TeamState } from "/app/teams.slice";
 
 export interface MatchDataSlice {
   matchData: {
@@ -27,25 +28,31 @@ export const createMatchDataSlice: StateCreator<
     status: "idle",
 
     matchFetchSuccess: (matchData) => {
-      const teams = {
-        homeTeam: mapTeam(matchData.homeTeam),
-        awayTeam: mapTeam(matchData.awayTeam),
-      };
+      const teams: [TeamState, TeamState] = [
+        mapTeamToState(matchData.teams[0]),
+        mapTeamToState(matchData.teams[1]),
+      ];
 
       fixSimilarColors(teams);
 
-      // TODO
-      const duration = 90 * 60;
+      const duration = matchData.positions.ball.px.length * MATCH_TIME_SCALE;
 
       set((state) => {
         state.matchData.status = "succeeded";
         state.matchData.data = matchData;
         state.mediaPlayer.duration = duration;
-        state.teams = teams;
+        state.teams.teamsArray = teams;
       });
 
-      function mapTeam(team: MatchTeam): TeamState {
-        return { ...team, goals: 0 };
+      function mapTeamToState(team: MatchTeam): TeamState {
+        return {
+          teamIdx: team.teamIdx,
+          id: team.id,
+          name: team.name,
+          colors: team.colors,
+          squadPlayers: [...team.squadPlayers],
+          goals: 0,
+        };
       }
     },
     matchFetchError: (error: string) => {
@@ -64,6 +71,7 @@ export const createMatchDataSlice: StateCreator<
       try {
         const fsMatch = await fetchFootstarMatchData(matchId);
         const matchData = mapFsMatch(fsMatch);
+        console.log("matchData", matchData.commentsMap);
         get().matchData.matchFetchSuccess(matchData);
       } catch (error) {
         get().matchData.matchFetchError(String(error));

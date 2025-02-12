@@ -1,14 +1,28 @@
 import { describe, expect, it } from "vitest";
 import { minuteToStep } from "../../animations/positions.utils";
-import { GameEvent } from "../../MatchData.model";
+import { MatchEvent } from "../../MatchData.model";
 import { createEventsMap } from "../footstar.mapper";
 
 describe.skip("create match events map", () => {
-  const rawEvents: GameEvent[] = [
+  const rawEvents: MatchEvent[] = [
     { time: 0, type: "gstart" },
-    { time: 1, type: "subst", playerInId: 130093, playerOutId: 1391 },
+    {
+      time: 1,
+      type: "subst",
+      playerInId: "130093",
+      playerOutId: "1391",
+      teamIdx: 0,
+    },
     { time: 45.19, type: "yellow", teamId: 24, playerId: 130100 },
-    { time: 47.99, type: "goal", teamId: 24, playerId: 12 },
+    {
+      time: 47.99,
+      type: "goal",
+      teamId: 24,
+      teamIdx: 0,
+      playerId: 12,
+      homeGoals: 1,
+      awayGoals: 0,
+    },
     { time: 45.62341, type: "halftime" },
     { time: 90.235, type: "extratime1" },
     { time: 105.833, type: "extratime2" },
@@ -26,7 +40,7 @@ describe.skip("create match events map", () => {
   });
 
   it("should create map with 2 elements", () => {
-    const events: GameEvent[] = [
+    const events: MatchEvent[] = [
       { time: 45.62341, type: "halftime" },
       { time: 90.235, type: "extratime1" },
     ];
@@ -41,7 +55,7 @@ describe.skip("create match events map", () => {
   });
 
   it("should create map with 2 elements at the same time", () => {
-    const events: GameEvent[] = [
+    const events: MatchEvent[] = [
       { time: 45.1, type: "yellow", teamId: 1, playerId: 2 },
       { time: 45.101, type: "halftime" },
     ];
@@ -55,7 +69,7 @@ describe.skip("create match events map", () => {
   });
 
   it("should create map with 2 elements at the same time sorted by time", () => {
-    const events: GameEvent[] = [
+    const events: MatchEvent[] = [
       { time: 45.101, type: "halftime" },
       { time: 45.1, type: "yellow", teamId: 1, playerId: 2 },
     ];

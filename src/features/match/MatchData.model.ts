@@ -1,11 +1,10 @@
 import { MatchMovement } from "./animations/positions.utils";
-import { MatchEventsMap } from "./matchEvents";
 
 export interface MatchData {
   positions: MatchMovement;
-  homeTeam: MatchTeam;
-  awayTeam: MatchTeam;
+  teams: [MatchTeam, MatchTeam];
   eventsMap: MatchEventsMap;
+  commentsMap: MatchCommentsMap;
 }
 export type TeamColors = {
   text: string;
@@ -19,6 +18,7 @@ export interface MatchTeam {
   teamIdx: 0 | 1;
   name: string;
   squadPlayers: MatchPlayer[];
+  substPlayers: MatchSubstPlayer[];
   colors: TeamColors;
 }
 
@@ -33,7 +33,17 @@ export interface MatchPlayer {
   shoesColor: string; // @_cb
 }
 
-export type GameEvent = { time: number } & (
+export interface MatchSubstPlayer extends MatchPlayer {
+  outPlayerId: string; // @_out
+  minute: number; // @_minute
+}
+
+export type MatchEventsMap = Record<
+  number,
+  { events: MatchEvent[]; nextEventStep: number }
+>;
+
+export type MatchEvent = { time: number } & (
   | {
       type:
         | "gstart"
@@ -45,12 +55,32 @@ export type GameEvent = { time: number } & (
     }
   | {
       type: "subst";
-      playerInId: number;
-      playerOutId: number;
+      playerInId: string;
+      playerOutId: string;
+      teamIdx: 0 | 1;
     }
+  | GoalMatchEvent
   | {
-      type: "goal" | "yellow";
+      type: "yellow";
       teamId: number;
       playerId: number;
     }
 );
+
+export type GoalMatchEvent = {
+  type: "goal";
+  teamId: number;
+  teamIdx: 0 | 1;
+  playerId: number;
+  homeGoals: number;
+  awayGoals: number;
+};
+
+export type MatchCommentsMap = Record<number, MatchComment>;
+
+export type MatchComment = {
+  time: number;
+  displayTime: string;
+  step: number;
+  text: string;
+};

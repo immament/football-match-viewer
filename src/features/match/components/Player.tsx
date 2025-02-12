@@ -1,6 +1,6 @@
 import { Billboard, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { useFrame, useGraph } from "@react-three/fiber";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ColorRepresentation, Group } from "three";
 import { SkeletonUtils } from "three-stdlib";
 import { setupPlayerAnimations } from "../animations/setupPlayer";
@@ -34,7 +34,7 @@ export function Player({
   );
   const group = React.useRef<Group>(null);
   const { scene, animations } = useGLTF(MODEL_URL);
-  const animationsResult = useAnimations(animations, group);
+  const poseAnimations = useAnimations(animations, group);
 
   const sceneClone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes, materials } = useGraph(sceneClone) as GLTFResult;
@@ -52,39 +52,54 @@ export function Player({
     (state) => state.mediaPlayer.playbackSpeed
   );
 
+  const labelVisibleRef = useRef(false);
+
+  const squadPlayer = useAppZuStore(
+    (state) => state.teams.teamsArray[teamIdx].squadPlayers[playerIdx]
+  );
+
   const [config, setConfig] =
     useState<ReturnType<typeof setupPlayerAnimations>>();
 
   useEffect(() => {
     if (matchData?.positions && group.current && !config) {
+      // console.log("PLAYER useEffect setupPlayerAnimations");
       const result = setupPlayerAnimations(
         playerId,
         group.current,
         matchData.positions,
-        animationsResult.actions
+        poseAnimations.actions
       );
       setConfig(result);
       result.playerPoses.forceIdle();
       result.positionAction.play();
       result.rotateAction.play();
     }
-  }, [matchData, animationsResult.actions, playerId, config]);
+  }, [matchData, poseAnimations.actions, playerId, config]);
 
   useEffect(() => {
-    if (config?.mixer) {
+    if (config) {
+      // console.log("PLAYER useEffect startTime", config.positionAction);
+      if (!config.mixer.timeScale) {
+        throw new Error("Player config.mixer.timeScale == 0");
+      }
+      config.positionAction.paused = false;
+      config.rotateAction.paused = false;
       config.mixer.setTime(startTime / config.mixer.timeScale);
     }
-  }, [config?.mixer, startTime]);
+  }, [config, startTime]);
 
   useEffect(() => {
-    animationsResult.mixer.timeScale = matchPaused ? 0 : playbackSpeed;
-  }, [matchPaused, animationsResult.mixer, playbackSpeed]);
+    // console.log("PLAYER useEffect playbackSpeed");
 
-  useEffect(() => {
-    if (config) config.mixer.timeScale = playbackSpeed;
-    if (animationsResult.mixer)
-      animationsResult.mixer.timeScale = playbackSpeed;
-  }, [config, animationsResult, playbackSpeed]);
+    if (config) {
+      config.mixer.timeScale = playbackSpeed;
+      config.positionAction.paused = false;
+      config.rotateAction.paused = false;
+    }
+    if (poseAnimations.mixer)
+      poseAnimations.mixer.timeScale = matchPaused ? 0 : playbackSpeed;
+  }, [config, poseAnimations, playbackSpeed, matchPaused]);
 
   const ctx = useContext(ContainerContext);
 
@@ -94,11 +109,18 @@ export function Player({
       // if (paused && !config.playerPoses.forceUpdatePose) return;
       config.playerPoses.updatePose(delta);
       config.mixer.update(delta);
-      updateLabel(config);
+      updateDbgLabel(config);
     }
   });
 
-  const labelRef = React.useRef<{ text: string }>(null);
+  function labelVisible(visible: boolean) {
+    if (labelRef.current) {
+      labelRef.current.visible = visible;
+    }
+  }
+
+  const labelRef = React.useRef<{ text: string; visible: boolean }>(null);
+  const dbgLabelRef = React.useRef<{ text: string }>(null);
   return (
     <group
       name={`Player`}
@@ -114,15 +136,31 @@ export function Player({
               color="black"
               anchorX="center"
               anchorY="bottom"
-              position={[0, 2, 0]}
+              position={[0, 2.3, 0]}
               fontSize={0.3}
-              ref={labelRef}
+              ref={dbgLabelRef}
             >
               {" "}
             </Text>
           </Billboard>
         </>
       )}
+
+      <Billboard>
+        <Text
+          color="black"
+          anchorX="center"
+          anchorY="bottom"
+          position={[0, 2, 0]}
+          fontSize={0.3}
+          ref={labelRef}
+          visible={labelVisibleRef.current}
+        >
+          {`${teamIdx ? "Away" : "Home"}\n${squadPlayer.shirtNumber}. ${
+            squadPlayer.name
+          }`}
+        </Text>
+      </Billboard>
       <group
         name={`Player-${teamIdx}-${playerIdx}`}
         rotation={[Math.PI / 2, 0, 0]}
@@ -130,6 +168,21 @@ export function Player({
         ref={group}
         {...props}
         dispose={null}
+        onPointerEnter={(e) => {
+          e.stopPropagation();
+          labelVisible(true);
+        }}
+        onPointerLeave={(e) => {
+          e.stopPropagation();
+          if (!labelVisibleRef.current) {
+            labelVisible(false);
+          }
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          labelVisibleRef.current = !labelVisibleRef.current;
+          labelVisible(labelVisibleRef.current);
+        }}
       >
         <primitive object={nodes.mixamorig5Hips} />
         <skinnedMesh
@@ -166,9 +219,9 @@ export function Player({
     </group>
   );
 
-  function updateLabel(config: ReturnType<typeof setupPlayerAnimations>) {
-    if (labelRef.current) {
-      labelRef.current.text =
+  function updateDbgLabel(config: ReturnType<typeof setupPlayerAnimations>) {
+    if (dbgLabelRef.current) {
+      dbgLabelRef.current.text =
         `${teamIdx === 0 ? "Home" : "Away"} Player ${playerIdx + 1}` +
         (config.mixer.time > 0 && ` (${round(config.mixer.time, 1)})`);
     }

@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Group, Mesh } from "three";
+import { TeamState } from "../../../app/teams.slice";
 import { Ball } from "./Ball";
 import { useMatchOrbitControls } from "./MatchOrbitControls";
 import { Player } from "./Player";
 import { useAppZuStore } from "/app/app.zu.store";
-import { TeamState } from "/app/TeamsSlice";
 
 export const Match = () => {
   const ballRef = useRef<Mesh | null>(null);
@@ -13,7 +13,7 @@ export const Match = () => {
 
   const matchFetch = useAppZuStore((state) => state.matchData.matchFetch);
   const matchStatus = useAppZuStore((state) => state.matchData.status);
-  const teams = useAppZuStore((state) => state.teams);
+  const teams = useAppZuStore((state) => state.teams.teamsArray);
 
   useEffect(() => {
     if (matchStatus === "idle") {
@@ -26,8 +26,9 @@ export const Match = () => {
   return (
     <group ref={matchRef} dispose={null}>
       <Ball ref={ballRef} key="ball" />
-      <Players team={teams.homeTeam} teamIdx={0} />
-      <Players team={teams.awayTeam} teamIdx={1} />
+      {teams.map((team) => (
+        <Players team={team} teamIdx={team.teamIdx} key={team.teamIdx} />
+      ))}
     </group>
   );
 };

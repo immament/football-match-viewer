@@ -1,16 +1,22 @@
 import { decode } from "he";
-import { secondsToStep } from "../animations/positions.utils";
+import { minuteToStep } from "../animations/positions.utils";
+import { formatTimeFromMinutes } from "../formatTime";
 import {
-  GameEvent,
+  MatchComment,
+  MatchCommentsMap,
   MatchData,
+  MatchEvent,
+  MatchEventsMap,
   MatchPlayer,
+  MatchSubstPlayer,
   MatchTeam,
 } from "../MatchData.model";
-import { MatchEventsMap } from "../matchEvents";
 import {
   FootstarMatchData,
+  FsGameComment,
   FsGameEvent,
   FsSquadPlayer,
+  FsSubstPlayer,
   FsTeamColors,
 } from "./footstar.api.model";
 import { mapMovement } from "./footstar.movement.mapper";
@@ -18,12 +24,14 @@ import { logger } from "/app/logger";
 
 export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
   const positions = mapMovement(fsMatch);
-
+  const teams: [MatchTeam, MatchTeam] = [mapHomeTeam(), mapAwayTeam()];
   return {
     positions,
-    homeTeam: mapHomeTeam(),
-    awayTeam: mapAwayTeam(),
-    eventsMap: mapMatchEventsToEventsMap(fsMatch.game_events.ge),
+    teams,
+    eventsMap: createEventsMap(mapMatchEvents(fsMatch.game_events.ge, teams)),
+    commentsMap: createCommentsMap(
+      mapGameComments(fsMatch.game_info.game_comments.gc)
+    ),
   };
 
   function mapHomeTeam(): MatchTeam {
@@ -34,6 +42,10 @@ export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
       squadPlayers: mapSquadPlayers(
         fsMatch.home_starting_eleven.home_player_se
       ),
+      substPlayers:
+        fsMatch.home_substitutes !== ""
+          ? mapSubstPlayers(fsMatch.home_substitutes.home_player_sub)
+          : [],
       colors: mapColors(fsMatch.colors.clr, "home"),
     };
   }
@@ -46,6 +58,10 @@ export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
       squadPlayers: mapSquadPlayers(
         fsMatch.away_starting_eleven.away_player_se
       ),
+      substPlayers:
+        fsMatch.away_substitutes !== ""
+          ? mapSubstPlayers(fsMatch.away_substitutes.away_player_sub)
+          : [],
       colors: mapColors(fsMatch.colors.clr, "away"),
     };
   }
@@ -78,6 +94,10 @@ export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
   }
 }
 
+export function mapSquadPlayers(players: FsSquadPlayer[]) {
+  return players.map(mapSquadPlayer);
+}
+
 export function mapSquadPlayer(pl: FsSquadPlayer): MatchPlayer {
   return {
     name: decode(pl.text),
@@ -91,61 +111,86 @@ export function mapSquadPlayer(pl: FsSquadPlayer): MatchPlayer {
   };
 }
 
-export function mapSquadPlayers(players: FsSquadPlayer[]) {
-  return players.map(mapSquadPlayer);
+export function mapSubstPlayers(players: FsSubstPlayer[]): MatchSubstPlayer[] {
+  return players.map(mapSubstPlayer);
 }
 
-export function mapMatchEventsToEventsMap(
-  fsEvents: FsGameEvent[]
-): MatchEventsMap {
-  return createEventsMap(mapMatchEvents(fsEvents));
+export function mapSubstPlayer(pl: FsSubstPlayer): MatchSubstPlayer {
+  return {
+    ...mapSquadPlayer(pl),
+    minute: Number(pl._minute),
+    outPlayerId: pl._out,
+  };
 }
 
-export function mapMatchEvents(fsEvents: FsGameEvent[]): GameEvent[] {
+export function mapMatchEvents(
+  fsEvents: FsGameEvent[],
+  teams: [MatchTeam, MatchTeam]
+): MatchEvent[] {
+  const matchResult = { homeGoals: 0, awayGoals: 0 };
+
   return fsEvents.map(mapMatchEvent).filter((ev) => !!ev);
+
+  function mapMatchEvent(fsEv: FsGameEvent): MatchEvent | undefined {
+    switch (fsEv._tipo) {
+      case "gstart":
+      case "halftime":
+      case "extratime1":
+      case "extratime2":
+      case "penalties":
+        return {
+          time: mapTime(fsEv._m),
+          type: fsEv._tipo,
+        };
+      case "amarelo":
+        return {
+          time: mapTime(fsEv._m),
+          type: "yellow",
+          teamId: Number(fsEv._eqmarca),
+          playerId: Number(fsEv._jogmarca),
+        };
+      case "goal":
+        if (Number(fsEv._eqmarca) === teams[0].id) {
+          matchResult.homeGoals++;
+        } else {
+          matchResult.awayGoals++;
+        }
+        return {
+          time: mapTime(fsEv._m),
+          teamId: Number(fsEv._eqmarca),
+          teamIdx: teams[0].id === Number(fsEv._eqmarca) ? 0 : 1,
+          playerId: Number(fsEv._jogmarca),
+          type: fsEv._tipo,
+          ...matchResult,
+        };
+      case "subst":
+        return {
+          time: mapTime(fsEv._m),
+          type: "subst",
+          teamIdx: teams[0].substPlayers.find((p) => p.id === fsEv._id_player1)
+            ? 0
+            : 1,
+          playerInId: fsEv._id_player1,
+          playerOutId: fsEv._id_player2,
+        };
+
+      default:
+        logger.warn("unknown match event type: " + (fsEv as FsGameEvent)._tipo);
+    }
+    function mapTime(time: string) {
+      return Number(time.replace(",", "."));
+    }
+  }
 }
 
-function mapMatchEvent(fsEv: FsGameEvent): GameEvent | undefined {
-  switch (fsEv._tipo) {
-    case "gstart":
-    case "halftime":
-    case "extratime1":
-    case "extratime2":
-    case "penalties":
-      return {
-        time: mapTime(fsEv._m),
-        type: fsEv._tipo,
-      };
-    case "amarelo":
-    case "goal":
-      return {
-        time: mapTime(fsEv._m),
-        teamId: Number(fsEv._eqmarca),
-        playerId: Number(fsEv._jogmarca),
-        type: fsEv._tipo === "amarelo" ? "yellow" : fsEv._tipo,
-      };
-    case "subst":
-      return {
-        time: mapTime(fsEv._m),
-        playerInId: Number(fsEv._id_player1),
-        playerOutId: Number(fsEv._id_player2),
-        type: "subst",
-      };
-
-    default:
-      logger.warn("unknown match event type: " + (fsEv as FsGameEvent)._tipo);
-  }
-  function mapTime(time: string) {
-    return Number(time.replace(",", "."));
-  }
-}
-
-export function createEventsMap(events: GameEvent[]): MatchEventsMap {
+export function createEventsMap(events: MatchEvent[]): MatchEventsMap {
   let lastStep = -1;
+
   return events
     .sort((a, b) => b.time - a.time)
     .reduce((acc, ev) => {
-      const step = secondsToStep(ev.time * 60);
+      const step = minuteToStep(ev.time);
+
       if (acc[step]) {
         acc[step].events.push(ev);
         acc[step].events.sort((a, b) => a.time - b.time);
@@ -155,4 +200,32 @@ export function createEventsMap(events: GameEvent[]): MatchEventsMap {
       lastStep = step;
       return acc;
     }, {} as MatchEventsMap);
+}
+
+export function mapGameComments(comments: FsGameComment[]): MatchComment[] {
+  return comments.map(mapGameComment);
+}
+
+export function mapGameComment(comment: FsGameComment): MatchComment {
+  const time = Number(comment._m.replace(",", "."));
+  return {
+    time,
+    step: minuteToStep(time),
+    displayTime: formatTimeFromMinutes(time),
+    text: comment.text.replace(/\[br\]/g, "\n"),
+  };
+}
+
+export function createCommentsMap(comments: MatchComment[]): MatchCommentsMap {
+  return comments
+    .sort((a, b) => a.time - b.time)
+    .reduce((acc, c) => {
+      if (acc[c.step]) {
+        // join texts from 2 events
+        acc[c.step].text += "\n" + c.text;
+      } else {
+        acc[c.step] = { ...c };
+      }
+      return acc;
+    }, {} as MatchCommentsMap);
 }

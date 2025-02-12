@@ -7,8 +7,8 @@ import { useAppZuStore } from "/app/app.zu.store";
 describe("MediaHeader", () => {
   test("Uses preloaded state to render", () => {
     const initialMatch = useAppZuStore.getState();
-    initialMatch.teams.homeTeam = {
-      ...initialMatch.teams.homeTeam,
+    initialMatch.teams.teamsArray[0] = {
+      ...initialMatch.teams.teamsArray[0],
       name: "Test home team",
       goals: 21,
     };

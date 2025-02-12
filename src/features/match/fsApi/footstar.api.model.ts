@@ -1,23 +1,5 @@
 export type FootstarMatchResponse = { xml: { general: FootstarMatchData } };
 
-export type FsTeamColors = {
-  _id: "home" | "away" | "0" | "1" | "2" | "3" | "4";
-  _text: string;
-  _shirt: string;
-  _shorts: string;
-  _socks: string;
-};
-
-type FsTeamColorsExt = {
-  // rest can be ignored
-  // always white
-  _text2?: string;
-  // rest always black
-  _shirt2: string;
-  _shorts2: string;
-  _socks2: string;
-};
-
 export type FootstarMatchData = {
   matchId?: number;
   gconfig: {
@@ -45,7 +27,7 @@ export type FootstarMatchData = {
   mm: { m: { _p: string; _t1: string; _t2: string }[] };
   game_info: {
     game_comments: {
-      gc: { text: string; _m: string; _LANG: string }[];
+      gc: FsGameComment[];
     };
     home_team_name: { text: string; _id: string };
     away_team_name: { text: string; _id: string };
@@ -78,28 +60,24 @@ export type FootstarMatchData = {
   ref: FsReferee;
   home_starting_eleven: { home_player_se: FsSquadPlayer[] };
   away_starting_eleven: { away_player_se: FsSquadPlayer[] };
-  home_substitutes:
-    | ""
-    | {
-        home_player_sub: FsPlayerSubstitution[];
-      };
-  away_substitutes: "" | { away_player_sub: FsPlayerSubstitution[] };
+  home_substitutes: "" | { home_player_sub: FsSubstPlayer[] };
+  away_substitutes: "" | { away_player_sub: FsSubstPlayer[] };
   game_events: { ge: FsGameEvent[] };
   translations: { t: { _name: string; _traducao: string }[] };
   game_data: { j: FsGameDataRecord[] };
 };
 
-export type FsPlayerSubstitution = FsSquadPlayer & {
+export type FsSubstPlayer = FsSquadPlayer & {
   _out: string;
   _minute: string;
-  // ?
+  // probably not used
   _type: string;
 };
 
 export type FsSquadPlayer = {
+  _id: string;
   // player name
   text: string;
-  _id: string;
   _shirt_number: string;
   _rating: string;
   // hair color
@@ -181,6 +159,30 @@ export type FsGameDataRecord = {
   _y9f: string;
   _y10f: string;
   _y11f: string;
+};
+
+export type FsTeamColors = {
+  _id: "home" | "away" | "0" | "1" | "2" | "3" | "4";
+  _text: string;
+  _shirt: string;
+  _shorts: string;
+  _socks: string;
+};
+
+export type FsTeamColorsExt = {
+  // rest can be ignored
+  // always white
+  _text2?: string;
+  // rest always black
+  _shirt2: string;
+  _shorts2: string;
+  _socks2: string;
+};
+
+export type FsGameComment = {
+  text: string;
+  _m: string;
+  _LANG: string;
 };
 
 // not used

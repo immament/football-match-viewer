@@ -94,3 +94,19 @@ export type MatchMovement = {
   players: PlayerPositions[][];
   poses: RawPoseEvents[][];
 };
+
+export function mixerDeltaTime(
+  delta: number,
+  currentTime: number,
+  matchPaused: boolean,
+  matchDuration: number
+): number {
+  let result = delta;
+
+  if (matchPaused) result = 0;
+
+  if (currentTime + result > matchDuration)
+    return Math.max(0, matchDuration - currentTime);
+  if (currentTime + result < 0) return Math.max(0, -currentTime);
+  return result;
+}

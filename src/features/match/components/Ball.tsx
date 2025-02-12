@@ -10,6 +10,7 @@ import {
 } from "react";
 import { AnimationAction, AnimationMixer, Mesh, Vector3 } from "three";
 import { createBallPositionAnimation } from "../animations/createBallPositionAnimation";
+import { mixerDeltaTime } from "../animations/positions.utils";
 import { useAppZuStore } from "/app/app.zu.store";
 import { ContainerContext } from "/app/Container.context";
 import { round } from "/app/utils";
@@ -28,6 +29,8 @@ export const Ball = forwardRef<Mesh, BallProps>(
 
     const matchData = useAppZuStore((state) => state.matchData.data);
     const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
+    const pauseMatch = useAppZuStore((state) => state.mediaPlayer.pause);
+    const matchDuration = useAppZuStore((state) => state.mediaPlayer.duration);
     const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
     const playbackSpeed = useAppZuStore(
       (state) => state.mediaPlayer.playbackSpeed
@@ -40,23 +43,31 @@ export const Ball = forwardRef<Mesh, BallProps>(
     const ctx = useContext(ContainerContext);
 
     useEffect(() => {
-      if (mixer) {
+      if (mixer && positionAnimation) {
+        // console.log("BALL startTime", startTime, positionAnimation);
+        if (!mixer.timeScale) {
+          throw new Error("Ball mixer.timeScale == 0");
+        }
+        positionAnimation.paused = false;
         mixer.setTime(startTime / mixer.timeScale);
+
+        // positionAnimation.play();
       }
-    }, [mixer, startTime]);
+    }, [mixer, startTime, positionAnimation]);
 
     useEffect(() => {
-      if (matchData?.positions.ball && ballRef.current) {
+      if (matchData?.positions.ball && ballRef.current && !positionAnimation) {
+        // console.log("BALL createBallPositionAnimation");
         const _mixer = new AnimationMixer(ballRef.current);
         const { positionAction } = createBallPositionAnimation(
           _mixer,
-          matchData?.positions.ball
+          matchData.positions.ball
         );
         positionAction.play();
         setMixer(_mixer);
         setPositionAnimation(positionAction);
       }
-    }, [matchData]);
+    }, [matchData, positionAnimation]);
 
     useEffect(() => {
       if (mixer) mixer.timeScale = playbackSpeed;
@@ -71,13 +82,24 @@ export const Ball = forwardRef<Mesh, BallProps>(
       if (matchPaused) return;
 
       if (mixer && positionAnimation) {
-        mixer.update(delta);
+        const deltaTime = mixerDeltaTime(
+          delta,
+          mixer.time,
+          matchPaused,
+          matchDuration
+        );
+        if (deltaTime === 0) {
+          if (mixer.time >= matchDuration) {
+            pauseMatch();
+          }
+        }
+        mixer.update(deltaTime);
 
-        if (ballRef.current) animateBallRotation(delta, ballRef.current);
-        // dispatch(updateMatchStepThunk(mixer.time));
+        if (ballRef.current) animateBallRotation(deltaTime, ballRef.current);
         updateStep(mixer.time);
       }
     });
+
     // ball rotation (calculated for previous movement)
     function animateBallRotation(delta: number, ball: Mesh) {
       if (prevDelta) {

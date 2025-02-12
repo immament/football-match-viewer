@@ -16,7 +16,7 @@ export const World = () => {
     <>
       {envCtl.visible && (
         <Environment
-          preset="city"
+          files={"models/potsdamer_platz_1k.hdr"}
           background={false}
           ground={{ height: 10, radius: 260, scale: 130 }}
           far={1000}

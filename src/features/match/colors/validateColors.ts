@@ -1,15 +1,9 @@
 import { TeamColors } from "../MatchData.model";
 import { Color } from "./Color";
 import { KitColorsVo } from "./KitColorsVo";
-import { TeamState } from "/app/TeamsSlice";
+import { TeamState } from "/app/teams.slice";
 
-export function fixSimilarColors({
-  homeTeam,
-  awayTeam,
-}: {
-  homeTeam: TeamState;
-  awayTeam: TeamState;
-}) {
+export function fixSimilarColors([homeTeam, awayTeam]: [TeamState, TeamState]) {
   const homeKit = createKit(homeTeam);
   const awayKit = createKit(awayTeam).fixIfSimilar(homeKit, homeTeam.id);
   applyColors(homeTeam.colors, homeKit);

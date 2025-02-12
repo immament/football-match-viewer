@@ -4,10 +4,14 @@ import { AppStoreState } from "./app.zu.store";
 
 export interface TeamsSlice {
   teams: {
-    homeTeam: TeamState;
-    awayTeam: TeamState;
+    // homeTeam: TeamState;
+    // awayTeam: TeamState;
+    teamsArray: [TeamState, TeamState];
+    selectTeamById: (id: number) => TeamState | undefined;
+    selectPlayerById: (playerId: string) => MatchPlayer | undefined;
   };
 }
+
 export interface TeamState {
   id: number;
   teamIdx: 0 | 1;
@@ -24,8 +28,18 @@ export const createTeamsSlice: StateCreator<
   TeamsSlice
 > = () => ({
   teams: {
-    homeTeam: emptyTeam(0),
-    awayTeam: emptyTeam(1),
+    teamsArray: [emptyTeam(0), emptyTeam(1)],
+    selectTeamById(this, id: number): TeamState | undefined {
+      return this.teamsArray.find((t) => t.id === id);
+    },
+    selectPlayerById(this, playerId) {
+      return (
+        searchPlayer(this.teamsArray[0]) ?? searchPlayer(this.teamsArray[1])
+      );
+      function searchPlayer(team: TeamState) {
+        return team.squadPlayers.find((p) => p.id === playerId);
+      }
+    },
   },
 });
 

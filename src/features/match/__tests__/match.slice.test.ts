@@ -88,21 +88,26 @@ describe("matchSlice", () => {
   describe("fetchMatchById", () => {
     it("should add a match to the state", () => {
       const payload: MatchData = {
-        homeTeam: {
-          id: 1,
-          teamIdx: 0,
-          name: "Home team",
-          squadPlayers: [],
-          colors: { shirt: "FFFFFF", shorts: "", socks: "", text: "FFFFFF" },
-        },
-        awayTeam: {
-          id: 2,
-          teamIdx: 1,
-          name: "Away team",
-          squadPlayers: [],
-          colors: { shirt: "FF0000", shorts: "", socks: "", text: "FF0000" },
-        },
+        teams: [
+          {
+            id: 1,
+            teamIdx: 0,
+            name: "Home team",
+            squadPlayers: [],
+            substPlayers: [],
+            colors: { shirt: "FFFFFF", shorts: "", socks: "", text: "FFFFFF" },
+          },
+          {
+            id: 2,
+            teamIdx: 1,
+            name: "Away team",
+            squadPlayers: [],
+            substPlayers: [],
+            colors: { shirt: "FF0000", shorts: "", socks: "", text: "FF0000" },
+          },
+        ],
         eventsMap: {},
+        commentsMap: {},
         positions: {
           ball: { px: [], pz: [], pHeight: [] },
           players: [],
@@ -116,7 +121,7 @@ describe("matchSlice", () => {
 
       expect(updatedState.matchData.status).toBe("succeeded");
       expect(updatedState.matchData.data).toBeTruthy();
-      expect(updatedState.teams.homeTeam).toMatchObject({
+      expect(updatedState.teams.teamsArray[0]).toMatchObject({
         id: 1,
         teamIdx: 0,
         name: "Home team",
@@ -124,8 +129,8 @@ describe("matchSlice", () => {
         goals: 0,
         colors: { shirt: "#FFFFFF", shorts: "", socks: "" },
       });
-      expect(updatedState.teams.homeTeam.colors.text).not.toBe("#FFFFFF");
-      expect(updatedState.teams.awayTeam).toMatchObject({
+      expect(updatedState.teams.teamsArray[0].colors.text).not.toBe("#FFFFFF");
+      expect(updatedState.teams.teamsArray[1]).toMatchObject({
         id: 2,
         teamIdx: 1,
         name: "Away team",
@@ -133,7 +138,7 @@ describe("matchSlice", () => {
         goals: 0,
         colors: { shirt: "#FF0000", shorts: "", socks: "" },
       });
-      expect(updatedState.teams.awayTeam.colors.text).not.toBe("#FF0000");
+      expect(updatedState.teams.teamsArray[1].colors.text).not.toBe("#FF0000");
     });
   });
 
