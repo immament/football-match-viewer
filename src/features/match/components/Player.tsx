@@ -63,7 +63,6 @@ export function Player({
 
   useEffect(() => {
     if (matchData?.positions && group.current && !config) {
-      // console.log("PLAYER useEffect setupPlayerAnimations");
       const result = setupPlayerAnimations(
         playerId,
         group.current,
@@ -79,7 +78,6 @@ export function Player({
 
   useEffect(() => {
     if (config) {
-      // console.log("PLAYER useEffect startTime", config.positionAction);
       if (!config.mixer.timeScale) {
         throw new Error("Player config.mixer.timeScale == 0");
       }
@@ -90,8 +88,6 @@ export function Player({
   }, [config, startTime]);
 
   useEffect(() => {
-    // console.log("PLAYER useEffect playbackSpeed");
-
     if (config) {
       config.mixer.timeScale = playbackSpeed;
       config.positionAction.paused = false;

@@ -44,7 +44,6 @@ export const Ball = forwardRef<Mesh, BallProps>(
 
     useEffect(() => {
       if (mixer && positionAnimation) {
-        // console.log("BALL startTime", startTime, positionAnimation);
         if (!mixer.timeScale) {
           throw new Error("Ball mixer.timeScale == 0");
         }
@@ -57,7 +56,6 @@ export const Ball = forwardRef<Mesh, BallProps>(
 
     useEffect(() => {
       if (matchData?.positions.ball && ballRef.current && !positionAnimation) {
-        // console.log("BALL createBallPositionAnimation");
         const _mixer = new AnimationMixer(ballRef.current);
         const { positionAction } = createBallPositionAnimation(
           _mixer,

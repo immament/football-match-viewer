@@ -71,7 +71,6 @@ export const createMatchDataSlice: StateCreator<
       try {
         const fsMatch = await fetchFootstarMatchData(matchId);
         const matchData = mapFsMatch(fsMatch);
-        console.log("matchData", matchData.commentsMap);
         get().matchData.matchFetchSuccess(matchData);
       } catch (error) {
         get().matchData.matchFetchError(String(error));

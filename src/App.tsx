@@ -29,14 +29,13 @@ function App() {
       >
         <Canvas
           dpr={dpr}
-          // shadows
           camera={{ position: [0, 30, 30], fov: 65, near: 0.01, far: 500 }}
         >
           <World />
           <PerformanceMonitor
             factor={1}
             onChange={({ factor }) => {
-              const newDpr = round(0.5 + 1.5 * factor, 1);
+              const newDpr = round(0.9 + 1.1 * factor, 1);
               setDpr(newDpr);
             }}
           />
