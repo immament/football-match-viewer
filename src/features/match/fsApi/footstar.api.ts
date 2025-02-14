@@ -24,13 +24,16 @@ export async function fetchFootstarMatchData(
   const url = apiUrl(matchId, srcType);
   fsLogger.info("fetch", matchId, url);
   const xml = await makeFetch(url);
-  const parser = createXmlParser();
-  const matchResp = parser.parse(xml) as FootstarMatchResponse;
-
-  const data = matchResp.xml.general;
+  const data = parseFsXml(xml);
   if (!data.matchId) data.matchId = matchId;
   fsLogger.info("matchData", data);
   return data;
+}
+
+export function parseFsXml(xml: string): FootstarMatchData {
+  const parser = createXmlParser();
+  const matchResp = parser.parse(xml) as FootstarMatchResponse;
+  return matchResp.xml.general;
 }
 
 function createXmlParser() {

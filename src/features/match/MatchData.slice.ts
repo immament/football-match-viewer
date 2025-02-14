@@ -1,7 +1,11 @@
 import { StateCreator } from "zustand";
 import { AppStoreState } from "../../app/app.zu.store";
 import { MATCH_TIME_SCALE } from "./animations/positions.utils";
-import { fetchFootstarMatchData, FetchSource } from "./fsApi/footstar.api";
+import {
+  fetchFootstarMatchData,
+  FetchSource,
+  parseFsXml,
+} from "./fsApi/footstar.api";
 import { mapFsMatch } from "./fsApi/footstar.mapper";
 import { MatchData } from "./MatchData.model";
 import { logger } from "/app/logger";
@@ -12,6 +16,10 @@ export interface MatchDataSlice {
     error?: string;
     data?: Readonly<MatchData>;
     matchFetch(matchId: number): Promise<void>;
+    loadMatchFromXml(props: {
+      matchId: number;
+      matchXml: string;
+    }): Promise<void>;
     matchFetchSuccess(matchData: MatchData): void;
     matchFetchError(error: string): void;
     visibleMatchDuration(liveTime: number): number;
@@ -45,6 +53,7 @@ export const createMatchDataSlice: StateCreator<
           Math.min(duration, matchData.currentMinute * 60)
         );
         duration = get().matchData.visibleMatchDuration(startTime);
+        duration = matchData.currentMinute;
       }
 
       set((state) => {
@@ -79,6 +88,28 @@ export const createMatchDataSlice: StateCreator<
         get().matchData.matchFetchSuccess(matchData);
       } catch (error) {
         logger.error("matchFetch error:", error);
+        get().matchData.matchFetchError(String(error));
+      }
+    },
+    loadMatchFromXml: async ({
+      matchId,
+      matchXml,
+    }: {
+      matchId: number;
+      matchXml: string;
+    }) => {
+      if (get().matchData.status !== "idle") return;
+      set(({ matchData }) => {
+        matchData.status = "pending";
+      });
+
+      try {
+        const fsMatch = parseFsXml(matchXml);
+        fsMatch.matchId = matchId;
+        const matchData = mapFsMatch(fsMatch);
+        get().matchData.matchFetchSuccess(matchData);
+      } catch (error) {
+        logger.error("loadMatchFromXml error:", error);
         get().matchData.matchFetchError(String(error));
       }
     },

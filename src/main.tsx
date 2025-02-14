@@ -9,7 +9,7 @@ import {
 } from "/app/Container.context.ts";
 import { logger } from "/app/logger.ts";
 
-enableMocking().then(() => main());
+main();
 
 function main() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -27,7 +27,6 @@ function main() {
     mediaPlayer: getContainer(MEDIA_PLAYER_CONTAINER_ID),
     debugMode: DEBUG_MODE,
   };
-  // const store = setupStore();
 
   createRoot(ctx.mediaPlayer).render(
     <StrictMode>
@@ -42,7 +41,8 @@ function getContainer(elementId: string): HTMLElement {
   const container = document.getElementById(elementId);
   if (!container) {
     throw new Error(
-      `Element with ID ${elementId} was not found in the document. Ensure there is a corresponding HTML element with the ID '${elementId}' in your HTML file.`
+      `Element with ID ${elementId} was not found in the document. 
+      Ensure there is a corresponding HTML element with the ID '${elementId}' in your HTML file.`
     );
   }
   return container;
@@ -50,9 +50,9 @@ function getContainer(elementId: string): HTMLElement {
 
 async function enableMocking() {
   return;
-  if (import.meta.env.PROD) return;
+  // if (import.meta.env.PROD) return;
 
-  const { worker } = await import("./mocks/browser.ts");
+  // const { worker } = await import("./mocks/browser.ts");
 
-  return worker.start();
+  // return worker.start();
 }
