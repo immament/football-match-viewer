@@ -54,8 +54,12 @@ export function onOut(position: Point3) {
   return position.z < PITCH_SIDE_MIN_Z || position.z > PITCH_SIDE_MAX_Z;
 }
 
-export function timeToStep(time: number): number {
-  return Math.floor(time / MATCH_TIME_SCALE);
+export function minuteToStep(minute: number) {
+  return secondsToStep(minute * 60);
+}
+
+export function secondsToStep(seconds: number): number {
+  return Math.floor(seconds / MATCH_TIME_SCALE);
 }
 
 export interface Point2 {
@@ -85,8 +89,24 @@ export function rotationAngle(direction: number, newDirection: number): number {
 
   return angle;
 }
-export type MatchPositions = {
+export type MatchMovement = {
   ball: BallPositionsConfig;
   players: PlayerPositions[][];
   poses: RawPoseEvents[][];
 };
+
+export function mixerDeltaTime(
+  delta: number,
+  currentTime: number,
+  matchPaused: boolean,
+  matchDuration: number
+): number {
+  let result = delta;
+
+  if (matchPaused) result = 0;
+
+  if (currentTime + result > matchDuration)
+    return Math.max(0, matchDuration - currentTime);
+  if (currentTime + result < 0) return Math.max(0, -currentTime);
+  return result;
+}

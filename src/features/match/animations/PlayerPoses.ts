@@ -10,7 +10,7 @@ import {
   PoseRecord,
   PoseTransitionProps,
 } from "./PoseAction.model";
-import { timeToStep } from "./positions.utils";
+import { secondsToStep } from "./positions.utils";
 import { logger } from "/app/logger";
 import { round } from "/app/utils";
 
@@ -20,7 +20,7 @@ export type PoseChangedEventDetail = {
 };
 
 // manage switch player pose (animation)
-export class PlayerPoses extends EventTarget {
+export class PlayerPoses {
   forceIdle() {
     const poseTime = this._mixer.time;
     const newPose: PoseRecord = {
@@ -31,6 +31,7 @@ export class PlayerPoses extends EventTarget {
       iteration: 0,
       direction: 0,
       rotation: 0,
+      distanceToBall: 9999,
     };
 
     this.changePose(newPose, poseTime);
@@ -56,7 +57,7 @@ export class PlayerPoses extends EventTarget {
     private _actions: PlayerActions,
     private _poses: PoseRecord[]
   ) {
-    super();
+    // super();
   }
 
   public get currentPose(): PoseRecord | undefined {
@@ -81,23 +82,24 @@ export class PlayerPoses extends EventTarget {
   public setCurrentPose(newPose: PoseRecord | undefined) {
     if (newPose?.action) newPose.action.poseRecord = newPose;
     this._currentPose = newPose;
-    this.dispatchEvent(
-      new CustomEvent<PoseChangedEventDetail>("poseChanged", {
-        detail: { player: this._playerId, pose: newPose },
-      })
-    );
+    // this.dispatchEvent(
+    //   new CustomEvent<PoseChangedEventDetail>("poseChanged", {
+    //     detail: { player: this._playerId, pose: newPose },
+    //   })
+    // );
   }
 
   // get and set pose for current time (AnimationMixer time)
-  public updatePose(mixerUpdateDelta: number): void {
+  public updatePose(mixerUpdateDelta: number): PoseRecord | undefined {
     if (!mixerUpdateDelta && !this._forceUpdatePose) return;
 
-    if (this.pause) return;
+    if (this.pause && !this._forceUpdatePose) return;
 
     const poseTime = this._mixer.time + mixerUpdateDelta;
     const newPose = this.poseForTime(poseTime);
 
     this.changePose(newPose, poseTime);
+    return newPose;
   }
 
   private changePose(newPose: PoseRecord, poseTime: number) {
@@ -160,7 +162,7 @@ export class PlayerPoses extends EventTarget {
   }
 
   private poseForTime(time: number): PoseRecord {
-    let roundedTime = timeToStep(time);
+    let roundedTime = secondsToStep(time);
     if (roundedTime >= this._poses.length) roundedTime = this._poses.length - 1;
     return this._poses[roundedTime];
   }

@@ -49,7 +49,6 @@ export class PoseAction implements IPoseAction {
     this._animation.stop();
   }
   play(): void {
-    // console.log("play", this._animation.getClip().name);
     // if (this._animation.getClip().name === "sk.throw_in.anim") {
     //   return;
     // }

@@ -65,7 +65,10 @@ export class PoseBuilderStep {
     return this._directionsResult;
   }
 
-  initPoseRecord(playerSpeed: number): Writeable<PoseRecord> {
+  initPoseRecord(
+    playerSpeed: number,
+    distanceToBall: number
+  ): Writeable<PoseRecord> {
     return (this._posesResult[this.stepIdx] = {
       type: PoseTypes.idle,
       step: this.stepIdx,
@@ -75,6 +78,7 @@ export class PoseBuilderStep {
       rawPose: this.rawPose,
       direction: 0,
       rotation: 0,
+      distanceToBall,
     });
   }
 

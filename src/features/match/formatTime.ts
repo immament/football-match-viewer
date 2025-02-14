@@ -1,19 +1,14 @@
-// export const updateTimeThunk = (timeInSeconds: number): AppThunk => {
-//   return async (dispatch, getState) => {
-//     // console.log("updateTimeThunk");
-//     if (getState().match.mediaPlayer.time !== timeInSeconds)
-//       dispatch(updateTime(timeInSeconds));
-//   };
-// };
-// UTILS
+export function formatTimeFromMinutes(timeInMinutes: number): string {
+  return formatTime(timeInMinutes * 60);
+}
 
-export function formatTime(time: number): string {
+export function formatTime(timeInSeconds: number): string {
   return `${minute()}:${second()}`;
 
   function minute() {
-    return String(Math.floor(time / 60)).padStart(2, "0");
+    return String(Math.floor(timeInSeconds / 60)).padStart(2, "0");
   }
   function second() {
-    return String(Math.floor(time % 60)).padStart(2, "0");
+    return String(Math.floor(timeInSeconds % 60)).padStart(2, "0");
   }
 }

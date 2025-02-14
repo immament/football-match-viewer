@@ -1,153 +1,243 @@
-import { RawPoseEvents, RawPoseTypes } from "../animations/Pose.model";
-import { PlayerPositions } from "../animations/positions.utils";
-import { FsPositionParser } from "./FsPositionParser";
+import { decode } from "he";
+import { minuteToStep } from "../animations/positions.utils";
+import { formatTimeFromMinutes } from "../formatTime";
 import {
-  GameDataRecord as GameDataPositions,
-  GameDataRecord,
+  MatchComment,
+  MatchCommentsMap,
+  MatchData,
+  MatchEvent,
+  MatchEventsMap,
+  MatchEventTimeTypesValues,
+  MatchPlayer,
+  MatchSubstPlayer,
+  MatchTeam,
+} from "../MatchData.model";
+import {
+  FootstarMatchData,
+  FsGameComment,
+  FsGameEvent,
+  FsSquadPlayer,
+  FsSubstPlayer,
+  FsTeamColors,
 } from "./footstar.api.model";
+import { mapMovement } from "./footstar.movement.mapper";
+import { logger } from "/app/logger";
 
-export type FsTeamKeys = "c" | "f";
-export type FsPlayerIdx = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
-const PLAYER_IDXS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
-type FsBallPositionDimension = "x" | "y" | "z";
-type FsPlayerPositionDimension = "x" | "y";
+export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
+  const positions = mapMovement(fsMatch);
+  const teams: [MatchTeam, MatchTeam] = [mapHomeTeam(), mapAwayTeam()];
+  const matchEvents = mapMatchEvents(fsMatch.game_events.ge, teams);
+  const matchTimes = matchEvents.filter((e) =>
+    MatchEventTimeTypesValues.includes(e.type)
+  );
 
-export function convertBallPositions(
-  gameData: GameDataPositions[],
-  dimension: FsBallPositionDimension
-) {
-  const result = convertToPositions(gameData, `@_${dimension}b`);
-
-  return result;
-}
-
-export function convertPlayerPositions(
-  gameData: GameDataPositions[],
-  team: FsTeamKeys,
-  player: FsPlayerIdx,
-  dimension: FsPlayerPositionDimension
-) {
-  const result = convertToPositions(gameData, `@_${dimension}${player}${team}`);
-  return result;
-}
-
-function convertToPositions(
-  gameData: GameDataPositions[],
-  type: keyof GameDataPositions
-) {
-  const parser = new FsPositionParser();
-
-  gameData.forEach((record) => {
-    for (const item of record[type]) {
-      parser.parse(item);
-    }
-  });
-
-  parser.end();
-  return parser.getResult();
-}
-export function convertPlayersPositions(
-  gameData: GameDataPositions[],
-  team: FsTeamKeys
-): PlayerPositions[] {
-  return PLAYER_IDXS.map((idx) => ({
-    px: convertPlayerPositions(gameData, team, idx, "x"),
-    pz: convertPlayerPositions(gameData, team, idx, "y"),
-  }));
-}
-
-// function convertPoses(poses: (number | string)[]) {
-//   const result: RawPoseEvents = {};
-//   for (let index = 0; index < poses.length; index += 2) {
-//     result[poses[index] as number] = poses[index + 1] as RawPoseTypes;
-//   }
-
-//   return result;
-// }
-
-export function convertPosesPhase1(rawPosesStr: string): string[] {
-  const tttArr = rawPosesStr.split("");
-  const result: string[] = [];
-  let idx = 0;
-  while (idx < tttArr.length) {
-    if (isNumber(tttArr[idx])) {
-      let playerIdx = tttArr[idx];
-      let digitIdx = idx + 1;
-      while (isNumber(tttArr[digitIdx])) {
-        playerIdx += tttArr[digitIdx];
-        digitIdx++;
-      }
-      idx = digitIdx - 1;
-      result[result.length - 1] += "_" + playerIdx;
-    } else {
-      result.push(tttArr[idx]);
-    }
-    idx++;
-  }
-  return result; //* _root.timeC;
-
-  function isNumber(value: string) {
-    return !isNaN(Number(value));
-  }
-}
-
-export function convertPoses(gameData: GameDataRecord[]): RawPoseEvents[][] {
-  return convertPosesWithSounds(getPosesStr()).poses;
-
-  function getPosesStr(): string {
-    return gameData.map((v) => v["@_tt"]).join("");
-  }
-}
-
-function convertPosesWithSounds(rawPosesStr: string): {
-  arrSounds: Record<number, number>;
-  poses: RawPoseEvents[][];
-} {
-  const rawPoses = convertPosesPhase1(rawPosesStr);
-  const result = {
-    arrSounds: {} as Record<number, number>,
-    poses: [createPlayersResult(), createPlayersResult()],
+  return {
+    positions,
+    teams,
+    eventsMap: createEventsMap(matchEvents),
+    commentsMap: createCommentsMap(
+      mapGameComments(fsMatch.game_info.game_comments.gc)
+    ),
+    status: fsMatch.game_info.game._status,
+    currentMinute: Number(fsMatch.game_info.game._minuto) || 0,
+    matchTimes,
   };
 
-  for (let minute = 0; minute < rawPoses.length; minute++) {
-    if (rawPoses[minute].length > 1) {
-      const [pose, player] = rawPoses[minute].split("_");
+  function mapHomeTeam(): MatchTeam {
+    return {
+      id: Number(fsMatch.game_info.home_team_name._id),
+      teamIdx: 0,
+      name: fsMatch.game_info.home_team_name.text,
+      squadPlayers: mapSquadPlayers(
+        fsMatch.home_starting_eleven.home_player_se
+      ),
+      substPlayers:
+        fsMatch.home_substitutes !== ""
+          ? mapSubstPlayers(fsMatch.home_substitutes.home_player_sub)
+          : [],
+      colors: mapColors(fsMatch.colors.clr, "home"),
+    };
+  }
 
-      if (pose !== "n") {
-        putResult(Number(player) - 1, minute, pose as RawPoseTypes);
-      }
+  function mapAwayTeam(): MatchTeam {
+    return {
+      id: Number(fsMatch.game_info.away_team_name._id),
+      teamIdx: 1,
+      name: fsMatch.game_info.away_team_name.text,
+      squadPlayers: mapSquadPlayers(
+        fsMatch.away_starting_eleven.away_player_se
+      ),
+      substPlayers:
+        fsMatch.away_substitutes !== ""
+          ? mapSubstPlayers(fsMatch.away_substitutes.away_player_sub)
+          : [],
+      colors: mapColors(fsMatch.colors.clr, "away"),
+    };
+  }
 
-      switch (pose) {
-        case "p":
-        case "l":
-        case "w":
-          result.arrSounds[minute] = 1;
-          break;
-        case "r":
-        case "v":
-          result.arrSounds[minute] = 2;
-          break;
-        case "b":
-          result.arrSounds[minute] = 7;
-          break;
-        case "s":
-          result.arrSounds[minute] = 4;
-          break;
-      }
+  function mapColors(colors: FsTeamColors[], team: "home" | "away") {
+    const teamColors = colors.find((c) => c._id === team);
+    if (!teamColors) return defaultColors();
+    return {
+      text: "#" + teamColors._text,
+      shirt: "#" + teamColors._shirt,
+      shorts: "#" + teamColors._shorts,
+      socks: "#" + teamColors._socks,
+    };
+
+    function defaultColors() {
+      return team === "home"
+        ? {
+            text: "#FFFFFF",
+            shirt: "#FF0000",
+            shorts: "#FFFFFF",
+            socks: "#FF0000",
+          }
+        : {
+            text: "#FFFFFF",
+            shirt: "#00FF00",
+            shorts: "#FFFFFF",
+            socks: "#00FF00",
+          };
     }
   }
-  return result;
+}
 
-  function putResult(playerIdx: number, time: number, value: RawPoseTypes) {
-    if (playerIdx > 10) {
-      result.poses[1][playerIdx - 11][time] = value;
-      return;
+export function mapSquadPlayers(players: FsSquadPlayer[]) {
+  return players.map(mapSquadPlayer);
+}
+
+export function mapSquadPlayer(pl: FsSquadPlayer): MatchPlayer {
+  return {
+    name: decode(pl.text),
+    id: pl._id,
+    shirtNumber: pl._shirt_number,
+    rating: Number(pl._rating),
+    hairColor: "#" + pl._cc,
+    hairType: pl._tc,
+    skinColor: "#" + pl._cp,
+    shoesColor: "#" + pl._cb,
+  };
+}
+
+export function mapSubstPlayers(players: FsSubstPlayer[]): MatchSubstPlayer[] {
+  return players.map(mapSubstPlayer);
+}
+
+export function mapSubstPlayer(pl: FsSubstPlayer): MatchSubstPlayer {
+  return {
+    ...mapSquadPlayer(pl),
+    minute: Number(pl._minute),
+    outPlayerId: pl._out,
+  };
+}
+
+export function mapMatchEvents(
+  fsEvents: FsGameEvent[],
+  teams: [MatchTeam, MatchTeam]
+): MatchEvent[] {
+  const matchResult = { homeGoals: 0, awayGoals: 0 };
+
+  return fsEvents
+    .map(mapMatchEvent)
+    .filter((ev) => !!ev)
+    .sort((a, b) => a.time - b.time);
+
+  function mapMatchEvent(fsEv: FsGameEvent): MatchEvent | undefined {
+    switch (fsEv._tipo) {
+      case "gstart":
+      case "halftime":
+      case "extratime1":
+      case "extratime2":
+      case "penalties":
+        return {
+          time: mapTime(fsEv._m),
+          type: fsEv._tipo,
+        };
+      case "amarelo":
+        return {
+          time: mapTime(fsEv._m),
+          type: "yellow",
+          teamId: Number(fsEv._eqmarca),
+          playerId: Number(fsEv._jogmarca),
+        };
+      case "goal":
+        if (Number(fsEv._eqmarca) === teams[0].id) {
+          matchResult.homeGoals++;
+        } else {
+          matchResult.awayGoals++;
+        }
+        return {
+          time: mapTime(fsEv._m),
+          teamId: Number(fsEv._eqmarca),
+          teamIdx: teams[0].id === Number(fsEv._eqmarca) ? 0 : 1,
+          playerId: Number(fsEv._jogmarca),
+          type: fsEv._tipo,
+          ...matchResult,
+        };
+      case "subst":
+        return {
+          time: mapTime(fsEv._m),
+          type: "subst",
+          teamIdx: teams[0].substPlayers.find((p) => p.id === fsEv._id_player1)
+            ? 0
+            : 1,
+          playerInId: fsEv._id_player1,
+          playerOutId: fsEv._id_player2,
+        };
+
+      default:
+        logger.warn("unknown match event type: " + (fsEv as FsGameEvent)._tipo);
     }
-    result.poses[0][playerIdx][time] = value;
-    return;
+    function mapTime(time: string) {
+      return Number(time.replace(",", "."));
+    }
   }
-  function createPlayersResult() {
-    return PLAYER_IDXS.map(() => ({} as RawPoseEvents));
-  }
-  // trace("_root.JogadoresCasa[0]: " + _root.JogadoresCasa[0].ac);
+}
+
+export function createEventsMap(events: MatchEvent[]): MatchEventsMap {
+  let lastStep = -1;
+
+  return events
+    .sort((a, b) => b.time - a.time)
+    .reduce((acc, ev) => {
+      const step = minuteToStep(ev.time);
+
+      if (acc[step]) {
+        acc[step].events.push(ev);
+        acc[step].events.sort((a, b) => a.time - b.time);
+      } else {
+        acc[step] = { events: [ev], nextEventStep: lastStep };
+      }
+      lastStep = step;
+      return acc;
+    }, {} as MatchEventsMap);
+}
+
+export function mapGameComments(comments: FsGameComment[]): MatchComment[] {
+  return comments.map(mapGameComment);
+}
+
+export function mapGameComment(comment: FsGameComment): MatchComment {
+  const time = Number(comment._m.replace(",", "."));
+  return {
+    time,
+    step: minuteToStep(time),
+    displayTime: formatTimeFromMinutes(time),
+    text: comment.text.replace(/\[br\]/g, "\n"),
+  };
+}
+
+export function createCommentsMap(comments: MatchComment[]): MatchCommentsMap {
+  return comments
+    .sort((a, b) => a.time - b.time)
+    .reduce((acc, c) => {
+      if (acc[c.step]) {
+        // join texts from 2 events
+        acc[c.step].text += "\n" + c.text;
+      } else {
+        acc[c.step] = { ...c };
+      }
+      return acc;
+    }, {} as MatchCommentsMap);
 }

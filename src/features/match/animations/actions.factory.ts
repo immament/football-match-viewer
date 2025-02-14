@@ -14,7 +14,7 @@ import { PoseBuilderContext } from "./PoseBuilderContext";
 import {
   BallPositionsConfig,
   MATCH_TIME_SCALE,
-  MatchPositions,
+  MatchMovement,
   PlayerPositions,
   xToPitch,
   zToPitch,
@@ -23,7 +23,7 @@ import {
 export function createMoveActions(
   mixer: AnimationMixer,
   playerId: PlayerId,
-  matchPositions: MatchPositions
+  matchPositions: MatchMovement
 ) {
   const { positionAction, positionKF } = createPositionAction(
     mixer,

@@ -5,9 +5,11 @@ import { Suspense, useContext, useState } from "react";
 import "./App.scss";
 import { ContainerContext } from "./app/Container.context";
 import { round } from "./app/utils";
-import { World } from "./components/World";
-import { MediaHeaderComponent } from "./features/match/MediaHeader/MediaHeader.component";
-import { MediaPlayerComponent } from "./features/match/MediaPlayer/MediaPlayer.component";
+import { CommentsBox } from "./features/mediaPlayer/components/CommentsBox";
+import { EventInfoBox } from "./features/mediaPlayer/components/EventInfoBox";
+import { MediaHeaderComponent } from "./features/mediaPlayer/components/MediaHeader/MediaHeader.component";
+import { MediaPlayerComponent } from "./features/mediaPlayer/components/MediaPlayer/MediaPlayer.component";
+import { World } from "./features/world/World";
 
 function App() {
   const [dpr, setDpr] = useState(1.5);
@@ -27,14 +29,13 @@ function App() {
       >
         <Canvas
           dpr={dpr}
-          shadows
-          camera={{ position: [0, 30, 30], fov: 65, near: 0.01, far: 200 }}
+          camera={{ position: [0, 30, 30], fov: 65, near: 0.01, far: 500 }}
         >
           <World />
           <PerformanceMonitor
             factor={1}
             onChange={({ factor }) => {
-              const newDpr = round(0.5 + 1.5 * factor, 1);
+              const newDpr = round(0.9 + 1.1 * factor, 1);
               setDpr(newDpr);
             }}
           />
@@ -43,6 +44,8 @@ function App() {
       </Suspense>
       <MediaHeaderComponent />
       <MediaPlayerComponent />
+      <EventInfoBox />
+      <CommentsBox />
       <Leva collapsed hidden={!ctx?.debugMode} />
     </>
   );

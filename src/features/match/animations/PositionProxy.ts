@@ -69,7 +69,6 @@ export abstract class PositionProxy implements Point3 {
     this._tmp_end.set(target.x, target.z);
     this._tmp_dir.subVectors(this._tmp_begin, this._tmp_end).normalize();
     this._tmp_end.addScaledVector(this._tmp_dir, distance);
-    //console.log("this._tmp_end", this._tmp_end);
 
     this.x = this._tmp_end.x;
     this.z = this._tmp_end.y;

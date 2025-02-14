@@ -12,3 +12,62 @@
   top: 100px;
   left: 0;
 }
+
+.info-box {
+  position: absolute;
+  font-size: 14px;
+  left: 50%;
+  top: 10%;
+  transform: translateX(-50%);
+  border-radius: 6px;
+  color: #dee2e6;
+  min-width: 100px;
+  border: 1px solid #ffffff26;
+  background-color: #212529d9;
+  width: calc(min(90%, 350px));
+
+  .info-box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    column-gap: 1em;
+    padding: 0.5em 1em;
+    color: #dee2e6bf;
+    background-color: #212529d9;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+  }
+
+  .info-box-content {
+    display: flex;
+    column-gap: 1em;
+    padding: 0.5em 1em;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+}
+
+.comment-box {
+  position: absolute;
+  font-size: 14px;
+  left: 50%;
+  bottom: 70px;
+  transform: translateX(-50%);
+  border-radius: 6px;
+  color: #010a13;
+  min-width: 100px;
+  max-width: 95%;
+  width: max-content;
+  border: 1px solid #ffffff26;
+  background-color: #adb1b455;
+  padding: 0.3em 0;
+  // width: calc(min(90%, 350px));
+
+  .comment-box-content {
+    display: flex;
+    column-gap: 1em;
+    padding: 0.2em 1em;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+}

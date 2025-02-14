@@ -1,15 +1,15 @@
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
 import App from "./App.tsx";
+
 import "./index.scss";
 import {
   ContainerContext,
   ContainerContextProps,
 } from "/app/Container.context.ts";
 import { logger } from "/app/logger.ts";
-import { store } from "/app/store.ts";
 
-main();
+enableMocking().then(() => main());
 
 function main() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -27,15 +27,14 @@ function main() {
     mediaPlayer: getContainer(MEDIA_PLAYER_CONTAINER_ID),
     debugMode: DEBUG_MODE,
   };
+  // const store = setupStore();
 
   createRoot(ctx.mediaPlayer).render(
-    // <StrictMode>
-    <Provider store={store}>
+    <StrictMode>
       <ContainerContext.Provider value={ctx}>
         <App />
       </ContainerContext.Provider>
-    </Provider>
-    // </StrictMode>
+    </StrictMode>
   );
 }
 
@@ -47,4 +46,13 @@ function getContainer(elementId: string): HTMLElement {
     );
   }
   return container;
+}
+
+async function enableMocking() {
+  return;
+  if (import.meta.env.PROD) return;
+
+  const { worker } = await import("./mocks/browser.ts");
+
+  return worker.start();
 }
