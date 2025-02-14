@@ -47,12 +47,3 @@ function getContainer(elementId: string): HTMLElement {
   }
   return container;
 }
-
-async function enableMocking() {
-  return;
-  // if (import.meta.env.PROD) return;
-
-  // const { worker } = await import("./mocks/browser.ts");
-
-  // return worker.start();
-}

@@ -38,6 +38,7 @@ export const createMatchDataSlice: StateCreator<
     status: "idle",
 
     matchFetchSuccess: (matchData) => {
+      logger.info("matchFetchSuccess ++");
       get().teams.initTeams(matchData.teams);
       set((state) => {
         state.matchData.status = "succeeded";
@@ -64,6 +65,7 @@ export const createMatchDataSlice: StateCreator<
       if (startTime > 0) {
         get().matchTimer.updateStep(startTime);
       }
+      logger.info("matchFetchSuccess --");
     },
     matchFetchError: (error: string) => {
       set(({ matchData }) => {
@@ -98,6 +100,7 @@ export const createMatchDataSlice: StateCreator<
       matchId: number;
       matchXml: string;
     }) => {
+      logger.info("loadMatchFromXml", { matchId });
       if (get().matchData.status !== "idle") return;
       set(({ matchData }) => {
         matchData.status = "pending";

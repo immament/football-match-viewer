@@ -23,11 +23,13 @@ export const Match = () => {
     if (matchStatus === "idle") {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("ext")) {
+        logger.info("matchData from ext");
         function listener(ev: Event) {
-          logger.debug("matchData from listener", ev);
+          logger.info("matchData from listener", ev);
           if (ev instanceof CustomEvent) loadMatchFromXml(ev.detail);
         }
         document.addEventListener("matchDataForViewer", listener);
+        document.dispatchEvent(new Event("matchViewerReady"));
         return () => {
           document.removeEventListener("matchDataForViewer", listener);
         };
