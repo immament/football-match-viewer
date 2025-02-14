@@ -1,22 +1,24 @@
 import { StateCreator } from "zustand";
 import { AppStoreState } from "../../app/app.zu.store";
 import { MATCH_TIME_SCALE } from "./animations/positions.utils";
-import { fixSimilarColors } from "./colors/validateColors";
-import { fetchFootstarMatchData } from "./fsApi/footstar.api";
+import { fetchFootstarMatchData, FetchSource } from "./fsApi/footstar.api";
 import { mapFsMatch } from "./fsApi/footstar.mapper";
-import { MatchData, MatchTeam } from "./MatchData.model";
-import { TeamState } from "/app/teams.slice";
+import { MatchData } from "./MatchData.model";
+import { logger } from "/app/logger";
 
 export interface MatchDataSlice {
   matchData: {
     status: "idle" | "pending" | "succeeded" | "failed";
     error?: string;
     data?: Readonly<MatchData>;
-    matchFetch: (matchId: number) => Promise<void>;
-    matchFetchSuccess: (matchData: MatchData) => void;
-    matchFetchError: (error: string) => void;
+    matchFetch(matchId: number): Promise<void>;
+    matchFetchSuccess(matchData: MatchData): void;
+    matchFetchError(error: string): void;
+    visibleMatchDuration(liveTime: number): number;
   };
 }
+
+const DEBUG_MATCHES_IDS = [2159688];
 
 export const createMatchDataSlice: StateCreator<
   AppStoreState,
@@ -28,31 +30,30 @@ export const createMatchDataSlice: StateCreator<
     status: "idle",
 
     matchFetchSuccess: (matchData) => {
-      const teams: [TeamState, TeamState] = [
-        mapTeamToState(matchData.teams[0]),
-        mapTeamToState(matchData.teams[1]),
-      ];
-
-      fixSimilarColors(teams);
-
-      const duration = matchData.positions.ball.px.length * MATCH_TIME_SCALE;
-
+      get().teams.initTeams(matchData.teams);
       set((state) => {
         state.matchData.status = "succeeded";
         state.matchData.data = matchData;
-        state.mediaPlayer.duration = duration;
-        state.teams.teamsArray = teams;
       });
 
-      function mapTeamToState(team: MatchTeam): TeamState {
-        return {
-          teamIdx: team.teamIdx,
-          id: team.id,
-          name: team.name,
-          colors: team.colors,
-          squadPlayers: [...team.squadPlayers],
-          goals: 0,
-        };
+      let duration = matchData.positions.ball.px.length * MATCH_TIME_SCALE;
+      let startTime: number = 0;
+
+      if (matchData.status === "online") {
+        startTime = Math.max(
+          0,
+          Math.min(duration, matchData.currentMinute * 60)
+        );
+        duration = get().matchData.visibleMatchDuration(startTime);
+      }
+
+      set((state) => {
+        state.mediaPlayer.duration = duration;
+        state.mediaPlayer.startTime = startTime;
+      });
+
+      if (startTime > 0) {
+        get().matchTimer.updateStep(startTime);
       }
     },
     matchFetchError: (error: string) => {
@@ -69,12 +70,27 @@ export const createMatchDataSlice: StateCreator<
       });
 
       try {
-        const fsMatch = await fetchFootstarMatchData(matchId);
+        const srcType: FetchSource = DEBUG_MATCHES_IDS.includes(matchId)
+          ? "local"
+          : "devFs";
+
+        const fsMatch = await fetchFootstarMatchData(matchId, srcType);
         const matchData = mapFsMatch(fsMatch);
         get().matchData.matchFetchSuccess(matchData);
       } catch (error) {
+        logger.error("matchFetch error:", error);
         get().matchData.matchFetchError(String(error));
       }
+    },
+    visibleMatchDuration(_liveTime: number): number {
+      if (!this.data) return 0;
+      const duration = this.data?.positions.ball.px.length * MATCH_TIME_SCALE;
+      // const nextTimeEvent = this.data.matchTimes.reduce((acc, c) => {
+      //   if (c.time < liveTime && c.time > acc) return c.time;
+      //   return acc;
+      // }, 0);
+      // if (nextTimeEvent > 0) return Math.min(duration, nextTimeEvent);
+      return duration;
     },
   },
 });

@@ -2,7 +2,7 @@ import { AnimationAction, AnimationMixer, Object3D } from "three";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
 import { PlayerId } from "../../PlayerId";
-import { PlayerPoses, PoseChangedEventDetail } from "../PlayerPoses";
+import { PlayerPoses } from "../PlayerPoses";
 import { PoseTypes } from "../Pose.model";
 import { PoseRecord } from "../PoseAction.model";
 
@@ -56,14 +56,15 @@ describe("PlayerPoses", () => {
         step: 0,
         direction: 0,
         rotation: 0,
+        distanceToBall: 9999,
         // action,
       };
-      const poseChange = new Promise((done) => {
-        playerPoses.addEventListener("poseChanged", (ev) => {
-          const pcEv = ev as CustomEvent<PoseChangedEventDetail>;
-          done(pcEv.detail);
-        });
-      });
+      // const poseChange = new Promise((done) => {
+      //   playerPoses.addEventListener("poseChanged", (ev) => {
+      //     const pcEv = ev as CustomEvent<PoseChangedEventDetail>;
+      //     done(pcEv.detail);
+      //   });
+      // });
       playerPoses.setCurrentPose(poseRecord);
 
       const result = playerPoses.currentPose;
@@ -71,10 +72,10 @@ describe("PlayerPoses", () => {
       expect(result).toEqual({ ...poseRecord });
       // expect(result?.action?.poseRecord).toEqual({ ...poseRecord });
 
-      await expect(poseChange, "pose change event emitted").resolves.toEqual({
-        player: defaultPlayerId,
-        pose: poseRecord,
-      });
+      // await expect(poseChange, "pose change event emitted").resolves.toEqual({
+      //   player: defaultPlayerId,
+      //   pose: poseRecord,
+      // });
     });
   });
 

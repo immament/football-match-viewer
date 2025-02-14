@@ -9,6 +9,7 @@ describe("PlayerDirectionBuilder", () => {
   const _angleKeys = [
     0, 45, 60, 61, 90, 119, 120, 135, 180, -45, -60, -61, -90, -119, -120, -135,
   ] as const;
+  const DEFAULT_DISTANCE_TO_BALL = 1000;
 
   type TestPosition = Readonly<{ x: number; z: number }>;
   type TestAngles = (typeof _angleKeys)[number];
@@ -65,7 +66,7 @@ describe("PlayerDirectionBuilder", () => {
         const expQuaterion = expectedQuaternion(ballDir);
 
         const playerSpeed = 1;
-        context.initPoseRecord(playerSpeed);
+        context.initPoseRecord(playerSpeed, DEFAULT_DISTANCE_TO_BALL);
 
         context.pose.type = poseType;
         const ballPos = angleToPosition(ballDir);
@@ -100,7 +101,7 @@ describe("PlayerDirectionBuilder", () => {
           const expQuaterion = expectedQuaternion(moveDir);
 
           const playerSpeed = 3;
-          context.initPoseRecord(playerSpeed);
+          context.initPoseRecord(playerSpeed, DEFAULT_DISTANCE_TO_BALL);
           context.pose.type = poseType;
           const playerNextPos = angleToPosition(moveDir);
           context.next.playerPos.x = playerNextPos.x;
@@ -132,7 +133,7 @@ describe("PlayerDirectionBuilder", () => {
           ({ moveDir }) => {
             const expQuaterion = expectedQuaternion(moveDir);
 
-            context.initPoseRecord(playerSpeed);
+            context.initPoseRecord(playerSpeed, DEFAULT_DISTANCE_TO_BALL);
             context.pose.type = poseType;
             const playerNextPos = angleToPosition(moveDir);
             context.next.playerPos.x = playerNextPos.x;
@@ -170,7 +171,7 @@ describe("PlayerDirectionBuilder", () => {
             const expDir = 0;
             const expQuaterion = expectedQuaternion(expDir);
 
-            context.initPoseRecord(playerSpeed);
+            context.initPoseRecord(playerSpeed, DEFAULT_DISTANCE_TO_BALL);
             context.pose.type = poseType;
             const playerNextPos = angleToPosition(moveDir);
             context.next.playerPos.x = playerNextPos.x;

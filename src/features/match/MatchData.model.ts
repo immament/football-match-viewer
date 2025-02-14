@@ -4,7 +4,10 @@ export interface MatchData {
   positions: MatchMovement;
   teams: [MatchTeam, MatchTeam];
   eventsMap: MatchEventsMap;
+  matchTimes: MatchEvent[];
   commentsMap: MatchCommentsMap;
+  status: "offline" | "online";
+  currentMinute: number;
 }
 export type TeamColors = {
   text: string;
@@ -43,28 +46,28 @@ export type MatchEventsMap = Record<
   { events: MatchEvent[]; nextEventStep: number }
 >;
 
+export type MatchEventTimeTypes =
+  | "gstart"
+  | "halftime"
+  | "gend"
+  | "extratime1"
+  | "extratime2"
+  | "penalties";
+
+export const MatchEventTimeTypesValues = [
+  "gstart",
+  "halftime",
+  "gend",
+  "extratime1",
+  "extratime2",
+  "penalties",
+];
+
 export type MatchEvent = { time: number } & (
-  | {
-      type:
-        | "gstart"
-        | "halftime"
-        | "gend"
-        | "extratime1"
-        | "extratime2"
-        | "penalties";
-    }
-  | {
-      type: "subst";
-      playerInId: string;
-      playerOutId: string;
-      teamIdx: 0 | 1;
-    }
+  | { type: MatchEventTimeTypes }
+  | { type: "subst"; playerInId: string; playerOutId: string; teamIdx: 0 | 1 }
   | GoalMatchEvent
-  | {
-      type: "yellow";
-      teamId: number;
-      playerId: number;
-    }
+  | { type: "yellow"; teamId: number; playerId: number }
 );
 
 export type GoalMatchEvent = {

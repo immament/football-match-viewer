@@ -113,6 +113,9 @@ describe("matchSlice", () => {
           players: [],
           poses: [],
         },
+        status: "offline",
+        currentMinute: 0,
+        matchTimes: [],
       };
 
       initialState.matchData.matchFetchSuccess(payload);

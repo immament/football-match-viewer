@@ -20,7 +20,7 @@ export type PoseChangedEventDetail = {
 };
 
 // manage switch player pose (animation)
-export class PlayerPoses extends EventTarget {
+export class PlayerPoses {
   forceIdle() {
     const poseTime = this._mixer.time;
     const newPose: PoseRecord = {
@@ -31,6 +31,7 @@ export class PlayerPoses extends EventTarget {
       iteration: 0,
       direction: 0,
       rotation: 0,
+      distanceToBall: 9999,
     };
 
     this.changePose(newPose, poseTime);
@@ -56,7 +57,7 @@ export class PlayerPoses extends EventTarget {
     private _actions: PlayerActions,
     private _poses: PoseRecord[]
   ) {
-    super();
+    // super();
   }
 
   public get currentPose(): PoseRecord | undefined {
@@ -81,15 +82,15 @@ export class PlayerPoses extends EventTarget {
   public setCurrentPose(newPose: PoseRecord | undefined) {
     if (newPose?.action) newPose.action.poseRecord = newPose;
     this._currentPose = newPose;
-    this.dispatchEvent(
-      new CustomEvent<PoseChangedEventDetail>("poseChanged", {
-        detail: { player: this._playerId, pose: newPose },
-      })
-    );
+    // this.dispatchEvent(
+    //   new CustomEvent<PoseChangedEventDetail>("poseChanged", {
+    //     detail: { player: this._playerId, pose: newPose },
+    //   })
+    // );
   }
 
   // get and set pose for current time (AnimationMixer time)
-  public updatePose(mixerUpdateDelta: number): void {
+  public updatePose(mixerUpdateDelta: number): PoseRecord | undefined {
     if (!mixerUpdateDelta && !this._forceUpdatePose) return;
 
     if (this.pause && !this._forceUpdatePose) return;
@@ -98,6 +99,7 @@ export class PlayerPoses extends EventTarget {
     const newPose = this.poseForTime(poseTime);
 
     this.changePose(newPose, poseTime);
+    return newPose;
   }
 
   private changePose(newPose: PoseRecord, poseTime: number) {

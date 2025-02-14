@@ -3,7 +3,9 @@ import type { AppStoreState } from "../../app/app.zu.store";
 
 export interface MediaPlayerSlice {
   mediaPlayer: {
+    // in seconds
     startTime: number;
+    // in seconds
     duration: number;
     paused: boolean;
     playbackSpeed: number;

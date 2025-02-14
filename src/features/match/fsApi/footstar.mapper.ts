@@ -7,6 +7,7 @@ import {
   MatchData,
   MatchEvent,
   MatchEventsMap,
+  MatchEventTimeTypesValues,
   MatchPlayer,
   MatchSubstPlayer,
   MatchTeam,
@@ -25,13 +26,21 @@ import { logger } from "/app/logger";
 export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
   const positions = mapMovement(fsMatch);
   const teams: [MatchTeam, MatchTeam] = [mapHomeTeam(), mapAwayTeam()];
+  const matchEvents = mapMatchEvents(fsMatch.game_events.ge, teams);
+  const matchTimes = matchEvents.filter((e) =>
+    MatchEventTimeTypesValues.includes(e.type)
+  );
+
   return {
     positions,
     teams,
-    eventsMap: createEventsMap(mapMatchEvents(fsMatch.game_events.ge, teams)),
+    eventsMap: createEventsMap(matchEvents),
     commentsMap: createCommentsMap(
       mapGameComments(fsMatch.game_info.game_comments.gc)
     ),
+    status: fsMatch.game_info.game._status,
+    currentMinute: Number(fsMatch.game_info.game._minuto) || 0,
+    matchTimes,
   };
 
   function mapHomeTeam(): MatchTeam {
@@ -129,7 +138,10 @@ export function mapMatchEvents(
 ): MatchEvent[] {
   const matchResult = { homeGoals: 0, awayGoals: 0 };
 
-  return fsEvents.map(mapMatchEvent).filter((ev) => !!ev);
+  return fsEvents
+    .map(mapMatchEvent)
+    .filter((ev) => !!ev)
+    .sort((a, b) => a.time - b.time);
 
   function mapMatchEvent(fsEv: FsGameEvent): MatchEvent | undefined {
     switch (fsEv._tipo) {

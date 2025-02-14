@@ -17,7 +17,7 @@ export class PoseBuilder {
 
   public calculatePose(): void {
     if (this.ctx.stepIdx < 0) return;
-    this.ctx.initPoseRecord(this.playerSpeed());
+    this.ctx.initPoseRecord(this.playerSpeed(), this.distanceToBall());
     this.createPose();
     this.poseReapeat();
 
@@ -91,7 +91,8 @@ export class PoseBuilder {
 
   private isHead() {
     return (
-      this.ctx.ballPos.y > HEAD_BALL_MIN_HEIGHT && this.distanceToBall() < 1.5
+      this.ctx.ballPos.y > HEAD_BALL_MIN_HEIGHT &&
+      this.ctx.pose.distanceToBall < 1.5
     );
   }
 
@@ -105,14 +106,15 @@ export class PoseBuilder {
     finalDistance = 0.4
   ) {
     if (!ALLOW_MOVE_PLAYER_TO_BALL) return;
-    const distToBall = this.ctx.playerPos.distanceTo(this.ctx.ballPos);
-    if (distToBall >= maxDistance) return;
-    if (distToBall <= minDistance) return;
+    // const distToBall = this.distanceToBall();
+    if (this.ctx.pose.distanceToBall >= maxDistance) return;
+    if (this.ctx.pose.distanceToBall <= minDistance) return;
 
     const { next } = this.ctx;
     this.ctx.playerPos.moveToPointAtDistance(this.ctx.ballPos, finalDistance);
     next.playerPos.x = this.ctx.playerPos.x;
     next.playerPos.z = this.ctx.playerPos.z;
+    this.ctx.pose.distanceToBall = this.distanceToBall();
 
     this.updatePreviousPose();
   }

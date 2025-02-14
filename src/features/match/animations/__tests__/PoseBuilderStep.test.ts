@@ -14,6 +14,7 @@ describe("PoseBuilderStep", () => {
   let rawPoses: RawPoseEvents;
   let playerPositionsProxy: PlayerPositionProxy;
   let ballPositionsProxy: BallPositionProxy;
+  const DEFAULT_DISTANCE_TO_BALL = 200;
 
   beforeEach(() => {
     playerPositions = new Float32Array([1, 2, 3, 4, 5, 6]);
@@ -81,7 +82,10 @@ describe("PoseBuilderStep", () => {
     );
 
     const playerSpeed = 1;
-    const poseRecord = builderStep.initPoseRecord(playerSpeed);
+    const poseRecord = builderStep.initPoseRecord(
+      playerSpeed,
+      DEFAULT_DISTANCE_TO_BALL
+    );
 
     expect(poseRecord).toEqual({
       type: PoseTypes.idle,
@@ -92,6 +96,7 @@ describe("PoseBuilderStep", () => {
       rawPose: rawPoses[0],
       direction: 0,
       rotation: 0,
+      distanceToBall: DEFAULT_DISTANCE_TO_BALL,
     });
 
     expect(builderStep.pose).toBe(poseRecord);
@@ -128,7 +133,10 @@ describe("PoseBuilderStep", () => {
     builderStep.stepIdx = stepIdx;
 
     const playerSpeed = 1;
-    const poseRecord = builderStep.initPoseRecord(playerSpeed);
+    const poseRecord = builderStep.initPoseRecord(
+      playerSpeed,
+      DEFAULT_DISTANCE_TO_BALL
+    );
 
     expect(poseRecord).toEqual({
       type: PoseTypes.idle,
@@ -139,6 +147,7 @@ describe("PoseBuilderStep", () => {
       rawPose: rawPoses[stepIdx],
       direction: 0,
       rotation: 0,
+      distanceToBall: DEFAULT_DISTANCE_TO_BALL,
     });
 
     expect(builderStep.pose).toBe(poseRecord);

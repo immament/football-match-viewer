@@ -61,6 +61,7 @@ export type PoseRecord = {
   readonly lastDirection?: number;
   // in radians
   readonly rotation: number;
+  readonly distanceToBall: number;
   action?: IPoseAction;
 };
 

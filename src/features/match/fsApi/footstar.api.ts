@@ -6,11 +6,11 @@ import { logger } from "/app/logger";
 const baseUrls = {
   fs: "https://www.footstar.org/match/get_data_nviewer.asp?jogo_id=[id]",
   devFs: "https://nd.footstar.org/match/get_data_nviewer.asp?jogo_id=[id]",
-  local: "assets/sampleMatch/match.live.xml",
+  local: "matches/match.[id].xml",
   api: "/api/[id]",
 };
 
-type FetchSource = "fs" | "devFs" | "local" | "api";
+export type FetchSource = "fs" | "devFs" | "local" | "api";
 
 const fsLogger = logger.getLogger("fs-api");
 

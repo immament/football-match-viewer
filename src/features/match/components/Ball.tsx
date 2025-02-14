@@ -119,30 +119,28 @@ export const Ball = forwardRef<Mesh, BallProps>(
     }
 
     return (
-      <>
-        <mesh
-          ref={(node) => {
-            ballRef.current = node;
-            if (typeof ref === "function") ref(node);
-            else if (ref) ref.current = node;
-          }}
-          dispose={null}
-        >
-          {ctx?.debugMode && (
-            <Billboard>
-              <Text
-                color="black"
-                anchorX="center"
-                anchorY="bottom"
-                position={[0, 1, 0]}
-                fontSize={0.3}
-              >{`time: ${round(mixer?.time ?? 0, 1)}`}</Text>
-            </Billboard>
-          )}
-          <sphereGeometry args={[BALL_RADIUS, 32, 32]} />
-          <meshStandardMaterial map={texture} />
-        </mesh>
-      </>
+      <mesh
+        ref={(node) => {
+          ballRef.current = node;
+          if (typeof ref === "function") ref(node);
+          else if (ref) ref.current = node;
+        }}
+        dispose={null}
+      >
+        {ctx?.debugMode && (
+          <Billboard>
+            <Text
+              color="black"
+              anchorX="center"
+              anchorY="bottom"
+              position={[0, 1, 0]}
+              fontSize={0.3}
+            >{`time: ${round(mixer?.time ?? 0, 1)}`}</Text>
+          </Billboard>
+        )}
+        <sphereGeometry args={[BALL_RADIUS, 32, 32]} />
+        <meshStandardMaterial map={texture} />
+      </mesh>
     );
   }
 );

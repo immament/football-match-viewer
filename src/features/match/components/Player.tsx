@@ -1,7 +1,8 @@
 import { Billboard, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { useFrame, useGraph } from "@react-three/fiber";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { ColorRepresentation, Group } from "three";
+import { BufferGeometry, ColorRepresentation, Group } from "three";
+import { computeBoundsTree } from "three-mesh-bvh";
 import { SkeletonUtils } from "three-stdlib";
 import { setupPlayerAnimations } from "../animations/setupPlayer";
 import { GLTFResult } from "./playerGltf.model";
@@ -11,6 +12,11 @@ import { ContainerContext } from "/app/Container.context";
 import { round } from "/app/utils";
 
 const MODEL_URL = "models/player-transformed.glb";
+
+BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+
+// bvhHelper = new MeshBVHHelper(meshHelper, 10);
+// scene.add(bvhHelper);
 
 type PlayerProps = {
   shirtColor: ColorRepresentation;
@@ -32,9 +38,12 @@ export function Player({
     () => ({ teamIdx, playerIdx }),
     [teamIdx, playerIdx]
   );
-  const group = React.useRef<Group>(null);
+
+  const playerRef = React.useRef<Group>(null);
+  const groupRef = React.useRef<Group>(new Group());
+
   const { scene, animations } = useGLTF(MODEL_URL);
-  const poseAnimations = useAnimations(animations, group);
+  const poseAnimations = useAnimations(animations, playerRef);
 
   const sceneClone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes, materials } = useGraph(sceneClone) as GLTFResult;
@@ -52,8 +61,6 @@ export function Player({
     (state) => state.mediaPlayer.playbackSpeed
   );
 
-  const labelVisibleRef = useRef(false);
-
   const squadPlayer = useAppZuStore(
     (state) => state.teams.teamsArray[teamIdx].squadPlayers[playerIdx]
   );
@@ -62,10 +69,10 @@ export function Player({
     useState<ReturnType<typeof setupPlayerAnimations>>();
 
   useEffect(() => {
-    if (matchData?.positions && group.current && !config) {
+    if (matchData?.positions && playerRef.current && !config) {
       const result = setupPlayerAnimations(
         playerId,
-        group.current,
+        playerRef.current,
         matchData.positions,
         poseAnimations.actions
       );
@@ -103,27 +110,72 @@ export function Player({
     if (matchPaused) return;
     if (config) {
       // if (paused && !config.playerPoses.forceUpdatePose) return;
-      config.playerPoses.updatePose(delta);
+      const pose = config.playerPoses.updatePose(delta);
+      if (pose) {
+        labelVisible(pose.distanceToBall < 2);
+      }
       config.mixer.update(delta);
       updateDbgLabel(config);
+
+      // if (playerRef.current) {
+      //   meshHelper.current.position.copy(playerRef.current.position);
+      //   // bvhHelper.current?.position.copy(playerRef.current.position);
+      // }
+      // meshHelper.current.position.copy(scene.position);
+      // bvhHelper.current?.update();
+      // regenerateMesh();
     }
   });
 
-  function labelVisible(visible: boolean) {
+  const labelRef = useRef<Group>(null);
+  const playerSelectedRef = useRef(false);
+  const playerHoverRef = useRef(false);
+  const dbgLabelRef = useRef<{ text: string }>(null);
+
+  function labelVisible(visible = false) {
     if (labelRef.current) {
-      labelRef.current.visible = visible;
+      labelRef.current.visible =
+        playerSelectedRef.current || playerHoverRef.current || visible;
     }
   }
 
-  const labelRef = React.useRef<{ text: string; visible: boolean }>(null);
-  const dbgLabelRef = React.useRef<{ text: string }>(null);
+  // function regenerateMesh() {
+  //   if (meshHelper.current) {
+  //     console.log("regenerateMesh");
+  //     // let generateTime, refitTime, startTime;
+
+  //     // time the geometry generation
+  //     // startTime = window.performance.now();
+  //     staticGeometryGenerator.current.generate(meshHelper.current.geometry);
+  //     // generateTime = window.performance.now() - startTime;
+
+  //     // time the bvh refitting
+  //     // startTime = window.performance.now();
+  //     if (!meshHelper.current.geometry.boundsTree) {
+  //       meshHelper.current.geometry.computeBoundsTree();
+  //       // refitTime = "-";
+  //     } else {
+  //       meshHelper.current.geometry.boundsTree.refit();
+  //       // refitTime = (window.performance.now() - startTime).toFixed(2);
+  //     }
+
+  //     // bvhHelper.current.update();
+  //     // timeSinceUpdate = 0;
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   // regenerateMesh();
+  // }, []);
+
   return (
     <group
       name={`Player`}
-      ref={group}
+      ref={playerRef}
       {...props}
       dispose={null}
       visible={!!config}
+      raycast={() => null}
     >
       {ctx?.debugMode && (
         <>
@@ -142,43 +194,54 @@ export function Player({
         </>
       )}
 
-      <Billboard>
+      <Billboard visible={false} ref={labelRef}>
         <Text
           color="black"
           anchorX="center"
           anchorY="bottom"
           position={[0, 2, 0]}
           fontSize={0.3}
-          ref={labelRef}
-          visible={labelVisibleRef.current}
         >
-          {`${teamIdx ? "Away" : "Home"}\n${squadPlayer.shirtNumber}. ${
-            squadPlayer.name
-          }`}
+          {/* ${teamIdx ? "Away" : "Home"}\n */}
+          {`${squadPlayer.shirtNumber}. ${squadPlayer.name}`}
         </Text>
       </Billboard>
+      <mesh
+        // ref={meshHelper}
+        onPointerEnter={(e) => {
+          e.stopPropagation();
+          playerHoverRef.current = true;
+          labelVisible();
+        }}
+        onPointerLeave={(e) => {
+          e.stopPropagation();
+          playerHoverRef.current = false;
+          labelVisible();
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          playerSelectedRef.current = !playerSelectedRef.current;
+          labelVisible(playerSelectedRef.current);
+        }}
+        visible={false}
+      >
+        {/* <bufferGeometry attach="geometry" /> */}
+        <boxGeometry args={[0.5, 3.4, 0.5]} />
+        <meshBasicMaterial
+          wireframe={true}
+          transparent={true}
+          opacity={0.5}
+          depthWrite={false}
+        />
+      </mesh>
+
       <group
         name={`Player-${teamIdx}-${playerIdx}`}
         rotation={[Math.PI / 2, 0, 0]}
         scale={0.01}
-        ref={group}
-        {...props}
         dispose={null}
-        onPointerEnter={(e) => {
-          e.stopPropagation();
-          labelVisible(true);
-        }}
-        onPointerLeave={(e) => {
-          e.stopPropagation();
-          if (!labelVisibleRef.current) {
-            labelVisible(false);
-          }
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          labelVisibleRef.current = !labelVisibleRef.current;
-          labelVisible(labelVisibleRef.current);
-        }}
+        ref={groupRef}
+        raycast={() => null}
       >
         <primitive object={nodes.mixamorig5Hips} />
         <skinnedMesh
@@ -186,30 +249,36 @@ export function Player({
           geometry={nodes.Ch38_Body.geometry}
           material={bodyMaterial}
           skeleton={nodes.Ch38_Body.skeleton}
+          raycast={() => null}
         ></skinnedMesh>
         <skinnedMesh
           name="Ch38_Shirt"
           geometry={nodes.Ch38_Shirt.geometry}
           material={shirtMaterial}
           skeleton={nodes.Ch38_Shirt.skeleton}
+          raycast={() => null}
         ></skinnedMesh>
+
         <skinnedMesh
           name="Ch38_Shorts"
           geometry={nodes.Ch38_Shorts.geometry}
           material={shortsMaterial}
           skeleton={nodes.Ch38_Shorts.skeleton}
+          raycast={() => null}
         />
         <skinnedMesh
           name="Ch38_Socks"
           geometry={nodes.Ch38_Socks.geometry}
           material={socksMaterial}
           skeleton={nodes.Ch38_Socks.skeleton}
+          raycast={() => null}
         />
         <skinnedMesh
           name="Ch38_Shoes"
           geometry={nodes.Ch38_Shoes.geometry}
           material={shoesMaterial}
           skeleton={nodes.Ch38_Shoes.skeleton}
+          raycast={() => null}
         />
       </group>
     </group>
