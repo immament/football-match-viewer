@@ -2259,8 +2259,8 @@ const match: FootstarMatchData = {
       _nome_estadio: "Infernum",
     },
     game: {
-      _status: "online",
-      _minuto: "55",
+      _status: "offline",
+      _minuto: "0",
       _refresh_time: "150",
       _matchType: "12",
     },
