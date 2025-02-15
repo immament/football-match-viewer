@@ -22,7 +22,7 @@ export const Match = () => {
   useEffect(() => {
     if (matchStatus === "idle") {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("ext") === "x") {
+      if (urlParams.get("ext")) {
         logger.info("matchData from ext");
         function listener(ev: Event) {
           logger.info("matchData from listener", ev);
