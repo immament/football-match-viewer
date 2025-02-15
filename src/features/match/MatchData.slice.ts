@@ -22,7 +22,10 @@ export interface MatchDataSlice {
     }): Promise<void>;
     matchFetchSuccess(matchData: MatchData): void;
     matchFetchError(error: string): void;
-    visibleMatchDuration(liveTime: number): number;
+    visibleMatchDuration(
+      liveTimeInMinutes: number,
+      totalDuration: number
+    ): number;
   };
 }
 
@@ -37,35 +40,43 @@ export const createMatchDataSlice: StateCreator<
   matchData: {
     status: "idle",
 
-    matchFetchSuccess: (matchData) => {
+    matchFetchSuccess: (aMatchData) => {
       logger.info("matchFetchSuccess ++");
-      get().teams.initTeams(matchData.teams);
+      get().teams.initTeams(aMatchData.teams);
       set((state) => {
         state.matchData.status = "succeeded";
-        state.matchData.data = matchData;
+        state.matchData.data = aMatchData;
       });
 
-      let duration = matchData.positions.ball.px.length * MATCH_TIME_SCALE;
-      let startTime: number = 0;
+      const times = calculateTimes();
 
-      if (matchData.status === "online") {
-        startTime = Math.max(
-          0,
-          Math.min(duration, matchData.currentMinute * 60)
-        );
-        duration = get().matchData.visibleMatchDuration(startTime);
-        duration = matchData.currentMinute;
-      }
+      get().mediaPlayer.init(times);
 
-      set((state) => {
-        state.mediaPlayer.duration = duration;
-        state.mediaPlayer.startTime = startTime;
-      });
-
-      if (startTime > 0) {
-        get().matchTimer.updateStep(startTime);
+      if (times.startTime > 0) {
+        get().matchTimer.updateStep(times.startTime);
       }
       logger.info("matchFetchSuccess --");
+
+      function calculateTimes() {
+        const totalDuration =
+          aMatchData.positions.ball.px.length * MATCH_TIME_SCALE;
+        let visibleDuration = totalDuration;
+        let startTime: number = 0;
+
+        if (aMatchData.status === "online") {
+          startTime = Math.max(
+            0,
+            Math.min(totalDuration, aMatchData.currentMinute * 60)
+          );
+          visibleDuration =
+            get().matchData.visibleMatchDuration(
+              startTime / 60,
+              totalDuration
+            ) * 60;
+          // totalDuration = aMatchData.currentMinute;
+        }
+        return { visibleDuration, totalDuration, startTime };
+      }
     },
     matchFetchError: (error: string) => {
       set(({ matchData }) => {
@@ -116,14 +127,24 @@ export const createMatchDataSlice: StateCreator<
         get().matchData.matchFetchError(String(error));
       }
     },
-    visibleMatchDuration(_liveTime: number): number {
+    visibleMatchDuration(
+      liveTimeInMinutes: number,
+      totalDuration: number
+    ): number {
+      const validEvents = ["extratime1", "extratime2", "penalties"];
       if (!this.data) return 0;
-      const duration = this.data?.positions.ball.px.length * MATCH_TIME_SCALE;
-      // const nextTimeEvent = this.data.matchTimes.reduce((acc, c) => {
-      //   if (c.time < liveTime && c.time > acc) return c.time;
-      //   return acc;
-      // }, 0);
-      // if (nextTimeEvent > 0) return Math.min(duration, nextTimeEvent);
+      const duration = totalDuration;
+      const nextTimeEvent = this.data.matchTimes.reduce((acc, c) => {
+        const result =
+          validEvents.includes(c.type) &&
+          c.time > liveTimeInMinutes &&
+          c.time < acc
+            ? c.time
+            : acc;
+
+        return result;
+      }, totalDuration);
+      if (nextTimeEvent > 0) return Math.min(duration, nextTimeEvent);
       return duration;
     },
   },

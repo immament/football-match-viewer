@@ -7,9 +7,19 @@ export interface MediaPlayerSlice {
     startTime: number;
     // in seconds
     duration: number;
+    totalDuration: number;
     paused: boolean;
     playbackSpeed: number;
     commentsVisible: boolean;
+    init({
+      startTime,
+      visibleDuration,
+      totalDuration,
+    }: {
+      startTime: number;
+      visibleDuration: number;
+      totalDuration: number;
+    }): void;
     gotoPercent: (percentTime: number) => void;
     tooglePlay: () => void;
     toogleComments: () => void;
@@ -27,9 +37,25 @@ export const createMediaPlayer2Slice: StateCreator<
   mediaPlayer: {
     startTime: 0,
     duration: 0,
+    totalDuration: 0,
     playbackSpeed: 2,
     paused: true,
     commentsVisible: true,
+    init({
+      startTime,
+      visibleDuration,
+      totalDuration,
+    }: {
+      startTime: number;
+      visibleDuration: number;
+      totalDuration: number;
+    }): void {
+      set(({ mediaPlayer }) => {
+        mediaPlayer.duration = visibleDuration;
+        mediaPlayer.totalDuration = totalDuration;
+        mediaPlayer.startTime = startTime;
+      });
+    },
     gotoPercent: (percentTime: number) => {
       const newPercentTime = Math.min(100, Math.max(0, percentTime));
       set(({ mediaPlayer }) => {

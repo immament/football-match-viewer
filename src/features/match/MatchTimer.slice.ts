@@ -100,6 +100,8 @@ export const createMediaPlayerSlice: StateCreator<
               stepEvents.events.forEach((ev) => applyEvent(ev));
               matchTimer.lastEventStep = matchTimer.nextEventStep;
               matchTimer.nextEventStep = stepEvents.nextEventStep;
+            } else {
+              return;
             }
           }
         }
