@@ -38,7 +38,7 @@ describe("matchData slice", () => {
     expect(updatedState.teams.teamsArray[1].colors.text).not.toBe("#FF0000");
   });
 
-  it.only("should calculate visible duration for live match", () => {
+  it("should calculate visible duration for live match", () => {
     const payload = matchDataMock();
     payload.status = "online";
     payload.currentMinute = 11;
