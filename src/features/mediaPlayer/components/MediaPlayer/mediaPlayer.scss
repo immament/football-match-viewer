@@ -59,6 +59,7 @@ div.mv-control-bar {
           margin: 0;
           padding: 0;
           width: 0;
+          z-index: 1;
           border-right: 1px solid #222;
           background-color: #bf3b4d;
 
@@ -72,11 +73,24 @@ div.mv-control-bar {
           display: none;
           height: var(--progress-height);
           width: 1px;
-          z-index: 1;
+          z-index: 3;
           pointer-events: none;
           background-color: #000;
           & .mv-time-tooltip {
             background-color: #000c;
+            color: #fff;
+          }
+        }
+
+        .mv-live-time {
+          position: absolute;
+          height: var(--progress-height);
+          width: 2px;
+          z-index: 2;
+          pointer-events: none;
+          background-color: #ffd900;
+          & .mv-time-tooltip {
+            background-color: #943c3c;
             color: #fff;
           }
         }
@@ -86,7 +100,7 @@ div.mv-control-bar {
           color: #000;
           float: right;
           font-family: Arial, Helvetica, sans-serif;
-          padding: 6px 8px 8px;
+          padding: 6px 8px 6px;
           pointer-events: none;
           position: absolute;
           top: -3.4em;
@@ -117,6 +131,9 @@ div.mv-control-bar {
           display: block;
           opacity: 1;
           transition: visibility 1s, opacity 1s;
+          visibility: visible;
+        }
+        .mv-live-time {
           visibility: visible;
         }
       }

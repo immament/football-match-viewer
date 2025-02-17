@@ -39,7 +39,7 @@ export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
       mapGameComments(fsMatch.game_info.game_comments.gc)
     ),
     status: fsMatch.game_info.game._status,
-    currentMinute: Number(fsMatch.game_info.game._minuto) || 0,
+    currentTime: Number(fsMatch.game_info.game._minuto) || 0,
     matchTimes,
   };
 
@@ -151,12 +151,12 @@ export function mapMatchEvents(
       case "extratime2":
       case "penalties":
         return {
-          time: mapTime(fsEv._m),
+          ...mapTime(fsEv._m),
           type: fsEv._tipo,
         };
       case "amarelo":
         return {
-          time: mapTime(fsEv._m),
+          ...mapTime(fsEv._m),
           type: "yellow",
           teamId: Number(fsEv._eqmarca),
           playerId: Number(fsEv._jogmarca),
@@ -168,7 +168,7 @@ export function mapMatchEvents(
           matchResult.awayGoals++;
         }
         return {
-          time: mapTime(fsEv._m),
+          ...mapTime(fsEv._m),
           teamId: Number(fsEv._eqmarca),
           teamIdx: teams[0].id === Number(fsEv._eqmarca) ? 0 : 1,
           playerId: Number(fsEv._jogmarca),
@@ -177,7 +177,7 @@ export function mapMatchEvents(
         };
       case "subst":
         return {
-          time: mapTime(fsEv._m),
+          ...mapTime(fsEv._m),
           type: "subst",
           teamIdx: teams[0].substPlayers.find((p) => p.id === fsEv._id_player1)
             ? 0
@@ -190,7 +190,8 @@ export function mapMatchEvents(
         logger.warn("unknown match event type: " + (fsEv as FsGameEvent)._tipo);
     }
     function mapTime(time: string) {
-      return Number(time.replace(",", "."));
+      const minute = Number(time.replace(",", "."));
+      return { time: minute, timeInSeconds: minute * 60 };
     }
   }
 }

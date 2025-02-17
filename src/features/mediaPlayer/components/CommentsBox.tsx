@@ -22,10 +22,13 @@ export function CommentsBox() {
       setTimeout(() => {
         setComments((state) => state.filter((c) => c !== commentToDisplay));
       }, COMMENTS_DISPLAY_TIME);
-      setComments((state) => [
-        ...state.slice(COMMENTS_SLICE_ARG),
-        commentToDisplay,
-      ]);
+      setComments((state) => {
+        const comments = state.slice(COMMENTS_SLICE_ARG);
+        if (!comments.includes(commentToDisplay))
+          comments.push(commentToDisplay);
+        // commentToDisplay,
+        return comments;
+      });
     }
   }, [commentToDisplay]);
   useEffect(() => {

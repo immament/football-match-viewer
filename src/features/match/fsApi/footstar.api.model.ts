@@ -40,6 +40,7 @@ export type FootstarMatchData = {
     };
     game: {
       _status: "online" | "offline";
+      // in seconds!!!
       _minuto: string;
       _refresh_time: string;
       _matchType: string;

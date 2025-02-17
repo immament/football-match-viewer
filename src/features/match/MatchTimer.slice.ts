@@ -9,6 +9,9 @@ import {
   MatchEvent,
   MatchEventsMap,
 } from "./MatchData.model";
+import { logger } from "/app/logger";
+
+let _liveInterval: number | undefined;
 
 export interface MatchTimerSlice {
   matchTimer: {
@@ -18,6 +21,11 @@ export interface MatchTimerSlice {
     lastEventStep: number;
     nextEventStep: number;
     lastCommentStep: number;
+    liveMatch?: {
+      liveTime: number;
+      startTime: number;
+      // liveTimeOffset: number;
+    };
     eventToDisplay?: {
       time: string;
       header: string;
@@ -34,6 +42,8 @@ export interface MatchTimerSlice {
     updateStep: (matchTimeInSeconds: number) => void;
     updateNextEventStep: (newStep: number) => void;
     updateComment: (newStep: number) => void;
+    initLiveMatch(liveTime: number): void;
+    updateLiveTime(): void;
   };
 }
 
@@ -173,6 +183,47 @@ export const createMediaPlayerSlice: StateCreator<
             content: comment.text,
             displayTime: comment.displayTime,
           };
+        }
+      });
+    },
+    initLiveMatch(liveTime: number) {
+      if (!(liveTime > 0)) return;
+      if (_liveInterval) clearInterval(_liveInterval);
+
+      set(({ matchTimer, mediaPlayer }) => {
+        if (liveTime < mediaPlayer.totalDuration) {
+          matchTimer.liveMatch = {
+            liveTime,
+            // liveTimeOffset: liveTime * 1000,
+            startTime: Date.now() - liveTime * 1000,
+          };
+          _liveInterval = setInterval(() => {
+            get().matchTimer.updateLiveTime();
+          }, 1000);
+        }
+      });
+      get().matchTimer.updateStep(liveTime);
+    },
+    updateLiveTime() {
+      set(({ matchTimer, mediaPlayer }) => {
+        const liveMatch = matchTimer.liveMatch;
+        if (!liveMatch) {
+          logger.info("no live match");
+          return;
+        }
+
+        liveMatch.liveTime = Math.floor(
+          (Date.now() - liveMatch.startTime) / 1000
+        );
+
+        if (liveMatch.liveTime >= mediaPlayer.totalDuration) {
+          clearInterval(_liveInterval);
+          _liveInterval = undefined;
+          matchTimer.liveMatch = undefined;
+          return;
+        }
+        if (liveMatch.liveTime >= mediaPlayer.duration) {
+          mediaPlayer.duration = mediaPlayer.totalDuration;
         }
       });
     },

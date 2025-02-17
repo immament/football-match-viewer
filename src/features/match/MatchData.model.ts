@@ -7,7 +7,7 @@ export interface MatchData {
   matchTimes: MatchEvent[];
   commentsMap: MatchCommentsMap;
   status: "offline" | "online";
-  currentMinute: number;
+  currentTime: number;
 }
 export type TeamColors = {
   text: string;
@@ -63,7 +63,7 @@ export const MatchEventTimeTypesValues = [
   "penalties",
 ];
 
-export type MatchEvent = { time: number } & (
+export type MatchEvent = { time: number; timeInSeconds: number } & (
   | { type: MatchEventTimeTypes }
   | { type: "subst"; playerInId: string; playerOutId: string; teamIdx: 0 | 1 }
   | GoalMatchEvent

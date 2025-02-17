@@ -49,11 +49,10 @@ export const createMatchDataSlice: StateCreator<
       });
 
       const times = calculateTimes();
+      get().mediaPlayer.init(times, aMatchData.status === "online");
 
-      get().mediaPlayer.init(times);
-
-      if (times.startTime > 0) {
-        get().matchTimer.updateStep(times.startTime);
+      if (aMatchData.status === "online") {
+        get().matchTimer.initLiveMatch(times.startTime);
       }
       logger.info("matchFetchSuccess --");
 
@@ -66,13 +65,12 @@ export const createMatchDataSlice: StateCreator<
         if (aMatchData.status === "online") {
           startTime = Math.max(
             0,
-            Math.min(totalDuration, aMatchData.currentMinute * 60)
+            Math.min(totalDuration, aMatchData.currentTime)
           );
-          visibleDuration =
-            get().matchData.visibleMatchDuration(
-              startTime / 60,
-              totalDuration
-            ) * 60;
+          visibleDuration = get().matchData.visibleMatchDuration(
+            startTime,
+            totalDuration
+          );
           // totalDuration = aMatchData.currentMinute;
         }
         return { visibleDuration, totalDuration, startTime };
@@ -121,29 +119,29 @@ export const createMatchDataSlice: StateCreator<
         const fsMatch = parseFsXml(matchXml);
         fsMatch.matchId = matchId;
         const matchData = mapFsMatch(fsMatch);
-        if (matchData.status === "offline") {
-          get().matchData.matchFetchSuccess(matchData);
-        } else {
-          logger.error("loadMatchFromXml error:", "live matches not supported");
-        }
+        // if (matchData.status === "offline") {
+        get().matchData.matchFetchSuccess(matchData);
+        // } else {
+        //   logger.error("loadMatchFromXml error:", "live matches not supported");
+        // }
       } catch (error) {
         logger.error("loadMatchFromXml error:", error);
         get().matchData.matchFetchError(String(error));
       }
     },
     visibleMatchDuration(
-      liveTimeInMinutes: number,
+      liveTimeInSeconds: number,
       totalDuration: number
     ): number {
-      const validEvents = ["extratime1", "extratime2", "penalties"];
+      const validEvents = ["extratime1"];
       if (!this.data) return 0;
       const duration = totalDuration;
       const nextTimeEvent = this.data.matchTimes.reduce((acc, c) => {
         const result =
           validEvents.includes(c.type) &&
-          c.time > liveTimeInMinutes &&
-          c.time < acc
-            ? c.time
+          c.timeInSeconds > liveTimeInSeconds &&
+          c.timeInSeconds < acc
+            ? c.timeInSeconds
             : acc;
 
         return result;

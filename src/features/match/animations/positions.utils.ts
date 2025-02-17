@@ -99,14 +99,23 @@ export function mixerDeltaTime(
   delta: number,
   currentTime: number,
   matchPaused: boolean,
-  matchDuration: number
-): number {
-  let result = delta;
+  matchDuration: number,
+  liveTime: number | undefined,
+  playbackSpeed: number
+): { delta: number; isEnd?: boolean; aboveLiveTime?: boolean } {
+  const effectiveDelta = delta * playbackSpeed;
+  if (matchPaused) return { delta: 0 };
+  if (liveTime && currentTime + effectiveDelta > liveTime + 1) {
+    return {
+      delta: playbackSpeed ? Math.max(0, liveTime - currentTime) : 0,
+      aboveLiveTime: true,
+    };
+  }
 
-  if (matchPaused) result = 0;
-
-  if (currentTime + result > matchDuration)
-    return Math.max(0, matchDuration - currentTime);
-  if (currentTime + result < 0) return Math.max(0, -currentTime);
-  return result;
+  if (currentTime + effectiveDelta > matchDuration) {
+    return { delta: Math.max(0, matchDuration - currentTime), isEnd: true };
+  }
+  if (currentTime + effectiveDelta < 0)
+    return { delta: Math.max(0, -currentTime) };
+  return { delta };
 }

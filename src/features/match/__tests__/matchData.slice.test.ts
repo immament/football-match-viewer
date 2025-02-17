@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTimeEvent } from "../fsApi/__tests__/matchEventTest.utils";
 import { MatchData } from "../MatchData.model";
 import { AppStoreState, useAppZuStore } from "/app/app.zu.store";
 
@@ -38,21 +39,40 @@ describe("matchData slice", () => {
     expect(updatedState.teams.teamsArray[1].colors.text).not.toBe("#FF0000");
   });
 
-  it("should calculate visible duration for live match", () => {
-    const payload = matchDataMock();
-    payload.status = "online";
-    payload.currentMinute = 11;
+  describe("liveMatch visibleTime", () => {
+    it("should visibleTime be equal to regular time", () => {
+      const payload = matchDataMock();
+      payload.status = "online";
+      payload.currentTime = 11 * 60;
 
-    initialState.matchData.matchFetchSuccess(payload);
+      initialState.matchData.matchFetchSuccess(payload);
 
-    const updatedState = useAppZuStore.getState();
-    expect(
-      updatedState.mediaPlayer.totalDuration,
-      "totalDuration 121 minutes"
-    ).toBe(121 * 60);
-    expect(updatedState.mediaPlayer.duration, "duration 91 minutes").toBe(
-      91 * 60
-    );
+      const updatedState = useAppZuStore.getState();
+      expect(
+        updatedState.mediaPlayer.totalDuration,
+        "totalDuration 121 minutes"
+      ).toBe(121 * 60);
+      expect(updatedState.mediaPlayer.duration, "duration 91 minutes").toBe(
+        91 * 60
+      );
+    });
+
+    it.only("should visibleTime be equal to full time (after penelties)", () => {
+      const payload = matchDataMock();
+      payload.status = "online";
+      payload.currentTime = 95 * 60;
+
+      initialState.matchData.matchFetchSuccess(payload);
+
+      const updatedState = useAppZuStore.getState();
+      expect(
+        updatedState.mediaPlayer.totalDuration,
+        "totalDuration 121 minutes"
+      ).toBe(121 * 60);
+      expect(updatedState.mediaPlayer.duration, "duration 91 minutes").toBe(
+        121 * 60
+      );
+    });
   });
 });
 
@@ -101,12 +121,12 @@ function matchDataMock(): MatchData {
       poses: [],
     },
     status: "offline",
-    currentMinute: 0,
+    currentTime: 0,
     matchTimes: [
-      { time: 40.2, type: "halftime" },
-      { time: 91, type: "extratime1" },
-      { time: 105.833, type: "extratime2" },
-      { time: 121.7, type: "penalties" },
+      createTimeEvent(45.2, "halftime"),
+      createTimeEvent(91, "extratime1"),
+      createTimeEvent(105.833, "extratime2"),
+      createTimeEvent(121.7, "penalties"),
     ],
   };
 }
