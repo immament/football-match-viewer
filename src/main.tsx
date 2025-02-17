@@ -9,7 +9,7 @@ import {
 } from "/app/Container.context.ts";
 import { logger } from "/app/logger.ts";
 
-main();
+enableMocking().then(() => main());
 
 function main() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -27,6 +27,7 @@ function main() {
     mediaPlayer: getContainer(MEDIA_PLAYER_CONTAINER_ID),
     debugMode: DEBUG_MODE,
   };
+  // const store = setupStore();
 
   createRoot(ctx.mediaPlayer).render(
     <StrictMode>
@@ -46,4 +47,13 @@ function getContainer(elementId: string): HTMLElement {
     );
   }
   return container;
+}
+
+async function enableMocking() {
+  return;
+  if (import.meta.env.PROD) return;
+
+  const { worker } = await import("./mocks/browser.ts");
+
+  return worker.start();
 }
