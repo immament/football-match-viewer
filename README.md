@@ -1,6 +1,6 @@
 ## Football 3D Match Viewer
 
-The extension allows to watch matches from the browser game footstar.org in 3D.
+App allows to watch matches from the browser game footstar.org in 3D.
 
 ### Demo
 
