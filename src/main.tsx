@@ -9,7 +9,7 @@ import {
 } from "/app/Container.context.ts";
 import { logger } from "/app/logger.ts";
 
-enableMocking().then(() => main());
+main();
 
 function main() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -49,11 +49,11 @@ function getContainer(elementId: string): HTMLElement {
   return container;
 }
 
-async function enableMocking() {
-  return;
-  if (import.meta.env.PROD) return;
+// async function enableMocking() {
+//   return;
+//   if (import.meta.env.PROD) return;
 
-  const { worker } = await import("./mocks/browser.ts");
+//   const { worker } = await import("./mocks/browser.ts");
 
-  return worker.start();
-}
+//   return worker.start();
+// }
