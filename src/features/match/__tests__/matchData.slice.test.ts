@@ -57,7 +57,7 @@ describe("matchData slice", () => {
       );
     });
 
-    it.only("should visibleTime be equal to full time (after penelties)", () => {
+    it("should visibleTime be equal to full time (after penelties)", () => {
       const payload = matchDataMock();
       payload.status = "online";
       payload.currentTime = 95 * 60;
