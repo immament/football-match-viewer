@@ -1494,7 +1494,7 @@
       <away_team_name id='58'>Chicago Under 18</away_team_name>
       <local pais="Serbia" cidade="Beograd" liga=""
         imagem_cidade="/img/cities/Beograd-serbia.jpg" nome_estadio="Dinamo Zrenjanin" />
-      <game status="offline" minuto="0" refresh_time="150" matchType="11" />
+      <game status="online" minuto="5400" refresh_time="150" matchType="11" />
 
       <weather>
         <wind intensity='1' wind_direction='90' desc='Light Breeze (S)' />

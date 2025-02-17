@@ -1,11 +1,12 @@
 import { Billboard, Text, useAnimations, useGLTF } from "@react-three/drei";
-import { useFrame, useGraph } from "@react-three/fiber";
+import { RootState, useGraph } from "@react-three/fiber";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { BufferGeometry, ColorRepresentation, Group } from "three";
 import { computeBoundsTree } from "three-mesh-bvh";
 import { SkeletonUtils } from "three-stdlib";
 import { setupPlayerAnimations } from "../animations/setupPlayer";
 import { GLTFResult } from "./playerGltf.model";
+import { useMatchDirector } from "./useMatchDirector";
 import { useMaterialClone } from "./useMaterialClone";
 import { useAppZuStore } from "/app/app.zu.store";
 import { ContainerContext } from "/app/Container.context";
@@ -49,7 +50,9 @@ export function Player({
   const { nodes, materials } = useGraph(sceneClone) as GLTFResult;
 
   const shirtMaterial = useMaterialClone(materials.Ch38_body, shirtColor);
-  const bodyMaterial = useMaterialClone(materials.Ch38_body, bodyColor);
+  const bodyMaterial = materials.Ch38_body;
+  // TODO: body color is to dark;
+  // const bodyMaterial = useMaterialClone(materials.Ch38_body, bodyColor);
   const shortsMaterial = useMaterialClone(materials.Ch38_body, shortsColor);
   const socksMaterial = useMaterialClone(materials.Ch38_body, shirtColor);
   const shoesMaterial = useMaterialClone(materials.Ch38_body, shortsColor);
@@ -100,37 +103,35 @@ export function Player({
       config.positionAction.paused = false;
       config.rotateAction.paused = false;
     }
+  }, [config, playbackSpeed]);
+
+  useEffect(() => {
     if (poseAnimations.mixer)
       poseAnimations.mixer.timeScale = matchPaused ? 0 : playbackSpeed;
-  }, [config, poseAnimations, playbackSpeed, matchPaused]);
+  }, [poseAnimations.mixer, playbackSpeed, matchPaused]);
 
   const ctx = useContext(ContainerContext);
 
-  useFrame((_, delta) => {
-    if (matchPaused) return;
-    if (config) {
-      // if (paused && !config.playerPoses.forceUpdatePose) return;
+  const onFrameUpdate = useMemo(() => {
+    return (_: RootState, delta: number) => {
+      if (matchPaused || !config) return;
       const pose = config.playerPoses.updatePose(delta);
       if (pose) {
         labelVisible(pose.distanceToBall < 2);
       }
-      config.mixer.update(delta);
       updateDbgLabel(config);
 
-      // if (playerRef.current) {
-      //   meshHelper.current.position.copy(playerRef.current.position);
-      //   // bvhHelper.current?.position.copy(playerRef.current.position);
-      // }
-      // meshHelper.current.position.copy(scene.position);
-      // bvhHelper.current?.update();
-      // regenerateMesh();
-    }
-  });
-
-  const labelRef = useRef<Group>(null);
-  const playerSelectedRef = useRef(false);
-  const playerHoverRef = useRef(false);
-  const dbgLabelRef = useRef<{ text: string }>(null);
+      function updateDbgLabel(
+        config: ReturnType<typeof setupPlayerAnimations>
+      ) {
+        if (dbgLabelRef.current) {
+          dbgLabelRef.current.text =
+            `${teamIdx === 0 ? "Home" : "Away"} Player ${playerIdx + 1}` +
+            (config.mixer.time > 0 && ` (${round(config.mixer.time, 1)})`);
+        }
+      }
+    };
+  }, [config, matchPaused, teamIdx, playerIdx]);
 
   function labelVisible(visible = false) {
     if (labelRef.current) {
@@ -139,34 +140,12 @@ export function Player({
     }
   }
 
-  // function regenerateMesh() {
-  //   if (meshHelper.current) {
-  //     console.log("regenerateMesh");
-  //     // let generateTime, refitTime, startTime;
+  useMatchDirector(config?.mixer, false, onFrameUpdate);
 
-  //     // time the geometry generation
-  //     // startTime = window.performance.now();
-  //     staticGeometryGenerator.current.generate(meshHelper.current.geometry);
-  //     // generateTime = window.performance.now() - startTime;
-
-  //     // time the bvh refitting
-  //     // startTime = window.performance.now();
-  //     if (!meshHelper.current.geometry.boundsTree) {
-  //       meshHelper.current.geometry.computeBoundsTree();
-  //       // refitTime = "-";
-  //     } else {
-  //       meshHelper.current.geometry.boundsTree.refit();
-  //       // refitTime = (window.performance.now() - startTime).toFixed(2);
-  //     }
-
-  //     // bvhHelper.current.update();
-  //     // timeSinceUpdate = 0;
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   // regenerateMesh();
-  // }, []);
+  const labelRef = useRef<Group>(null);
+  const playerSelectedRef = useRef(false);
+  const playerHoverRef = useRef(false);
+  const dbgLabelRef = useRef<{ text: string }>(null);
 
   return (
     <group
@@ -283,14 +262,6 @@ export function Player({
       </group>
     </group>
   );
-
-  function updateDbgLabel(config: ReturnType<typeof setupPlayerAnimations>) {
-    if (dbgLabelRef.current) {
-      dbgLabelRef.current.text =
-        `${teamIdx === 0 ? "Home" : "Away"} Player ${playerIdx + 1}` +
-        (config.mixer.time > 0 && ` (${round(config.mixer.time, 1)})`);
-    }
-  }
 }
 
 useGLTF.preload(MODEL_URL);

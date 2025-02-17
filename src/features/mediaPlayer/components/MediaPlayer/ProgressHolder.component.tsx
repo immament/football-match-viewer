@@ -15,6 +15,9 @@ export function ProgressHolderComponent() {
   const duration = useAppZuStore((state) => state.mediaPlayer.duration);
   const time = useAppZuStore((state) => state.matchTimer.time);
   const displayTime = useAppZuStore((state) => state.matchTimer.displayTime);
+  const liveTime = useAppZuStore(
+    (state) => state.matchTimer.liveMatch?.liveTime ?? 0
+  );
   const gotoPercent = useAppZuStore((state) => state.mediaPlayer.gotoPercent);
 
   const playProgressRef = useRef<HTMLDivElement>(null);
@@ -65,7 +68,14 @@ export function ProgressHolderComponent() {
         const offsetX = ev.nativeEvent.offsetX;
 
         if (offsetX >= 0 && offsetX <= progressWidth) {
-          const displayTime = percentToDisplayTime(offsetX / progressWidth);
+          const hoverTime = (offsetX / progressWidth) * duration;
+          if (liveTime > 0 && hoverTime > liveTime) {
+            setHoverTooltip({ visibility: "hidden" });
+            return;
+            // hoverTime = liveTime;
+            // offsetX = (liveTime / duration) * progressWidth;
+          }
+          const displayTime = formatTime(hoverTime);
           if (displayTime) {
             setHoverTooltip({
               visibility: "visible",
@@ -116,6 +126,21 @@ export function ProgressHolderComponent() {
               {hoverTooltip.text}
             </div>
           </div>
+          {liveTime > 0 && duration > 0 && (
+            <div
+              className="mv-live-time"
+              style={{ left: `${(liveTime / duration) * 100}%` }}
+            >
+              <div
+                className="mv-time-tooltip"
+                aria-hidden="true"
+                style={{ transform: "translateX(-50%)" }}
+                // ref={hoverTooltipRef}
+              >
+                {formatTime(liveTime)}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -153,9 +178,5 @@ export function ProgressHolderComponent() {
       }
       return tooltipHalf;
     }
-  }
-
-  function percentToDisplayTime(value: number): string {
-    return formatTime(value * duration);
   }
 }

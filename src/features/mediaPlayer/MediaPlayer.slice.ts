@@ -7,14 +7,24 @@ export interface MediaPlayerSlice {
     startTime: number;
     // in seconds
     duration: number;
+    totalDuration: number;
     paused: boolean;
     playbackSpeed: number;
     commentsVisible: boolean;
-    gotoPercent: (percentTime: number) => void;
-    tooglePlay: () => void;
-    toogleComments: () => void;
-    pause: () => void;
-    changePlaybackSpeed: (playbackSpeed: number) => void;
+    // actions
+    init(
+      props: {
+        startTime: number;
+        visibleDuration: number;
+        totalDuration: number;
+      },
+      isOnline: boolean
+    ): void;
+    gotoPercent(percentTime: number): void;
+    tooglePlay(): void;
+    toogleComments(): void;
+    pause(): void;
+    changePlaybackSpeed(playbackSpeed: number): void;
   };
 }
 
@@ -27,13 +37,26 @@ export const createMediaPlayer2Slice: StateCreator<
   mediaPlayer: {
     startTime: 0,
     duration: 0,
+    totalDuration: 0,
     playbackSpeed: 2,
     paused: true,
     commentsVisible: true,
+    init({ startTime, visibleDuration, totalDuration }, isOnline): void {
+      set(({ mediaPlayer }) => {
+        mediaPlayer.duration = visibleDuration;
+        mediaPlayer.totalDuration = totalDuration;
+        mediaPlayer.startTime = startTime;
+        mediaPlayer.playbackSpeed = isOnline ? 1 : 2;
+      });
+    },
     gotoPercent: (percentTime: number) => {
       const newPercentTime = Math.min(100, Math.max(0, percentTime));
-      set(({ mediaPlayer }) => {
-        mediaPlayer.startTime = (newPercentTime / 100) * mediaPlayer.duration;
+      set(({ mediaPlayer, matchTimer }) => {
+        let newTime = (newPercentTime / 100) * mediaPlayer.duration;
+        if (matchTimer.liveMatch && matchTimer.liveMatch.liveTime < newTime) {
+          newTime = matchTimer.liveMatch.liveTime;
+        }
+        mediaPlayer.startTime = newTime;
       });
       get().matchTimer.updateStep(get().mediaPlayer.startTime);
     },

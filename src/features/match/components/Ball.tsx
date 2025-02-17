@@ -1,16 +1,17 @@
 import { Billboard, Text, useTexture } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { RootState } from "@react-three/fiber";
 import {
   ForwardedRef,
   forwardRef,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { AnimationAction, AnimationMixer, Mesh, Vector3 } from "three";
 import { createBallPositionAnimation } from "../animations/createBallPositionAnimation";
-import { mixerDeltaTime } from "../animations/positions.utils";
+import { useMatchDirector } from "./useMatchDirector";
 import { useAppZuStore } from "/app/app.zu.store";
 import { ContainerContext } from "/app/Container.context";
 import { round } from "/app/utils";
@@ -29,14 +30,10 @@ export const Ball = forwardRef<Mesh, BallProps>(
 
     const matchData = useAppZuStore((state) => state.matchData.data);
     const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
-    const pauseMatch = useAppZuStore((state) => state.mediaPlayer.pause);
-    const matchDuration = useAppZuStore((state) => state.mediaPlayer.duration);
     const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
     const playbackSpeed = useAppZuStore(
       (state) => state.mediaPlayer.playbackSpeed
     );
-
-    const updateStep = useAppZuStore((state) => state.matchTimer.updateStep);
 
     const [mixer, setMixer] = useState<AnimationMixer>();
 
@@ -49,8 +46,6 @@ export const Ball = forwardRef<Mesh, BallProps>(
         }
         positionAnimation.paused = false;
         mixer.setTime(startTime / mixer.timeScale);
-
-        // positionAnimation.play();
       }
     }, [mixer, startTime, positionAnimation]);
 
@@ -68,55 +63,44 @@ export const Ball = forwardRef<Mesh, BallProps>(
     }, [matchData, positionAnimation]);
 
     useEffect(() => {
-      if (mixer) mixer.timeScale = playbackSpeed;
+      if (mixer) {
+        mixer.timeScale = playbackSpeed;
+      }
     }, [mixer, playbackSpeed]);
 
-    const [prevDelta, setPrevDelta] = useState(0);
+    const prevDelta = useRef(0);
     const prevPosition = useRef<Vector3>(new Vector3(0, 0, 0));
 
-    // const lastStep = useRef<number>(-1);
+    const onFrameUpdate = useMemo(
+      () => (_: RootState, delta: number) => {
+        if (matchPaused) return;
+        if (ballRef.current) animateBallRotation(delta, ballRef.current);
 
-    useFrame((_, delta) => {
-      if (matchPaused) return;
+        function animateBallRotation(delta: number, ball: Mesh) {
+          if (prevDelta) {
+            ball.rotation.z -= rotation("x");
+            ball.rotation.x += rotation("z");
+            prevPosition.current.copy(ball.position);
+          }
+          prevDelta.current = delta;
 
-      if (mixer && positionAnimation) {
-        const deltaTime = mixerDeltaTime(
-          delta,
-          mixer.time,
-          matchPaused,
-          matchDuration
-        );
-        if (deltaTime === 0) {
-          if (mixer.time >= matchDuration) {
-            pauseMatch();
+          function rotation(axe: "x" | "z") {
+            return Math.max(-0.2, Math.min(0.2, rawRotation(axe)));
+          }
+
+          function rawRotation(axe: "x" | "z") {
+            return (
+              (ball.position[axe] - prevPosition.current[axe]) *
+              30 *
+              prevDelta.current
+            );
           }
         }
-        mixer.update(deltaTime);
+      },
+      [matchPaused]
+    );
 
-        if (ballRef.current) animateBallRotation(deltaTime, ballRef.current);
-        updateStep(mixer.time);
-      }
-    });
-
-    // ball rotation (calculated for previous movement)
-    function animateBallRotation(delta: number, ball: Mesh) {
-      if (prevDelta) {
-        ball.rotation.z -= rotation("x");
-        ball.rotation.x += rotation("z");
-        prevPosition.current.copy(ball.position);
-      }
-      setPrevDelta(delta);
-
-      function rotation(axe: "x" | "z") {
-        return Math.max(-0.2, Math.min(0.2, rawRotation(axe)));
-      }
-
-      function rawRotation(axe: "x" | "z") {
-        return (
-          (ball.position[axe] - prevPosition.current[axe]) * 30 * prevDelta
-        );
-      }
-    }
+    useMatchDirector(mixer, true, onFrameUpdate);
 
     return (
       <mesh
