@@ -100,3 +100,14 @@ div#root {
 //     color: #444;
 //   }
 // }
+
+a {
+  color: #c0c0c0;
+  text-decoration: none;
+}
+
+.head-title {
+  display: flex;
+  align-items: center;
+  column-gap: 8px;
+}
