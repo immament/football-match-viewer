@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Group, Mesh } from "three";
 import { TeamState } from "../../../app/teams.slice";
+import { FetchSource } from "../fsApi/footstar.api";
 import { Ball } from "./Ball";
 import { useMatchOrbitControls } from "./MatchOrbitControls";
 import { Player } from "./Player";
@@ -36,7 +37,8 @@ export const Match = () => {
       }
 
       const matchId = Number(urlParams.get("id"));
-      matchFetch(matchId);
+      const srcType: FetchSource = urlParams.has("dev") ? "devFs" : "fs";
+      matchFetch(matchId, srcType);
     }
   }, [matchStatus, matchFetch, loadMatchFromXml]);
 
