@@ -16,7 +16,7 @@ const fsLogger = logger.getLogger("fs-api");
 
 export async function fetchFootstarMatchData(
   matchId: number,
-  srcType: FetchSource = "devFs"
+  srcType: FetchSource = "fs"
 ): Promise<FootstarMatchData> {
   if (!matchId) {
     return getMatchData(1);

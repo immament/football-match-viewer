@@ -15,7 +15,7 @@ export interface MatchDataSlice {
     status: "idle" | "pending" | "succeeded" | "failed";
     error?: string;
     data?: Readonly<MatchData>;
-    matchFetch(matchId: number): Promise<void>;
+    matchFetch(matchId: number, srcType: FetchSource): Promise<void>;
     loadMatchFromXml(props: {
       matchId: number;
       matchXml: string;
@@ -82,18 +82,16 @@ export const createMatchDataSlice: StateCreator<
         matchData.error = error;
       });
     },
-    matchFetch: async (matchId: number) => {
+    matchFetch: async (matchId: number, srcType: FetchSource) => {
       if (typeof matchId !== "number") return;
       if (get().matchData.status !== "idle") return;
       set(({ matchData }) => {
         matchData.status = "pending";
       });
 
-      try {
-        const srcType: FetchSource = DEBUG_MATCHES_IDS.includes(matchId)
-          ? "local"
-          : "devFs";
+      if (DEBUG_MATCHES_IDS.includes(matchId)) srcType = "local";
 
+      try {
         const fsMatch = await fetchFootstarMatchData(matchId, srcType);
         const matchData = mapFsMatch(fsMatch);
         get().matchData.matchFetchSuccess(matchData);
