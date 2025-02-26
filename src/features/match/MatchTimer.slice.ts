@@ -47,7 +47,7 @@ export interface MatchTimerSlice {
   };
 }
 
-export const createMediaPlayerSlice: StateCreator<
+export const createMatchTimerSlice: StateCreator<
   AppStoreState,
   [["zustand/immer", never]],
   [],

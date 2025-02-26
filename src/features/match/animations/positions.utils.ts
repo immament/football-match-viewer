@@ -119,3 +119,17 @@ export function mixerDeltaTime(
     return { delta: Math.max(0, -currentTime) };
   return { delta };
 }
+
+export function angle2dRaw(x1: number, z1: number, x2: number, z2: number) {
+  const xDist = x1 - x2;
+  const zDist = z1 - z2;
+
+  if (xDist === 0 && zDist === 0) return undefined;
+  return (Math.atan2(zDist, xDist) * 180) / Math.PI;
+}
+
+// export function angle2d(a: Vector2, b: Vector2) {
+//   const xDist = a.x - b.x;
+//   const zDist = a.y - b.y;
+//   return (Math.atan2(zDist, xDist) * 180) / Math.PI;
+// }

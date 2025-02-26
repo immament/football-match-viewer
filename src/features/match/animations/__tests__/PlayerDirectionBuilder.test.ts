@@ -17,7 +17,7 @@ describe("PlayerDirectionBuilder", () => {
 
   const angleToPositionMap: AngleToPositionMap = createAngleVectors();
 
-  const playerPositions = new Float32Array([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  const playerPositions = [0, 0, 0, 0, 0, 0, 0, 0, 0];
   const ballPositions: BallPositionsConfig = {
     px: [0, 0, 0],
     pHeight: [0, 0, 0],

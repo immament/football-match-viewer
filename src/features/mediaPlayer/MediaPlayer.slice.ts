@@ -28,7 +28,7 @@ export interface MediaPlayerSlice {
   };
 }
 
-export const createMediaPlayer2Slice: StateCreator<
+export const createMediaPlayerSlice: StateCreator<
   AppStoreState,
   [["zustand/immer", never]],
   [],

@@ -8,7 +8,7 @@ import { PoseBuilderStep } from "../PoseBuilderStep";
 import { BallPositionsConfig } from "../positions.utils";
 
 describe("PoseBuilderStep", () => {
-  let playerPositions: Float32Array;
+  let playerPositions: number[];
   let ballPositions: BallPositionsConfig;
   let times: ReadonlyArray<number>;
   let rawPoses: RawPoseEvents;
@@ -17,7 +17,7 @@ describe("PoseBuilderStep", () => {
   const DEFAULT_DISTANCE_TO_BALL = 200;
 
   beforeEach(() => {
-    playerPositions = new Float32Array([1, 2, 3, 4, 5, 6]);
+    playerPositions = [1, 2, 3, 4, 5, 6];
     ballPositions = { px: [11, 14], pHeight: [12, 15], pz: [13, 16] };
     times = [101, 102];
     rawPoses = { 0: "l", 1: "r" };

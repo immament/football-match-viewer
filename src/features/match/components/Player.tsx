@@ -1,16 +1,20 @@
 import { Billboard, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { RootState, useGraph } from "@react-three/fiber";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { BufferGeometry, ColorRepresentation, Group } from "three";
 import { computeBoundsTree } from "three-mesh-bvh";
 import { SkeletonUtils } from "three-stdlib";
-import { setupPlayerAnimations } from "../animations/setupPlayer";
+import { PoseRecord } from "../animations/PoseAction.model";
+import { secondsToStep } from "../animations/positions.utils";
+import {
+  PlayerAnimationsConfig,
+  setupPlayerAnimations,
+} from "../animations/setupPlayer";
 import { GLTFResult } from "./playerGltf.model";
 import { useMatchDirector } from "./useMatchDirector";
 import { useMaterialClone } from "./useMaterialClone";
 import { useAppZuStore } from "/app/app.zu.store";
 import { ContainerContext } from "/app/Container.context";
-import { round } from "/app/utils";
 
 const MODEL_URL = "models/player-transformed.glb";
 
@@ -19,12 +23,13 @@ BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 // bvhHelper = new MeshBVHHelper(meshHelper, 10);
 // scene.add(bvhHelper);
 
-type PlayerProps = {
+export type PlayerProps = {
   shirtColor: ColorRepresentation;
   shortsColor: ColorRepresentation;
   bodyColor: ColorRepresentation;
   teamIdx: 0 | 1;
   playerIdx: number;
+  dbgLabelVisible: boolean;
 };
 
 export function Player({
@@ -33,6 +38,7 @@ export function Player({
   bodyColor,
   teamIdx,
   playerIdx,
+  dbgLabelVisible,
   ...props
 }: PlayerProps & JSX.IntrinsicElements["group"]) {
   const playerId = useMemo(
@@ -68,42 +74,43 @@ export function Player({
     (state) => state.teams.teamsArray[teamIdx].squadPlayers[playerIdx]
   );
 
-  const [config, setConfig] =
-    useState<ReturnType<typeof setupPlayerAnimations>>();
+  const config = useRef<PlayerAnimationsConfig>();
 
   useEffect(() => {
-    if (matchData?.positions && playerRef.current && !config) {
+    if (matchData?.positions && playerRef.current && !config.current) {
       const result = setupPlayerAnimations(
         playerId,
         playerRef.current,
         matchData.positions,
         poseAnimations.actions
       );
-      setConfig(result);
+      config.current = result;
       result.playerPoses.forceIdle();
       result.positionAction.play();
       result.rotateAction.play();
     }
-  }, [matchData, poseAnimations.actions, playerId, config]);
+  }, [matchData, poseAnimations.actions, playerId]);
 
   useEffect(() => {
-    if (config) {
-      if (!config.mixer.timeScale) {
+    if (config.current) {
+      if (!config.current.mixer.timeScale) {
         throw new Error("Player config.mixer.timeScale == 0");
       }
-      config.positionAction.paused = false;
-      config.rotateAction.paused = false;
-      config.mixer.setTime(startTime / config.mixer.timeScale);
+      config.current.positionAction.paused = false;
+      config.current.rotateAction.paused = false;
+      config.current.mixer.setTime(startTime / config.current.mixer.timeScale);
     }
-  }, [config, startTime]);
+  }, [startTime]);
 
   useEffect(() => {
-    if (config) {
-      config.mixer.timeScale = playbackSpeed;
-      config.positionAction.paused = false;
-      config.rotateAction.paused = false;
+    if (config.current) {
+      config.current.mixer.timeScale = playbackSpeed;
+      config.current.positionAction.paused = false;
+      config.current.rotateAction.paused = false;
     }
-  }, [config, playbackSpeed]);
+  }, [playbackSpeed]);
+
+  const lastRawPoseRef = useRef<string>();
 
   useEffect(() => {
     if (poseAnimations.mixer)
@@ -114,24 +121,32 @@ export function Player({
 
   const onFrameUpdate = useMemo(() => {
     return (_: RootState, delta: number) => {
-      if (matchPaused || !config) return;
-      const pose = config.playerPoses.updatePose(delta);
+      if (matchPaused || !config.current) return;
+      const pose = config.current.playerPoses.updatePose(delta);
       if (pose) {
         labelVisible(pose.distanceToBall < 2);
       }
-      updateDbgLabel(config);
-
-      function updateDbgLabel(
-        config: ReturnType<typeof setupPlayerAnimations>
-      ) {
-        if (dbgLabelRef.current) {
-          dbgLabelRef.current.text =
-            `${teamIdx === 0 ? "Home" : "Away"} Player ${playerIdx + 1}` +
-            (config.mixer.time > 0 && ` (${round(config.mixer.time, 1)})`);
-        }
-      }
+      updateDbgLabel(config.current, pose);
     };
-  }, [config, matchPaused, teamIdx, playerIdx]);
+
+    function updateDbgLabel(
+      config: PlayerAnimationsConfig,
+      pose: PoseRecord | undefined
+    ) {
+      if (dbgLabelRef.current && dbgLabelVisible) {
+        const step = secondsToStep(config.mixer.time);
+        if (pose?.rawPose) {
+          lastRawPoseRef.current = `(${step}: ${pose.rawPose})`;
+        }
+        dbgLabelRef.current.text =
+          (config.mixer.time > 0 &&
+            `(step: ${step}, time: ${config.mixer.time.toFixed(1)})\n`) +
+          `${teamIdx === 0 ? "Home" : "Away"} ${playerIdx + 1} ${
+            pose?.type
+          } / ${lastRawPoseRef.current ?? ""} / ${pose?.rawPose ?? ""}`;
+      }
+    }
+  }, [config, matchPaused, teamIdx, playerIdx, dbgLabelVisible]);
 
   function labelVisible(visible = false) {
     if (labelRef.current) {
@@ -140,7 +155,7 @@ export function Player({
     }
   }
 
-  useMatchDirector(config?.mixer, false, onFrameUpdate);
+  useMatchDirector(config.current?.mixer, false, onFrameUpdate);
 
   const labelRef = useRef<Group>(null);
   const playerSelectedRef = useRef(false);
@@ -160,12 +175,14 @@ export function Player({
         <>
           <Billboard>
             <Text
-              color="black"
+              color="#505050"
               anchorX="center"
               anchorY="bottom"
+              textAlign="center"
               position={[0, 2.3, 0]}
               fontSize={0.3}
               ref={dbgLabelRef}
+              visible={dbgLabelVisible}
             >
               {" "}
             </Text>
@@ -178,6 +195,7 @@ export function Player({
           color="black"
           anchorX="center"
           anchorY="bottom"
+          textAlign="center"
           position={[0, 2, 0]}
           fontSize={0.3}
         >
@@ -203,9 +221,10 @@ export function Player({
           labelVisible(playerSelectedRef.current);
         }}
         visible={false}
+        position-y={0.9}
       >
         {/* <bufferGeometry attach="geometry" /> */}
-        <boxGeometry args={[0.5, 3.4, 0.5]} />
+        <boxGeometry args={[0.5, 1.7, 0.5]} />
         <meshBasicMaterial
           wireframe={true}
           transparent={true}
@@ -244,6 +263,7 @@ export function Player({
           material={shortsMaterial}
           skeleton={nodes.Ch38_Shorts.skeleton}
           raycast={() => null}
+          castShadow
         />
         <skinnedMesh
           name="Ch38_Socks"

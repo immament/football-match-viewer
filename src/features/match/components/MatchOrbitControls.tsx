@@ -1,5 +1,5 @@
 import { useFrame, useThree } from "@react-three/fiber";
-import { MutableRefObject, useEffect, useMemo, useState } from "react";
+import { MutableRefObject, useEffect, useRef } from "react";
 import { Group, Mesh, Object3D } from "three";
 import { OrbitControls } from "three-stdlib";
 import { ViewFromTarget } from "../ViewFromTarget";
@@ -13,9 +13,9 @@ export function useMatchOrbitControls(
   const domElement = useThree((state) => state.gl.domElement);
   const defaultCamera = useThree((state) => state.camera);
 
-  const [controls, setControls] = useState<OrbitControls>();
+  const controls = useRef<OrbitControls>();
   useEffect(() => {
-    if (defaultCamera && domElement && !controls) {
+    if (defaultCamera && domElement && !controls.current) {
       const ctls = new OrbitControls(defaultCamera, domElement);
       ctls.enableDamping = true;
       ctls.listenToKeyEvents(document.body);
@@ -23,56 +23,63 @@ export function useMatchOrbitControls(
       ctls.minDistance = 0.4;
       ctls.maxDistance = 120;
       ctls.zoomSpeed = 2;
-      setControls(ctls);
+      controls.current = ctls;
       // return ctls;
     }
-  }, [controls, defaultCamera, domElement]);
+  }, [defaultCamera, domElement]);
 
   const followedObjectId = useAppZuStore((st) => st.camera.followedObjectId);
   const viewFromObject = useAppZuStore((st) => st.camera.viewFromObject);
-  const [followedObject, setFollowedObject] = useState<Object3D>();
-  const viewfromTarget = useMemo<ViewFromTarget>(
-    () => new ViewFromTarget(),
-    []
-  );
+  const followedObject = useRef<Object3D>();
+  const viewfromTarget = useRef<ViewFromTarget>(new ViewFromTarget());
 
   useEffect(() => {
-    let object = undefined;
+    let obj = undefined;
     if (followedObjectId === FOLLOW_BALL_IDX) {
-      object = ballRef.current;
+      obj = ballRef.current;
     } else if (
       matchRef.current &&
       followedObjectId >= 1 &&
       followedObjectId <= 22
     ) {
-      object = matchRef.current.getObjectByName(
+      obj = matchRef.current.getObjectByName(
         toPlayerObjectName(followedObjectId - 1)
       )?.parent;
     }
-    setFollowedObject(object ?? undefined);
-  }, [followedObjectId, matchRef, ballRef]);
+    followedObject.current = obj ?? undefined;
+  }, [followedObjectId, ballRef, matchRef]);
 
   useEffect(() => {
-    viewfromTarget.enabled = viewFromObject;
-  }, [viewFromObject, viewfromTarget]);
+    viewfromTarget.current.enabled = viewFromObject;
+    if (controls.current) {
+      controls.current.enableZoom =
+        !viewFromObject ||
+        followedObjectId === FOLLOW_BALL_IDX ||
+        !followedObjectId;
+    }
+  }, [viewFromObject, followedObjectId]);
 
-  useFrame(() => {
-    if (!controls?.enabled) return;
-    if (followedObject) {
+  useFrame((_, delta) => {
+    if (!controls.current) return;
+    if (followedObject.current) {
       if (viewFromObject) {
-        viewfromTarget.update(followedObject, controls.object, controls.target);
+        viewfromTarget.current.update(
+          followedObject.current,
+          controls.current.object,
+          controls.current.target,
+          controls.current,
+          delta
+        );
       } else {
-        controls.target.set(
-          followedObject.position.x,
-          (followedObject.position.y + 4) / 4,
-          followedObject.position.z
+        controls.current.target.set(
+          followedObject.current.position.x,
+          (followedObject.current.position.y + 4) / 4,
+          followedObject.current.position.z
         );
       }
     }
-    controls.update();
+    controls.current.update();
   });
-
-  return controls;
 }
 
 // helpers

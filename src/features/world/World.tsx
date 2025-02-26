@@ -1,28 +1,35 @@
-import { ContactShadows, Environment, Sky } from "@react-three/drei";
+import { Environment, Sky, useHelper } from "@react-three/drei";
 import { useControls } from "leva";
-import { useContext, useRef } from "react";
-import { DirectionalLight } from "three";
+import { MutableRefObject, useContext, useRef } from "react";
+import { CameraHelper, DirectionalLight, OrthographicCamera } from "three";
 import { Match } from "../match/components/Match";
 import { Stadium } from "./Stadium";
 import { ContainerContext } from "/app/Container.context";
 
 export const World = () => {
-  const { envCtl, shadowCtl, dirLightCtl, ambientLightCtl, skyCtl } =
-    useWorldCtls();
+  const { envCtl, dirLightCtl, ambientLightCtl, skyCtl } = useWorldCtls();
   const dirLight = useRef<DirectionalLight>(null);
   const ctx = useContext(ContainerContext);
+
+  const shadowCamera = useRef<OrthographicCamera>(null);
+  useHelper(
+    dirLightCtl.shadowCameraHelper &&
+      (shadowCamera as MutableRefObject<OrthographicCamera>),
+    CameraHelper
+  );
 
   return (
     <>
       {envCtl.visible && (
         <Environment
+          environmentIntensity={0}
           files={"models/potsdamer_platz_1k.hdr"}
           background={false}
           ground={{ height: 10, radius: 260, scale: 130 }}
           far={1000}
         ></Environment>
       )}
-      {shadowCtl.visible && <ContactShadows {...shadowCtl} />}
+      {/* {shadowCtl.visible && <ContactShadows {...shadowCtl} />} */}
       {(dirLightCtl.visible || dirLight.current) && (
         <directionalLight
           ref={dirLight}
@@ -34,7 +41,16 @@ export const World = () => {
           ]}
           castShadow={dirLightCtl.castShadow}
           intensity={dirLightCtl.intensity}
-        />
+          shadow-mapSize={[512, 512]}
+        >
+          <orthographicCamera
+            ref={shadowCamera}
+            attach={"shadow-camera"}
+            args={[-52, 54, -36, 37]}
+            far={dirLightCtl.shadowFar}
+            near={dirLightCtl.shadowNear}
+          />
+        </directionalLight>
       )}
 
       <ambientLight {...ambientLightCtl} />
@@ -44,7 +60,7 @@ export const World = () => {
       {ctx?.debugMode && dirLight.current && (
         <directionalLightHelper
           args={[dirLight.current, 2, 0xff0000]}
-          visible={dirLight.current.visible}
+          visible={dirLight.current.visible && dirLightCtl.helper}
         />
       )}
     </>
@@ -53,13 +69,17 @@ export const World = () => {
 
 function useWorldCtls() {
   const dirLightCtl = useControls("Directional Light", {
-    visible: false,
-    position: { x: 1, y: 20, z: 1 },
-    castShadow: false,
+    visible: true,
+    position: { x: 0, y: 20, z: -2 },
     intensity: 3,
+    helper: false,
+    castShadow: true,
+    shadowCameraHelper: false,
+    shadowNear: 15,
+    shadowFar: 24,
   });
   const ambientLightCtl = useControls("Ambient Light", {
-    visible: false,
+    visible: true,
     intensity: 0.9,
   });
   const envCtl = useControls("Environment", {
@@ -69,18 +89,5 @@ function useWorldCtls() {
     visible: false,
   });
 
-  const shadowCtl = useControls("Shadows", {
-    visible: false,
-    opacity: 1,
-    scale: 25,
-    blur: 1,
-    far: 2,
-    resolution: 256,
-    color: "#000000",
-    width: 1,
-    height: 1,
-    //frames: 1,
-  });
-
-  return { envCtl, shadowCtl, dirLightCtl, ambientLightCtl, skyCtl };
+  return { envCtl, dirLightCtl, ambientLightCtl, skyCtl };
 }

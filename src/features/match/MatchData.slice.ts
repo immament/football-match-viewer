@@ -29,7 +29,7 @@ export interface MatchDataSlice {
   };
 }
 
-const DEBUG_MATCHES_IDS = [2159688];
+const DEBUG_MATCHES_IDS = [2159688, 2161622];
 
 export const createMatchDataSlice: StateCreator<
   AppStoreState,
@@ -43,6 +43,22 @@ export const createMatchDataSlice: StateCreator<
     matchFetchSuccess: (aMatchData) => {
       logger.info("matchFetchSuccess ++");
       get().teams.initTeams(aMatchData.teams);
+
+      // get().teams.teamsArray.forEach((team) => {
+      //   team.squadPlayers.forEach((player, playerIdx) => {
+      //     const movement = calculataPlayerMovement(
+      //       { playerIdx, teamIdx: team.teamIdx },
+      //       aMatchData.positions
+      //     );
+      //   });
+      // });
+
+      // const playerMovements = calculataPlayerMovement(
+      //   playerId,
+      //   matchMovement,
+      //   rawActions
+      // );
+
       set((state) => {
         state.matchData.status = "succeeded";
         state.matchData.data = aMatchData;
