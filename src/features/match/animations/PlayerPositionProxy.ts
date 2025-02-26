@@ -1,7 +1,7 @@
 import { PositionProxy } from "./PositionProxy";
 
 export class PlayerPositionProxy extends PositionProxy {
-  constructor(private _positions: Float32Array) {
+  constructor(private _positions: number[]) {
     super();
     this.step = 0;
   }

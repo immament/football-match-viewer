@@ -1,5 +1,6 @@
 import { Billboard, Text, useTexture } from "@react-three/drei";
 import { RootState } from "@react-three/fiber";
+import { useControls } from "leva";
 import {
   ForwardedRef,
   forwardRef,
@@ -10,11 +11,14 @@ import {
   useState,
 } from "react";
 import { AnimationAction, AnimationMixer, Mesh, Vector3 } from "three";
-import { createBallPositionAnimation } from "../animations/createBallPositionAnimation";
+import {
+  BallStates,
+  createBallPositionAnimation,
+} from "../animations/createBallPositionAnimation";
+import { secondsToStep } from "../animations/positions.utils";
 import { useMatchDirector } from "./useMatchDirector";
 import { useAppZuStore } from "/app/app.zu.store";
 import { ContainerContext } from "/app/Container.context";
-import { round } from "/app/utils";
 
 export const BALL_RADIUS = 0.18;
 
@@ -23,12 +27,16 @@ type BallProps = unknown;
 export const Ball = forwardRef<Mesh, BallProps>(
   (_: BallProps, ref: ForwardedRef<Mesh>) => {
     const ballRef = useRef<Mesh | null>(null);
+    const dbgLabelRef = useRef<{ text: string }>(null);
+
     const texture = useTexture("models/ball.jpg");
 
-    const [positionAnimation, setPositionAnimation] =
-      useState<AnimationAction>();
+    const positionAnimationRef = useRef<AnimationAction>();
+    const ballStatesRef = useRef<BallStates>();
 
-    const matchData = useAppZuStore((state) => state.matchData.data);
+    const ballPositions = useAppZuStore(
+      (state) => state.matchData.data?.positions.ball
+    );
     const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
     const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
     const playbackSpeed = useAppZuStore(
@@ -39,28 +47,31 @@ export const Ball = forwardRef<Mesh, BallProps>(
 
     const ctx = useContext(ContainerContext);
 
+    const controls = useControls("Ball", { labelVisible: true });
+
     useEffect(() => {
-      if (mixer && positionAnimation) {
+      if (mixer && positionAnimationRef.current) {
         if (!mixer.timeScale) {
           throw new Error("Ball mixer.timeScale == 0");
         }
-        positionAnimation.paused = false;
+        positionAnimationRef.current.paused = false;
         mixer.setTime(startTime / mixer.timeScale);
       }
-    }, [mixer, startTime, positionAnimation]);
+    }, [mixer, startTime, positionAnimationRef]);
 
     useEffect(() => {
-      if (matchData?.positions.ball && ballRef.current && !positionAnimation) {
+      if (ballPositions && ballRef.current && !positionAnimationRef.current) {
         const _mixer = new AnimationMixer(ballRef.current);
-        const { positionAction } = createBallPositionAnimation(
+        const { positionAction, directions } = createBallPositionAnimation(
           _mixer,
-          matchData.positions.ball
+          ballPositions
         );
         positionAction.play();
         setMixer(_mixer);
-        setPositionAnimation(positionAction);
+        positionAnimationRef.current = positionAction;
+        ballStatesRef.current = directions;
       }
-    }, [matchData, positionAnimation]);
+    }, [ballPositions, positionAnimationRef]);
 
     useEffect(() => {
       if (mixer) {
@@ -95,9 +106,33 @@ export const Ball = forwardRef<Mesh, BallProps>(
               prevDelta.current
             );
           }
+          updateDbgLabel();
+        }
+
+        function updateDbgLabel() {
+          if (dbgLabelRef.current) {
+            const timeText = mixer?.time.toFixed(1);
+
+            dbgLabelRef.current.text = `${
+              balStats(ballStatesRef.current) ?? ""
+            } ${timeText && `\ntime: ${timeText}`}`;
+          }
+        }
+
+        function balStats(stats: BallStates | undefined) {
+          if (!mixer?.time || !stats) return;
+          const step = secondsToStep(mixer.time);
+          const stepStats = stats[step];
+          if (!stepStats) return;
+
+          return `${step}: ${stepStats.angle.toFixed(
+            1
+          )} / ${stepStats.dAngle?.toFixed(1)} / ${stepStats.dist.toFixed(
+            1
+          )} / ${stepStats.dDist?.toFixed(1)}`;
         }
       },
-      [matchPaused]
+      [matchPaused, mixer]
     );
 
     useMatchDirector(mixer, true, onFrameUpdate);
@@ -109,17 +144,23 @@ export const Ball = forwardRef<Mesh, BallProps>(
           if (typeof ref === "function") ref(node);
           else if (ref) ref.current = node;
         }}
+        castShadow={true}
         dispose={null}
       >
-        {ctx?.debugMode && (
+        {ctx?.debugMode && controls.labelVisible && (
           <Billboard>
             <Text
               color="black"
               anchorX="center"
               anchorY="bottom"
+              textAlign="center"
               position={[0, 1, 0]}
               fontSize={0.3}
-            >{`time: ${round(mixer?.time ?? 0, 1)}`}</Text>
+              ref={dbgLabelRef}
+            >
+              {" "}
+            </Text>
+            {/* {`time: ${round(mixer?.time ?? 0, 1)}`} */}
           </Billboard>
         )}
         <sphereGeometry args={[BALL_RADIUS, 32, 32]} />

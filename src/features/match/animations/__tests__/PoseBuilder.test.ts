@@ -7,12 +7,12 @@ import { BallPositionsConfig } from "../positions.utils";
 
 describe("PoseBuilder", () => {
   const times: number[] = [0, 1, 2];
-  let playerPositions: Float32Array;
+  let playerPositions: number[];
   let ballPositions: BallPositionsConfig;
   let rawPoses: RawPoseEvents;
 
   beforeEach(() => {
-    playerPositions = new Float32Array([0, 0, 0, 1, 0, 1, 2, 0, 2]);
+    playerPositions = [0, 0, 0, 1, 0, 1, 2, 0, 2];
     ballPositions = { px: [0, 3, 9], pz: [0, 3, 9], pHeight: [0, 0, 0] };
     rawPoses = Array(3);
   });

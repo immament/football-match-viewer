@@ -2,6 +2,7 @@ import { PerformanceMonitor, Stats } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Leva } from "leva";
 import { Suspense, useContext, useState } from "react";
+import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from "three";
 import "./App.scss";
 import { ContainerContext } from "./app/Container.context";
 import { round } from "./app/utils";
@@ -30,6 +31,12 @@ function App() {
         <Canvas
           dpr={dpr}
           camera={{ position: [0, 30, 30], fov: 65, near: 0.01, far: 500 }}
+          gl={{
+            antialias: true,
+            toneMapping: ACESFilmicToneMapping,
+            outputColorSpace: SRGBColorSpace,
+          }}
+          shadows={{ type: PCFSoftShadowMap }}
         >
           <World />
           <PerformanceMonitor

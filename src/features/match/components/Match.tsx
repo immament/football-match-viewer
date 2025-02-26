@@ -1,3 +1,4 @@
+import { useControls } from "leva";
 import { useEffect, useRef } from "react";
 import { Group, Mesh } from "three";
 import { TeamState } from "../../../app/teams.slice";
@@ -53,6 +54,9 @@ export const Match = () => {
 };
 
 function Players({ team, teamIdx }: { team: TeamState; teamIdx: 0 | 1 }) {
+  const { dbgLabelVisible } = useControls("Players", {
+    dbgLabelVisible: false,
+  });
   return team?.squadPlayers.map((player, idx) => (
     <Player
       key={`${team.id}-${idx}`}
@@ -61,6 +65,7 @@ function Players({ team, teamIdx }: { team: TeamState; teamIdx: 0 | 1 }) {
       shirtColor={team.colors.shirt}
       shortsColor={team.colors.shorts}
       bodyColor={player.skinColor}
+      dbgLabelVisible={dbgLabelVisible}
     />
   ));
 }

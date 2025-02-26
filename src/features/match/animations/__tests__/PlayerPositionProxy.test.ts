@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { PlayerPositionProxy } from "../PlayerPositionProxy";
 
 describe("PlayerPositionProxy", () => {
-  const positions = new Float32Array(6);
+  let positions: Array<number>;
 
   beforeEach(() => {
-    positions.set([0, 0, 0, 1, 1, 1]);
+    positions = [0, 0, 0, 1, 1, 1];
   });
 
   test("should initialize with default values", () => {

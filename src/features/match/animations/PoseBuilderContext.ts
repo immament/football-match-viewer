@@ -30,7 +30,7 @@ export class PoseBuilderContext extends PoseBuilderStep {
   }
 
   constructor(
-    playerPositions: Float32Array,
+    playerPositions: number[],
     ballPositions: BallPositionsConfig,
     times: ReadonlyArray<number>,
     rawPoses: RawPoseEvents

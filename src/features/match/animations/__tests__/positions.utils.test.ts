@@ -98,4 +98,40 @@ describe("positions utils", () => {
       expect(result).toBeCloseTo(Math.PI - 0.1);
     });
   });
+
+  // test.only("should calculate angle between 3 points 2d ", () => {
+  //   const prev = new Vector2(0, 1);
+  //   const current = new Vector2(1, 1);
+  //   const next = new Vector2(2, 2);
+  //   console.log(
+  //     angle2d(prev, current),
+  //     ",",
+  //     angle2d(current, next),
+  //     ",",
+  //     "result:",
+  //     angle2d(prev, current) + angle2d(current, next)
+  //   );
+  //   // console.log(MathUtils.radToDeg(prev.angleTo(current)));
+  //   // // An example at 90 degree
+  //   // console.log(MathUtils.radToDeg(current.angleTo(next)));
+
+  //   console.log("find angle", findAngleDeg(prev, current, next));
+  // });
 });
+
+// function angle2d(a: Vector2, b: Vector2) {
+//   const xDist = a.x - b.x;
+//   const zDist = a.y - b.y;
+//   return (Math.atan2(zDist, xDist) * 180) / Math.PI;
+// }
+
+// function findAngleDeg(a: Vector2, b: Vector2, c: Vector2) {
+//   return MathUtils.radToDeg(findAngle(a, b, c));
+// }
+
+// function findAngle(a: Vector2, b: Vector2, c: Vector2) {
+//   const ab = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
+//   const bc = Math.sqrt(Math.pow(b.x - c.x, 2) + Math.pow(b.y - c.y, 2));
+//   const ac = Math.sqrt(Math.pow(c.x - a.x, 2) + Math.pow(c.y - a.y, 2));
+//   return Math.acos((bc * bc + ab * ab - ac * ac) / (2 * bc * ab));
+// }

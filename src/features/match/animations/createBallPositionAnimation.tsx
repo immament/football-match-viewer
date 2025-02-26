@@ -7,11 +7,22 @@ import {
 import { BallPositionsConfig, MATCH_TIME_SCALE } from "./positions.utils";
 import { logger } from "/app/logger";
 
+export type BallState = {
+  angle: number;
+  dist: number;
+  dAngle?: number;
+  dDist?: number;
+};
+export type BallStates = (BallState | undefined)[];
+
 export function createBallPositionAnimation(
   mixer: AnimationMixer,
   rawPositions: BallPositionsConfig
 ) {
   const { times, positions } = createPositionsArrays(rawPositions);
+
+  const directions = analyzeBallDirections(rawPositions);
+
   const positionKF = new VectorKeyframeTrack(".position", times, positions);
 
   const positionClip = new AnimationClip(
@@ -24,8 +35,61 @@ export function createBallPositionAnimation(
   positionAction.loop = LoopOnce;
   positionAction.clampWhenFinished = true;
 
-  return { positionAction };
+  return { positionAction, directions };
 }
+
+function analyzeBallDirections(rawPositions: BallPositionsConfig): BallStates {
+  // const prev = new Vector2();
+  // const current = new Vector2();
+  // const next = new Vector2();
+  const result: (BallState | undefined)[] = [];
+  const p1 = { x: 0, z: 0 };
+  const p2 = { x: 0, z: 0 };
+  let last = undefined;
+
+  for (let i = 0; i < rawPositions.px.length - 1; i++) {
+    p1.x = rawPositions.px[i];
+    p1.z = rawPositions.pz[i];
+    p2.x = rawPositions.px[i + 1];
+    p2.z = rawPositions.pz[i + 1];
+
+    const xDist = p1.x - p2.x;
+    const zDist = p1.z - p2.z;
+    const dist = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.z - p2.z, 2));
+    const angle = (Math.atan2(zDist, xDist) * 180) / Math.PI;
+    let dAngle: number | undefined;
+    let dDist: number | undefined;
+    if (last) {
+      dAngle = angle - last.angle;
+      dDist = dist - last.dist;
+    }
+
+    last = { angle, dist, dAngle, dDist };
+    result.push(last);
+  }
+  return result;
+}
+
+// function analyze(positions: number[]) {
+//   // const prev = new Vector2();
+//   // const current = new Vector2();
+//   // const next = new Vector2();
+//   const angles = [];
+
+//   for (let i = 3; i < positions.length; i += 3) {
+//     angles.push(
+//       angle2dRaw(
+//         positions[i - 3],
+//         positions[i - 1],
+//         positions[i],
+//         positions[i + 2]
+//       )
+//     );
+//   }
+
+//   console.log("ball angles", angles);
+// }
+
 // pz => height
 function createPositionsArrays({ px, pz, pHeight }: BallPositionsConfig): {
   times: number[];

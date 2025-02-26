@@ -4,14 +4,14 @@ import { PoseBuilderContext } from "../PoseBuilderContext";
 import { BallPositionsConfig } from "../positions.utils";
 
 describe("PoseBuilderContext", () => {
-  let playerPositions: Float32Array;
+  let playerPositions: number[];
   let ballPositions: BallPositionsConfig;
   let times: ReadonlyArray<number>;
   let rawPoses: RawPoseEvents;
   let context: PoseBuilderContext;
 
   beforeEach(() => {
-    playerPositions = new Float32Array([0, 0, 0, 1, 0, 1]);
+    playerPositions = [0, 0, 0, 1, 0, 1];
     ballPositions = { px: [1, 4], pz: [3, 5], pHeight: [2, 6] };
     times = [0, 1];
     rawPoses = ["l", "p"];

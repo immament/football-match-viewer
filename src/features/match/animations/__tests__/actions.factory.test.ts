@@ -6,35 +6,43 @@ import {
   VectorKeyframeTrack,
 } from "three";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { PlayerId } from "../../PlayerId";
-import { createMoveActions } from "../actions.factory";
-import { MatchMovement } from "../positions.utils";
-import { getPlayers as getAwayPlayers } from "./__testData__/awayPlayersPosition.big.mock";
-import { getBallPositions } from "./__testData__/ball.mock";
-import { getPlayers as getHomePlayers } from "./__testData__/homePlayersPosition.big.mock";
-import { getAllPlayerPoses } from "./__testData__/playersPose.mock";
+import { createPlayerMoveActions } from "../actions.factory";
+import { PlayerMovement } from "../playerMovement/calculataPlayerMovement";
 
 vi.mock("three");
 
 describe("actions factory", () => {
   let _mixer: AnimationMixer;
-  const _playerId: PlayerId = { teamIdx: 0, playerIdx: 1 };
-  let positionsConfig: MatchMovement;
+  // const _playerId: PlayerId = { teamIdx: 0, playerIdx: 1 };
+  // let positionsConfig: MatchMovement;
+  let playerMovement: PlayerMovement;
 
   beforeEach(() => {
     _mixer = new AnimationMixer({} as Object3D);
-    positionsConfig = {
-      ball: getBallPositions(),
-      players: [getHomePlayers(), getAwayPlayers()],
-      poses: getAllPlayerPoses(),
+    // positionsConfig = {
+    //   ball: getBallPositions(),
+    //   players: [getHomePlayers(), getAwayPlayers()],
+    //   poses: getAllPlayerPoses(),
+    // };
+    playerMovement = {
+      times: [0, 0.5, 1, 1.5, 2],
+      positions: [0, 0, 0, 1, 0, 2, 1, 0, 2, -2, 0, 5, -2, 0, 5],
+      rotateValues: [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+      poses: [],
     };
   });
 
+  // {
+  //     times: number[];
+  //     positions: number[];
+  //     rotateValues: number[];
+  //     poses: PoseRecord[];
+  //   }
+
   test("should create move actions", () => {
-    const { positionAction, rotateAction, poses } = createMoveActions(
+    const { positionAction, rotateAction, poses } = createPlayerMoveActions(
       _mixer,
-      _playerId,
-      positionsConfig
+      playerMovement
     );
 
     expect(positionAction).toBeTruthy();
@@ -43,22 +51,14 @@ describe("actions factory", () => {
   });
 
   test("should create position action with default values", () => {
-    const { positionAction } = createMoveActions(
-      _mixer,
-      _playerId,
-      positionsConfig
-    );
+    const { positionAction } = createPlayerMoveActions(_mixer, playerMovement);
 
     expect(positionAction.loop).toBe(LoopOnce);
     expect(positionAction.clampWhenFinished).toBe(true);
   });
 
   test("should create position action with correct keyframes", () => {
-    const { positionAction } = createMoveActions(
-      _mixer,
-      _playerId,
-      positionsConfig
-    );
+    const { positionAction } = createPlayerMoveActions(_mixer, playerMovement);
 
     const positionKF = positionAction
       .getClip()
@@ -72,11 +72,7 @@ describe("actions factory", () => {
   });
 
   test("should create rotate action with correct keyframes", () => {
-    const { rotateAction } = createMoveActions(
-      _mixer,
-      _playerId,
-      positionsConfig
-    );
+    const { rotateAction } = createPlayerMoveActions(_mixer, playerMovement);
 
     const rotateKF = rotateAction
       .getClip()
