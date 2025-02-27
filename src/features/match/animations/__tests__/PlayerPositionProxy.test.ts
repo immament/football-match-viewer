@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { PlayerPositionProxy } from "../PlayerPositionProxy";
+import { PlayerPositionProxy } from "../player/PlayerPositionProxy";
 
 describe("PlayerPositionProxy", () => {
   let positions: Array<number>;

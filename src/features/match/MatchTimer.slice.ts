@@ -16,6 +16,7 @@ let _liveInterval: number | undefined;
 export interface MatchTimerSlice {
   matchTimer: {
     step: number;
+    /** in seconds */
     time: number;
     displayTime: string;
     lastEventStep: number;
@@ -68,7 +69,7 @@ export const createMatchTimerSlice: StateCreator<
         const newTime = Math.floor(newStep / 2);
 
         matchTimer.step = newStep;
-        matchTimer.time = newTime;
+        matchTimer.time = matchTimeInSeconds;
         matchTimer.displayTime = formatTime(newTime);
         stepUpdated = true;
       });

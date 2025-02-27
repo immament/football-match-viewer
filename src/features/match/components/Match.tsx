@@ -2,6 +2,7 @@ import { useControls } from "leva";
 import { useEffect, useRef } from "react";
 import { Group, Mesh } from "three";
 import { TeamState } from "../../../app/teams.slice";
+import { TeamIdx } from "../MatchData.model";
 import { FetchSource } from "../fsApi/footstar.api";
 import { Ball } from "./Ball";
 import { useMatchOrbitControls } from "./MatchOrbitControls";
@@ -53,19 +54,20 @@ export const Match = () => {
   );
 };
 
-function Players({ team, teamIdx }: { team: TeamState; teamIdx: 0 | 1 }) {
+function Players({ team, teamIdx }: { team: TeamState; teamIdx: TeamIdx }) {
   const { dbgLabelVisible } = useControls("Players", {
     dbgLabelVisible: false,
   });
-  return team?.squadPlayers.map((player, idx) => (
+  return team.squadPlayers.map((player, playerIdx) => (
     <Player
-      key={`${team.id}-${idx}`}
+      key={`${team.id}-${playerIdx}`}
       teamIdx={teamIdx}
-      playerIdx={idx}
+      playerIdx={playerIdx}
       shirtColor={team.colors.shirt}
       shortsColor={team.colors.shorts}
       bodyColor={player.skinColor}
       dbgLabelVisible={dbgLabelVisible}
+      movements={player.movements}
     />
   ));
 }

@@ -13,8 +13,8 @@ import {
 import { AnimationAction, AnimationMixer, Mesh, Vector3 } from "three";
 import {
   BallStates,
-  createBallPositionAnimation,
-} from "../animations/createBallPositionAnimation";
+  createBallPositionAction,
+} from "../animations/ball/createBallPositionAnimation";
 import { secondsToStep } from "../animations/positions.utils";
 import { useMatchDirector } from "./useMatchDirector";
 import { useAppZuStore } from "/app/app.zu.store";
@@ -32,12 +32,13 @@ export const Ball = forwardRef<Mesh, BallProps>(
     const texture = useTexture("models/ball.jpg");
 
     const positionAnimationRef = useRef<AnimationAction>();
-    const ballStatesRef = useRef<BallStates>();
+    // const ballStatesRef = useRef<BallStates>();
 
-    const ballPositions = useAppZuStore(
-      (state) => state.matchData.data?.positions.ball
-    );
-    const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
+    // const ballPositions = useAppZuStore(
+    //   (state) => state.matchData.data?.positions.ball
+    // );
+    const ballData = useAppZuStore((state) => state.matchData.ball);
+    // const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
     const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
     const playbackSpeed = useAppZuStore(
       (state) => state.mediaPlayer.playbackSpeed
@@ -60,18 +61,19 @@ export const Ball = forwardRef<Mesh, BallProps>(
     }, [mixer, startTime, positionAnimationRef]);
 
     useEffect(() => {
-      if (ballPositions && ballRef.current && !positionAnimationRef.current) {
+      if (ballRef.current && !positionAnimationRef.current && ballData) {
         const _mixer = new AnimationMixer(ballRef.current);
-        const { positionAction, directions } = createBallPositionAnimation(
+        const positionAction = createBallPositionAction(
           _mixer,
-          ballPositions
+          ballData.times,
+          ballData.positions
         );
         positionAction.play();
         setMixer(_mixer);
         positionAnimationRef.current = positionAction;
-        ballStatesRef.current = directions;
+        // ballStatesRef.current = ballData.directions;
       }
-    }, [ballPositions, positionAnimationRef]);
+    }, [positionAnimationRef, ballData]);
 
     useEffect(() => {
       if (mixer) {
@@ -84,7 +86,7 @@ export const Ball = forwardRef<Mesh, BallProps>(
 
     const onFrameUpdate = useMemo(
       () => (_: RootState, delta: number) => {
-        if (matchPaused) return;
+        //if (matchPaused) return;
         if (ballRef.current) animateBallRotation(delta, ballRef.current);
 
         function animateBallRotation(delta: number, ball: Mesh) {
@@ -114,25 +116,26 @@ export const Ball = forwardRef<Mesh, BallProps>(
             const timeText = mixer?.time.toFixed(1);
 
             dbgLabelRef.current.text = `${
-              balStats(ballStatesRef.current) ?? ""
+              ballStats(ballData?.ballStats) ?? ""
             } ${timeText && `\ntime: ${timeText}`}`;
           }
         }
 
-        function balStats(stats: BallStates | undefined) {
-          if (!mixer?.time || !stats) return;
+        function ballStats(stats: BallStates | undefined) {
+          if (!mixer || !stats) return;
           const step = secondsToStep(mixer.time);
-          const stepStats = stats[step];
-          if (!stepStats) return;
-
-          return `${step}: ${stepStats.angle.toFixed(
-            1
-          )} / ${stepStats.dAngle?.toFixed(1)} / ${stepStats.dist.toFixed(
-            1
-          )} / ${stepStats.dDist?.toFixed(1)}`;
+          if (!stats[step]) return;
+          const { angle, dAngle, dist, dDist, stop, start } = stats[step];
+          return `${step} a: ${angle.toFixed(1)} / ${
+            dAngle?.toFixed(1) ?? ""
+          }, d: ${dist.toFixed(1)} / ${dDist?.toFixed(1) ?? ""}\n${
+            start ? "start" : ""
+          }${stop ? " / stop" : ""}${
+            dAngle && Math.abs(dAngle) > 1 && dist > 1 ? " / turn" : ""
+          }`;
         }
       },
-      [matchPaused, mixer]
+      [mixer, ballData]
     );
 
     useMatchDirector(mixer, true, onFrameUpdate);

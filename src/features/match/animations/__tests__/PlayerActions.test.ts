@@ -2,13 +2,13 @@ import {
   AnimationAction,
   AnimationClip,
   AnimationMixer,
-  Object3D
+  Object3D,
 } from "three";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { PlayerId } from "../../PlayerId";
-import { PlayerActions } from "../PlayerActions";
-import { PoseTypes } from "../Pose.model";
-import { IPoseAction } from "../PoseAction.model";
+import { PlayerActions } from "../player/PlayerActions";
+import { PoseTypes } from "../player/Pose.model";
+import { IPoseAction } from "../player/PoseAction.model";
 
 vi.mock("three");
 const PoseActionMock = vi.fn((isMove: boolean) => {
@@ -19,7 +19,7 @@ const PoseActionMock = vi.fn((isMove: boolean) => {
     paused: true,
     setEffectiveWeight: vi.fn(),
     time: 0,
-    enabled: true
+    enabled: true,
   } as unknown as IPoseAction;
 });
 
@@ -37,7 +37,7 @@ describe("PlayerActions", () => {
 
     _poseActions = {
       [PoseTypes.walk]: new PoseActionMock(true),
-      [PoseTypes.head]: new PoseActionMock(false)
+      [PoseTypes.head]: new PoseActionMock(false),
     } as Record<PoseTypes, IPoseAction>;
   });
 

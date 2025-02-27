@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { BallPositionProxy } from "../BallPositionProxy";
+import { BallPositionProxy } from "../ball/BallPositionProxy";
 import { BallPositionsConfig } from "../positions.utils";
 
 describe("BallPositionProxy", () => {

@@ -1,9 +1,9 @@
 import { playerLogger } from "../../player.logger";
 import { PlayerId } from "../../PlayerId";
-import { PlayerDirectionBuilder } from "../PlayerDirectionBuilder";
-import { RawPoseEvents } from "../Pose.model";
-import { PoseBuilder } from "../PoseBuilder";
-import { PoseBuilderContext } from "../PoseBuilderContext";
+import { PlayerDirectionBuilder } from "../player/PlayerDirectionBuilder";
+import { RawPoseEvents } from "../player/Pose.model";
+import { PoseBuilder } from "../player/PoseBuilder";
+import { PoseBuilderContext } from "../player/PoseBuilderContext";
 import { BallPositionsConfig } from "../positions.utils";
 
 export function calculateRotationsAndPoses(

@@ -1,10 +1,10 @@
 import { Euler, Quaternion } from "three";
 import { beforeEach, describe, expect, test } from "vitest";
-import { BallPositionProxy } from "../BallPositionProxy";
-import { PlayerPositionProxy } from "../PlayerPositionProxy";
-import { PoseTypes, RawPoseEvents } from "../Pose.model";
-import { PoseRecord } from "../PoseAction.model";
-import { PoseBuilderStep } from "../PoseBuilderStep";
+import { BallPositionProxy } from "../ball/BallPositionProxy";
+import { PlayerPositionProxy } from "../player/PlayerPositionProxy";
+import { PoseTypes, RawPoseEvents } from "../player/Pose.model";
+import { PoseRecord } from "../player/PoseAction.model";
+import { PoseBuilderStep } from "../player/PoseBuilderStep";
 import { BallPositionsConfig } from "../positions.utils";
 
 describe("PoseBuilderStep", () => {

@@ -1,8 +1,9 @@
 import { AnimationAction, AnimationMixer } from "three";
 
-import { ILabelUpdater } from "../ILabelUpdater";
-import { logDebugTransition, playerLogger } from "../player.logger";
-import { PlayerId } from "../PlayerId";
+import { ILabelUpdater } from "../../ILabelUpdater";
+import { logDebugTransition, playerLogger } from "../../player.logger";
+import { PlayerId } from "../../PlayerId";
+import { secondsToStep } from "../positions.utils";
 import { PlayerActions } from "./PlayerActions";
 import { PoseTypes } from "./Pose.model";
 import {
@@ -10,7 +11,6 @@ import {
   PoseRecord,
   PoseTransitionProps,
 } from "./PoseAction.model";
-import { secondsToStep } from "./positions.utils";
 import { logger } from "/app/logger";
 import { round } from "/app/utils";
 
@@ -32,6 +32,7 @@ export class PlayerPoses {
       direction: 0,
       rotation: 0,
       distanceToBall: 9999,
+      action: undefined,
     };
 
     this.changePose(newPose, poseTime);

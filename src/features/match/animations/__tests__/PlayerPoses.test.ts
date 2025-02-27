@@ -2,9 +2,9 @@ import { AnimationAction, AnimationMixer, Object3D } from "three";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
 import { PlayerId } from "../../PlayerId";
-import { PlayerPoses } from "../PlayerPoses";
-import { PoseTypes } from "../Pose.model";
-import { PoseRecord } from "../PoseAction.model";
+import { PlayerPoses } from "../player/PlayerPoses";
+import { PoseTypes } from "../player/Pose.model";
+import { PoseRecord } from "../player/PoseAction.model";
 
 vi.mock(import("three"));
 
@@ -57,7 +57,7 @@ describe("PlayerPoses", () => {
         direction: 0,
         rotation: 0,
         distanceToBall: 9999,
-        // action,
+        action: undefined,
       };
       // const poseChange = new Promise((done) => {
       //   playerPoses.addEventListener("poseChanged", (ev) => {

@@ -1,4 +1,4 @@
-import { RawPoseEvents, RawPoseTypes } from "../animations/Pose.model";
+import { RawPoseEvents, RawPoseTypes } from "../animations/player/Pose.model";
 import {
   BALL_OFFSET_Y,
   ballHeightToPitch,
@@ -101,29 +101,29 @@ export function convertPoses(gameData: FsGameDataRecord[]): RawPoseEvents[][] {
       poses: [createPlayersResult(), createPlayersResult()],
     };
 
-    for (let minute = 0; minute < rawPoses.length; minute++) {
-      if (rawPoses[minute].length > 1) {
-        const [pose, player] = rawPoses[minute].split("_");
+    for (let step = 0; step < rawPoses.length; step++) {
+      if (rawPoses[step].length > 1) {
+        const [pose, player] = rawPoses[step].split("_");
 
         if (pose !== "n") {
-          putResult(Number(player) - 1, minute, pose as RawPoseTypes);
+          putResult(Number(player) - 1, step, pose as RawPoseTypes);
         }
 
         switch (pose) {
           case "p":
           case "l":
           case "w":
-            result.arrSounds[minute] = 1;
+            result.arrSounds[step] = 1;
             break;
           case "r":
           case "v":
-            result.arrSounds[minute] = 2;
+            result.arrSounds[step] = 2;
             break;
           case "b":
-            result.arrSounds[minute] = 7;
+            result.arrSounds[step] = 7;
             break;
           case "s":
-            result.arrSounds[minute] = 4;
+            result.arrSounds[step] = 4;
             break;
         }
       }
@@ -148,7 +148,7 @@ export function convertPoses(gameData: FsGameDataRecord[]): RawPoseEvents[][] {
 export function convertPosesPhase1(rawPosesStr: string): string[] {
   const tttArr = rawPosesStr.split("");
   const result: string[] = [];
-  let idx = 0;
+  let idx = tttArr[0] === "n" ? 1 : 0;
   while (idx < tttArr.length) {
     if (isNumber(tttArr[idx])) {
       let playerIdx = tttArr[idx];

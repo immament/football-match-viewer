@@ -4,7 +4,7 @@ import {
   LoopOnce,
   VectorKeyframeTrack,
 } from "three";
-import { BallPositionsConfig, MATCH_TIME_SCALE } from "./positions.utils";
+import { BallPositionsConfig, MATCH_TIME_SCALE } from "../positions.utils";
 import { logger } from "/app/logger";
 
 export type BallState = {
@@ -12,17 +12,16 @@ export type BallState = {
   dist: number;
   dAngle?: number;
   dDist?: number;
+  stop: boolean;
+  start: boolean;
 };
 export type BallStates = (BallState | undefined)[];
 
-export function createBallPositionAnimation(
+export function createBallPositionAction(
   mixer: AnimationMixer,
-  rawPositions: BallPositionsConfig
+  times: number[],
+  positions: number[]
 ) {
-  const { times, positions } = createPositionsArrays(rawPositions);
-
-  const directions = analyzeBallDirections(rawPositions);
-
   const positionKF = new VectorKeyframeTrack(".position", times, positions);
 
   const positionClip = new AnimationClip(
@@ -35,10 +34,12 @@ export function createBallPositionAnimation(
   positionAction.loop = LoopOnce;
   positionAction.clampWhenFinished = true;
 
-  return { positionAction, directions };
+  return positionAction;
 }
 
-function analyzeBallDirections(rawPositions: BallPositionsConfig): BallStates {
+export function analyzeBallDirections(
+  rawPositions: BallPositionsConfig
+): BallStates {
   // const prev = new Vector2();
   // const current = new Vector2();
   // const next = new Vector2();
@@ -59,12 +60,15 @@ function analyzeBallDirections(rawPositions: BallPositionsConfig): BallStates {
     const angle = (Math.atan2(zDist, xDist) * 180) / Math.PI;
     let dAngle: number | undefined;
     let dDist: number | undefined;
+    let stop: boolean = false;
+    let start: boolean = false;
     if (last) {
       dAngle = angle - last.angle;
       dDist = dist - last.dist;
+      stop = dist < 0.05 && last.dist > 1;
+      start = dist > 1 && last.dist < 0.05;
     }
-
-    last = { angle, dist, dAngle, dDist };
+    last = { angle, dist, dAngle, dDist, stop, start };
     result.push(last);
   }
   return result;
@@ -91,7 +95,11 @@ function analyzeBallDirections(rawPositions: BallPositionsConfig): BallStates {
 // }
 
 // pz => height
-function createPositionsArrays({ px, pz, pHeight }: BallPositionsConfig): {
+export function createPositionsArrays({
+  px,
+  pz,
+  pHeight,
+}: BallPositionsConfig): {
   times: number[];
   positions: number[];
 } {
@@ -118,12 +126,18 @@ function createPositionsArrays({ px, pz, pHeight }: BallPositionsConfig): {
     positions[positionIndex + 2] = pz[index];
   }
 
-  logger.trace("ball positions start:", positions.slice(0, 9), px.slice(0, 3));
-  logger.trace("ball positions end:", positions.slice(-9), px.slice(-3));
+  if (logger.getLevel() <= logger.levels["TRACE"]) {
+    logger.trace(
+      "ball positions start:",
+      positions.slice(0, 9),
+      px.slice(0, 3)
+    );
+    logger.trace("ball positions end:", positions.slice(-9), px.slice(-3));
 
-  logger.trace("ball times length:", times.length);
-  logger.trace("ball times start:", times.slice(0, 9));
-  logger.trace("ball times end:", times.slice(-9));
+    logger.trace("ball times length:", times.length);
+    logger.trace("ball times start:", times.slice(0, 9));
+    logger.trace("ball times end:", times.slice(-9));
+  }
 
   if (times.length * 3 !== positions.length) {
     throw new Error(

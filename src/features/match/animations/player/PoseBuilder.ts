@@ -1,8 +1,8 @@
+import { PositionProxy } from "../PositionProxy";
+import { distance2D, MATCH_TIME_SCALE, onOut } from "../positions.utils";
 import { PlayerDirectionBuilder } from "./PlayerDirectionBuilder";
 import { PoseTypes } from "./Pose.model";
 import { PoseBuilderContext } from "./PoseBuilderContext";
-import { PositionProxy } from "./PositionProxy";
-import { distance2D, MATCH_TIME_SCALE, onOut } from "./positions.utils";
 import { round } from "/app/utils";
 
 const THROW_IN_BALL_MIN_HEIGHT = 1.6;

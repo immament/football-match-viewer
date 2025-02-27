@@ -6,16 +6,15 @@ import {
   QuaternionKeyframeTrack,
   VectorKeyframeTrack,
 } from "three";
-import { PoseRecord } from "./PoseAction.model";
-import { PlayerMovement } from "./playerMovement/calculataPlayerMovement";
+import { PlayerMovement } from "../playerMovement/calculataPlayerMovement";
 
 export function createPlayerMoveActions(
   mixer: AnimationMixer,
-  { times, positions, rotateValues, poses }: PlayerMovement
+  { times, positions, rotateValues }: PlayerMovement
 ): {
   positionAction: AnimationAction;
   rotateAction: AnimationAction;
-  poses: PoseRecord[];
+  // poses: PoseRecord[];
 } {
   const positionAction = createPlayerPositionAction(mixer, times, positions);
   const rotateAction = createPlayerRotateAnimationAction(
@@ -24,7 +23,7 @@ export function createPlayerMoveActions(
     rotateValues
   );
 
-  return { positionAction, rotateAction, poses };
+  return { positionAction, rotateAction };
 }
 
 function createPlayerPositionAction(

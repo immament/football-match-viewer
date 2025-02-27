@@ -1,9 +1,9 @@
-import { BallPositionProxy } from "./BallPositionProxy";
+import { BallPositionProxy } from "../ball/BallPositionProxy";
+import { BallPositionsConfig } from "../positions.utils";
 import { PlayerPositionProxy } from "./PlayerPositionProxy";
 import { RawPoseEvents } from "./Pose.model";
 import { PoseRecord } from "./PoseAction.model";
 import { PoseBuilderStep } from "./PoseBuilderStep";
-import { BallPositionsConfig } from "./positions.utils";
 
 export class PoseBuilderContext extends PoseBuilderStep {
   private _prev: PoseBuilderStep;

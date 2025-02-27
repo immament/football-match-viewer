@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { PlayerId } from "../../../PlayerId";
-import { RawPoseEvents } from "../../Pose.model";
+import { RawPoseEvents } from "../../player/Pose.model";
 import { BallPositionsConfig } from "../../positions.utils";
 import { calculateRotationsAndPoses } from "../calculateRotationsAndPoses";
 

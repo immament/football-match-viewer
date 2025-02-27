@@ -17,6 +17,8 @@ export function CommentsBox() {
     { displayTime: string; content: string; step: number }[]
   >([]);
 
+  const startTime = useAppZuStore(({ mediaPlayer }) => mediaPlayer.startTime);
+
   useEffect(() => {
     if (commentToDisplay) {
       setTimeout(() => {
@@ -31,9 +33,14 @@ export function CommentsBox() {
       });
     }
   }, [commentToDisplay]);
+
   useEffect(() => {
     if (!commentsVisible) setComments([]);
   }, [commentsVisible]);
+
+  useEffect(() => {
+    setComments([]);
+  }, [startTime]);
 
   return (
     <div

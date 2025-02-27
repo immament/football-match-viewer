@@ -1,11 +1,8 @@
-import { PositionProxy } from "./PositionProxy";
-import { BallPositionsConfig } from "./positions.utils";
+import { PositionProxy } from "../PositionProxy";
+import { BallPositionsConfig } from "../positions.utils";
 
 export class BallPositionProxy extends PositionProxy {
-  constructor(
-    private _positions: BallPositionsConfig
-  ) // private _playerId: PlayerId
-  {
+  constructor(private _positions: BallPositionsConfig) {
     super();
     this.step = 0;
   }

@@ -1,5 +1,5 @@
 import { PlayerId } from "../../PlayerId";
-import { PoseRecord } from "../PoseAction.model";
+import { PoseRecord } from "../player/PoseAction.model";
 import { MatchMovement } from "../positions.utils";
 import { calculateRotationsAndPoses } from "./calculateRotationsAndPoses";
 import { createPositionsArrays } from "./createPositionsArrays";

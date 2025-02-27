@@ -6,7 +6,7 @@ import {
   VectorKeyframeTrack,
 } from "three";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { createPlayerMoveActions } from "../actions.factory";
+import { createPlayerMoveActions } from "../player/actions.factory";
 import { PlayerMovement } from "../playerMovement/calculataPlayerMovement";
 
 vi.mock("three");
@@ -40,14 +40,13 @@ describe("actions factory", () => {
   //   }
 
   test("should create move actions", () => {
-    const { positionAction, rotateAction, poses } = createPlayerMoveActions(
+    const { positionAction, rotateAction } = createPlayerMoveActions(
       _mixer,
       playerMovement
     );
 
     expect(positionAction).toBeTruthy();
     expect(rotateAction).toBeTruthy();
-    expect(poses).toBeTruthy();
   });
 
   test("should create position action with default values", () => {

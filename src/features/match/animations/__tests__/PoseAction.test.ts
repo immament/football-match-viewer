@@ -6,9 +6,9 @@ import {
 } from "three";
 import { describe, expect, test, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
-import { PoseTypes } from "../Pose.model";
-import { PoseAction } from "../PoseAction";
-import { PoseRecord } from "../PoseAction.model";
+import { PoseTypes } from "../player/Pose.model";
+import { PoseAction } from "../player/PoseAction";
+import { PoseRecord } from "../player/PoseAction.model";
 
 vi.mock("three");
 

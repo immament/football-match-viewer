@@ -62,7 +62,7 @@ export type PoseRecord = {
   // in radians
   readonly rotation: number;
   readonly distanceToBall: number;
-  action?: IPoseAction;
+  action: IPoseAction | undefined;
 };
 
 export type PoseTransitionProps = {
