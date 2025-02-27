@@ -12,7 +12,6 @@ import {
   type MediaPlayerSlice,
 } from "../features/mediaPlayer/MediaPlayer.slice";
 import { type CameraSlice, createCameraSlice } from "./Camera.slice";
-import { createStatusSlice, type StatusSlice } from "./StatusSlice";
 import { createTeamsSlice, type TeamsSlice } from "./teams.slice";
 
 import { immer } from "zustand/middleware/immer";
@@ -21,7 +20,6 @@ export type AppStoreState = MatchTimerSlice &
   MediaPlayerSlice &
   MatchDataSlice &
   CameraSlice &
-  StatusSlice &
   TeamsSlice;
 
 export const useAppZuStore = create<AppStoreState>()(
@@ -29,7 +27,6 @@ export const useAppZuStore = create<AppStoreState>()(
     ...createMatchTimerSlice(...a),
     ...createMediaPlayerSlice(...a),
     ...createCameraSlice(...a),
-    ...createStatusSlice(...a),
     ...createTeamsSlice(...a),
     ...createMatchDataSlice(...a),
   }))

@@ -1,14 +1,13 @@
 import { AnimationAction, AnimationMixer, Object3D } from "three";
-import { actionNames } from "../components/playerGltf.model";
-import { PlayerId } from "../PlayerId";
+import { actionNames } from "../../components/playerGltf.model";
+import { PlayerId } from "../../PlayerId";
+import { PlayerMovement } from "../playerMovement/calculataPlayerMovement";
 import { createPlayerMoveActions } from "./actions.factory";
 import { PlayerActions } from "./PlayerActions";
-import { calculataPlayerMovement } from "./playerMovement/calculataPlayerMovement";
 import { PlayerPoses } from "./PlayerPoses";
 import { PoseTypes } from "./Pose.model";
 import { PoseAction } from "./PoseAction";
 import { IPoseAction, PoseRecord } from "./PoseAction.model";
-import { MatchMovement } from "./positions.utils";
 import { logger } from "/app/logger";
 
 export type PlayerAnimationsConfig = {
@@ -23,17 +22,18 @@ export type PlayerAnimationsConfig = {
 export function setupPlayerAnimations(
   playerId: PlayerId,
   model: Object3D,
-  matchMovement: MatchMovement,
-  rawActions: Record<string, AnimationAction | null>
+  rawActions: Record<string, AnimationAction | null>,
+  playerMovements: PlayerMovement
 ): PlayerAnimationsConfig {
   const mixer = new AnimationMixer(model);
 
-  const playerMovements = calculataPlayerMovement(playerId, matchMovement);
+  // const _playerMovements2 = calculataPlayerMovement(playerId, matchMovement);
 
-  const { rotateAction, positionAction, poses } = createPlayerMoveActions(
+  const { rotateAction, positionAction } = createPlayerMoveActions(
     mixer,
     playerMovements
   );
+  const poses = playerMovements.poses.map((pose) => ({ ...pose }));
 
   const poseActions = convertPoseActions(rawActions);
 

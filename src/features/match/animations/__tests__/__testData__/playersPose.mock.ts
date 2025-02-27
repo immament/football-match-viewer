@@ -1,4 +1,4 @@
-import { RawPoseEvents } from "../../Pose.model";
+import { RawPoseEvents } from "../../player/Pose.model";
 export function getAllPlayerPoses(): RawPoseEvents[][] {
   return poses;
 }

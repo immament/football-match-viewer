@@ -1,8 +1,8 @@
 import { MathUtils } from "three";
+import { rotationAngle } from "../positions.utils";
 import { PoseTypes, Writeable } from "./Pose.model";
 import { PoseRecord } from "./PoseAction.model";
 import { PoseBuilderContext } from "./PoseBuilderContext";
-import { rotationAngle } from "./positions.utils";
 
 const TURN_MIN_ANGLE = MathUtils.degToRad(15);
 

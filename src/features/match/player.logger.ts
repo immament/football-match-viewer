@@ -1,7 +1,7 @@
 import logger, { LogLevelNames, LogLevelNumbers, Logger } from "loglevel";
 import prefix from "loglevel-plugin-prefix";
 
-import { PoseTransitionProps } from "./animations/PoseAction.model";
+import { PoseTransitionProps } from "./animations/player/PoseAction.model";
 import { originalFactory } from "/app/logger";
 
 // TODO

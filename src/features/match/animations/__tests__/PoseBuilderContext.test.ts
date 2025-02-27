@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { RawPoseEvents } from "../Pose.model";
-import { PoseBuilderContext } from "../PoseBuilderContext";
+import { RawPoseEvents } from "../player/Pose.model";
+import { PoseBuilderContext } from "../player/PoseBuilderContext";
 import { BallPositionsConfig } from "../positions.utils";
 
 describe("PoseBuilderContext", () => {

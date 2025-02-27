@@ -1,3 +1,4 @@
+import { PlayerMovement } from "./animations/playerMovement/calculataPlayerMovement";
 import { MatchMovement } from "./animations/positions.utils";
 
 export interface MatchData {
@@ -18,7 +19,7 @@ export type TeamColors = {
 
 export interface MatchTeam {
   id: number;
-  teamIdx: 0 | 1;
+  teamIdx: TeamIdx;
   name: string;
   squadPlayers: MatchPlayer[];
   substPlayers: MatchSubstPlayer[];
@@ -34,6 +35,7 @@ export interface MatchPlayer {
   hairType: string; // @_tc
   skinColor: string; // @_cp
   shoesColor: string; // @_cb
+  movements?: PlayerMovement;
 }
 
 export interface MatchSubstPlayer extends MatchPlayer {
@@ -65,7 +67,7 @@ export const MatchEventTimeTypesValues = [
 
 export type MatchEvent = { time: number; timeInSeconds: number } & (
   | { type: MatchEventTimeTypes }
-  | { type: "subst"; playerInId: string; playerOutId: string; teamIdx: 0 | 1 }
+  | { type: "subst"; playerInId: string; playerOutId: string; teamIdx: TeamIdx }
   | GoalMatchEvent
   | { type: "yellow"; teamId: number; playerId: number }
 );
@@ -73,7 +75,7 @@ export type MatchEvent = { time: number; timeInSeconds: number } & (
 export type GoalMatchEvent = {
   type: "goal";
   teamId: number;
-  teamIdx: 0 | 1;
+  teamIdx: TeamIdx;
   playerId: number;
   homeGoals: number;
   awayGoals: number;
@@ -87,3 +89,4 @@ export type MatchComment = {
   step: number;
   text: string;
 };
+export type TeamIdx = 0 | 1;

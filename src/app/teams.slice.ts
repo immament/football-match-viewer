@@ -1,16 +1,19 @@
 import { StateCreator } from "zustand";
+import { calculataPlayerMovement } from "../features/match/animations/playerMovement/calculataPlayerMovement";
+import { MatchMovement } from "../features/match/animations/positions.utils";
 import { fixSimilarColors } from "../features/match/colors/validateColors";
 import {
   MatchPlayer,
   MatchTeam,
   TeamColors,
+  TeamIdx,
 } from "../features/match/MatchData.model";
 import { AppStoreState } from "./app.zu.store";
 
 export interface TeamsSlice {
   teams: {
     teamsArray: [TeamState, TeamState];
-    initTeams(teams: MatchTeam[]): void;
+    initTeams(teams: MatchTeam[], matchMovement: MatchMovement): void;
     selectTeamById(id: number): TeamState | undefined;
     selectPlayerById(playerId: string): MatchPlayer | undefined;
   };
@@ -18,7 +21,7 @@ export interface TeamsSlice {
 
 export interface TeamState {
   id: number;
-  teamIdx: 0 | 1;
+  teamIdx: TeamIdx;
   name: string;
   goals: number;
   squadPlayers: MatchPlayer[];
@@ -33,10 +36,10 @@ export const createTeamsSlice: StateCreator<
 > = (set) => ({
   teams: {
     teamsArray: [emptyTeam(0), emptyTeam(1)],
-    initTeams(aTeams: MatchTeam[]): void {
+    initTeams(aTeams: MatchTeam[], matchMovement: MatchMovement): void {
       const teamsState: [TeamState, TeamState] = [
-        mapTeamToState(aTeams[0]),
-        mapTeamToState(aTeams[1]),
+        mapTeamToState(aTeams[0], matchMovement),
+        mapTeamToState(aTeams[1], matchMovement),
       ];
       fixSimilarColors(teamsState);
       set((state) => {
@@ -57,7 +60,7 @@ export const createTeamsSlice: StateCreator<
   },
 });
 
-function emptyTeam(teamIdx: 0 | 1): TeamState {
+function emptyTeam(teamIdx: TeamIdx): TeamState {
   return {
     id: 0,
     teamIdx,
@@ -68,7 +71,17 @@ function emptyTeam(teamIdx: 0 | 1): TeamState {
   };
 }
 
-function mapTeamToState(team: MatchTeam): TeamState {
+function mapTeamToState(
+  team: MatchTeam,
+  matchMovement: MatchMovement
+): TeamState {
+  team.squadPlayers.forEach((player, playerIdx) => {
+    player.movements = calculataPlayerMovement(
+      { playerIdx, teamIdx: team.teamIdx },
+      matchMovement
+    );
+  });
+
   return {
     teamIdx: team.teamIdx,
     id: team.id,

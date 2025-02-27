@@ -1,8 +1,8 @@
 import { MathUtils, Quaternion, Vector2, Vector3 } from "three";
 import { beforeEach, describe, expect, test } from "vitest";
-import { PlayerDirectionBuilder } from "../PlayerDirectionBuilder";
-import { PoseTypes, RawPoseEvents } from "../Pose.model";
-import { PoseBuilderContext } from "../PoseBuilderContext";
+import { PlayerDirectionBuilder } from "../player/PlayerDirectionBuilder";
+import { PoseTypes, RawPoseEvents } from "../player/Pose.model";
+import { PoseBuilderContext } from "../player/PoseBuilderContext";
 import { BallPositionsConfig } from "../positions.utils";
 
 describe("PlayerDirectionBuilder", () => {

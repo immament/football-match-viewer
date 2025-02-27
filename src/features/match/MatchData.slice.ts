@@ -1,5 +1,10 @@
 import { StateCreator } from "zustand";
 import { AppStoreState } from "../../app/app.zu.store";
+import {
+  analyzeBallDirections,
+  BallStates,
+  createPositionsArrays,
+} from "./animations/ball/createBallPositionAnimation";
 import { MATCH_TIME_SCALE } from "./animations/positions.utils";
 import {
   fetchFootstarMatchData,
@@ -7,7 +12,7 @@ import {
   parseFsXml,
 } from "./fsApi/footstar.api";
 import { mapFsMatch } from "./fsApi/footstar.mapper";
-import { MatchData } from "./MatchData.model";
+import { MatchData, MatchEvent } from "./MatchData.model";
 import { logger } from "/app/logger";
 
 export interface MatchDataSlice {
@@ -15,6 +20,11 @@ export interface MatchDataSlice {
     status: "idle" | "pending" | "succeeded" | "failed";
     error?: string;
     data?: Readonly<MatchData>;
+    ball?: {
+      times: number[];
+      positions: number[];
+      ballStats?: BallStates;
+    };
     matchFetch(matchId: number, srcType: FetchSource): Promise<void>;
     loadMatchFromXml(props: {
       matchId: number;
@@ -24,7 +34,8 @@ export interface MatchDataSlice {
     matchFetchError(error: string): void;
     visibleMatchDuration(
       liveTimeInMinutes: number,
-      totalDuration: number
+      totalDuration: number,
+      matchTimes: MatchEvent[]
     ): number;
   };
 }
@@ -42,35 +53,38 @@ export const createMatchDataSlice: StateCreator<
 
     matchFetchSuccess: (aMatchData) => {
       logger.info("matchFetchSuccess ++");
-      get().teams.initTeams(aMatchData.teams);
 
-      // get().teams.teamsArray.forEach((team) => {
-      //   team.squadPlayers.forEach((player, playerIdx) => {
-      //     const movement = calculataPlayerMovement(
-      //       { playerIdx, teamIdx: team.teamIdx },
-      //       aMatchData.positions
-      //     );
-      //   });
-      // });
+      get().teams.initTeams(aMatchData.teams, aMatchData.positions);
 
-      // const playerMovements = calculataPlayerMovement(
-      //   playerId,
-      //   matchMovement,
-      //   rawActions
-      // );
-
-      set((state) => {
-        state.matchData.status = "succeeded";
-        state.matchData.data = aMatchData;
+      set(({ matchData }) => {
+        matchData.status = "succeeded";
+        matchData.data = aMatchData;
+        matchData.ball = ballData();
       });
 
-      const times = calculateTimes();
-      get().mediaPlayer.init(times, aMatchData.status === "online");
+      const matchTimes = calculateTimes();
+      get().mediaPlayer.init(matchTimes, aMatchData.status === "online");
 
       if (aMatchData.status === "online") {
-        get().matchTimer.initLiveMatch(times.startTime);
+        get().matchTimer.initLiveMatch(matchTimes.startTime);
       }
-      logger.info("matchFetchSuccess --");
+      logger.debug("matchFetchSuccess --");
+      return;
+
+      function ballData(): {
+        times: number[];
+        positions: number[];
+        ballStats: BallStates | undefined;
+      } {
+        const { positions, times } = createPositionsArrays(
+          aMatchData.positions.ball
+        );
+        let ballStats: BallStates | undefined = undefined;
+        if (get().debug.isDebug) {
+          ballStats = analyzeBallDirections(aMatchData.positions.ball);
+        }
+        return { positions, times, ballStats };
+      }
 
       function calculateTimes() {
         const totalDuration =
@@ -85,9 +99,9 @@ export const createMatchDataSlice: StateCreator<
           );
           visibleDuration = get().matchData.visibleMatchDuration(
             startTime,
-            totalDuration
+            totalDuration,
+            aMatchData.matchTimes
           );
-          // totalDuration = aMatchData.currentMinute;
         }
         return { visibleDuration, totalDuration, startTime };
       }
@@ -145,12 +159,13 @@ export const createMatchDataSlice: StateCreator<
     },
     visibleMatchDuration(
       liveTimeInSeconds: number,
-      totalDuration: number
+      totalDuration: number,
+      matchTimes: MatchEvent[]
     ): number {
       const validEvents = ["extratime1"];
-      if (!this.data) return 0;
       const duration = totalDuration;
-      const nextTimeEvent = this.data.matchTimes.reduce((acc, c) => {
+
+      const nextTimeEvent = matchTimes.reduce((acc, c) => {
         const result =
           validEvents.includes(c.type) &&
           c.timeInSeconds > liveTimeInSeconds &&

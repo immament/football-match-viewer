@@ -4,12 +4,13 @@ import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { BufferGeometry, ColorRepresentation, Group } from "three";
 import { computeBoundsTree } from "three-mesh-bvh";
 import { SkeletonUtils } from "three-stdlib";
-import { PoseRecord } from "../animations/PoseAction.model";
-import { secondsToStep } from "../animations/positions.utils";
+import { PoseRecord } from "../animations/player/PoseAction.model";
 import {
   PlayerAnimationsConfig,
   setupPlayerAnimations,
-} from "../animations/setupPlayer";
+} from "../animations/player/setupPlayer";
+import { PlayerMovement } from "../animations/playerMovement/calculataPlayerMovement";
+import { secondsToStep } from "../animations/positions.utils";
 import { GLTFResult } from "./playerGltf.model";
 import { useMatchDirector } from "./useMatchDirector";
 import { useMaterialClone } from "./useMaterialClone";
@@ -30,15 +31,16 @@ export type PlayerProps = {
   teamIdx: 0 | 1;
   playerIdx: number;
   dbgLabelVisible: boolean;
+  movements?: PlayerMovement;
 };
 
 export function Player({
   shirtColor,
   shortsColor,
-  bodyColor,
   teamIdx,
   playerIdx,
   dbgLabelVisible,
+  movements,
   ...props
 }: PlayerProps & JSX.IntrinsicElements["group"]) {
   const playerId = useMemo(
@@ -63,7 +65,6 @@ export function Player({
   const socksMaterial = useMaterialClone(materials.Ch38_body, shirtColor);
   const shoesMaterial = useMaterialClone(materials.Ch38_body, shortsColor);
 
-  const matchData = useAppZuStore((state) => state.matchData.data);
   const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
   const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
   const playbackSpeed = useAppZuStore(
@@ -77,19 +78,19 @@ export function Player({
   const config = useRef<PlayerAnimationsConfig>();
 
   useEffect(() => {
-    if (matchData?.positions && playerRef.current && !config.current) {
+    if (playerRef.current && !config.current && movements) {
       const result = setupPlayerAnimations(
         playerId,
         playerRef.current,
-        matchData.positions,
-        poseAnimations.actions
+        poseAnimations.actions,
+        movements
       );
       config.current = result;
       result.playerPoses.forceIdle();
       result.positionAction.play();
       result.rotateAction.play();
     }
-  }, [matchData, poseAnimations.actions, playerId]);
+  }, [poseAnimations.actions, playerId, movements]);
 
   useEffect(() => {
     if (config.current) {
@@ -99,6 +100,7 @@ export function Player({
       config.current.positionAction.paused = false;
       config.current.rotateAction.paused = false;
       config.current.mixer.setTime(startTime / config.current.mixer.timeScale);
+      config.current.playerPoses.forceUpdatePose = true;
     }
   }, [startTime]);
 
@@ -121,7 +123,7 @@ export function Player({
 
   const onFrameUpdate = useMemo(() => {
     return (_: RootState, delta: number) => {
-      if (matchPaused || !config.current) return;
+      if (!config.current) return;
       const pose = config.current.playerPoses.updatePose(delta);
       if (pose) {
         labelVisible(pose.distanceToBall < 2);
@@ -142,11 +144,11 @@ export function Player({
           (config.mixer.time > 0 &&
             `(step: ${step}, time: ${config.mixer.time.toFixed(1)})\n`) +
           `${teamIdx === 0 ? "Home" : "Away"} ${playerIdx + 1} ${
-            pose?.type
+            pose?.type ?? ""
           } / ${lastRawPoseRef.current ?? ""} / ${pose?.rawPose ?? ""}`;
       }
     }
-  }, [config, matchPaused, teamIdx, playerIdx, dbgLabelVisible]);
+  }, [config, teamIdx, playerIdx, dbgLabelVisible]);
 
   function labelVisible(visible = false) {
     if (labelRef.current) {

@@ -1,4 +1,5 @@
 import { Quaternion, Vector3 } from "three";
+import { PositionProxy } from "../PositionProxy";
 import {
   PoseTypes,
   RawPoseEvents,
@@ -6,7 +7,6 @@ import {
   Writeable,
 } from "./Pose.model";
 import { PoseRecord } from "./PoseAction.model";
-import { PositionProxy } from "./PositionProxy";
 
 export class PoseBuilderStep {
   private _stepIdx: number = 0;
@@ -79,6 +79,7 @@ export class PoseBuilderStep {
       direction: 0,
       rotation: 0,
       distanceToBall,
+      action: undefined,
     });
   }
 

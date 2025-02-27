@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 
+import { useAppZuStore } from "./app/app.zu.store.ts";
 import "./index.scss";
 import {
   ContainerContext,
@@ -28,6 +29,11 @@ function main() {
     debugMode: DEBUG_MODE,
   };
   // const store = setupStore();
+  if (DEBUG_MODE) {
+    useAppZuStore.setState((state) => {
+      state.debug.isDebug = DEBUG_MODE;
+    });
+  }
 
   createRoot(ctx.mediaPlayer).render(
     <StrictMode>

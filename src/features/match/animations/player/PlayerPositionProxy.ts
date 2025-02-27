@@ -1,4 +1,4 @@
-import { PositionProxy } from "./PositionProxy";
+import { PositionProxy } from "../PositionProxy";
 
 export class PlayerPositionProxy extends PositionProxy {
   constructor(private _positions: number[]) {

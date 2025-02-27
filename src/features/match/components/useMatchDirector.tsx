@@ -30,7 +30,7 @@ export function useMatchDirector(
   const updateStep = useAppZuStore((state) => state.matchTimer.updateStep);
 
   useFrame((state, aDelta) => {
-    if (matchPaused || !mixer) return;
+    if (!mixer) return;
 
     const {
       delta: deltaTime,

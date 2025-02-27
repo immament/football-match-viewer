@@ -113,9 +113,9 @@ function matchDataMock(): MatchData {
     commentsMap: {},
     positions: {
       ball: {
-        px: { length: 121 * 60 * 2 } as number[],
-        pz: [],
-        pHeight: [],
+        px: { length: 121 * 60 * 2, slice: () => [0] } as number[],
+        pz: { length: 121 * 60 * 2, slice: () => [0] } as number[],
+        pHeight: { length: 121 * 60 * 2, slice: () => [0] } as number[],
       },
       players: [],
       poses: [],

@@ -2,6 +2,9 @@ import type { StateCreator } from "zustand";
 import type { AppStoreState } from "../../app/app.zu.store";
 
 export interface MediaPlayerSlice {
+  debug: {
+    isDebug: boolean;
+  };
   mediaPlayer: {
     // in seconds
     startTime: number;
@@ -21,6 +24,7 @@ export interface MediaPlayerSlice {
       isOnline: boolean
     ): void;
     gotoPercent(percentTime: number): void;
+    moveTime(deltaSeconds: number): void;
     tooglePlay(): void;
     toogleComments(): void;
     pause(): void;
@@ -34,6 +38,9 @@ export const createMediaPlayerSlice: StateCreator<
   [],
   MediaPlayerSlice
 > = (set, get) => ({
+  debug: {
+    isDebug: false,
+  },
   mediaPlayer: {
     startTime: 0,
     duration: 0,
@@ -58,6 +65,22 @@ export const createMediaPlayerSlice: StateCreator<
         }
         mediaPlayer.startTime = newTime;
       });
+      get().matchTimer.updateStep(get().mediaPlayer.startTime);
+    },
+    moveTime(deltaSeconds: number): void {
+      set(({ mediaPlayer, matchTimer }) => {
+        let newTime = Math.min(
+          mediaPlayer.duration,
+          Math.max(0, matchTimer.time + deltaSeconds)
+        );
+
+        if (matchTimer.liveMatch && matchTimer.liveMatch.liveTime < newTime) {
+          newTime = matchTimer.liveMatch.liveTime;
+        }
+        mediaPlayer.startTime = newTime;
+        matchTimer.time = newTime;
+      });
+
       get().matchTimer.updateStep(get().mediaPlayer.startTime);
     },
     tooglePlay: () => {
