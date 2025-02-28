@@ -21,7 +21,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "paths": { "/app/*": ["./src/app/*"], "/src/*": ["./src/*"] }
+    "paths": { "/app/*": ["./src/app/*"], "/src/*": ["./src/*"] },
+    "allowJs": true
   },
   "include": ["src", "src/types/*.d.ts"]
 }

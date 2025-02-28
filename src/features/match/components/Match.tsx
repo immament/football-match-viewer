@@ -58,16 +58,24 @@ function Players({ team, teamIdx }: { team: TeamState; teamIdx: TeamIdx }) {
   const { dbgLabelVisible } = useControls("Players", {
     dbgLabelVisible: false,
   });
-  return team.squadPlayers.map((player, playerIdx) => (
-    <Player
-      key={`${team.id}-${playerIdx}`}
-      teamIdx={teamIdx}
-      playerIdx={playerIdx}
-      shirtColor={team.colors.shirt}
-      shortsColor={team.colors.shorts}
-      bodyColor={player.skinColor}
-      dbgLabelVisible={dbgLabelVisible}
-      movements={player.movements}
-    />
-  ));
+  return (
+    team.squadPlayers
+      // .filter((_, idx) => idx === 10 && teamIdx === 0)
+      .map((player, playerIdx) => {
+        return (
+          <Player
+            key={`${team.id}-${playerIdx}`}
+            teamIdx={teamIdx}
+            player={player}
+            playerIdx={playerIdx}
+            shirtColor={team.colors.shirt}
+            shortsColor={team.colors.shorts}
+            textColor={team.colors.text}
+            bodyColor={player.skinColor}
+            dbgLabelVisible={dbgLabelVisible}
+            movements={player.movements}
+          />
+        );
+      })
+  );
 }

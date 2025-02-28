@@ -31,7 +31,10 @@ export type GLTFResult = GLTF & {
     Ch38_Socks: SkinnedMesh;
     mixamorig5Hips: Bone;
   };
-  materials: { Ch38_body: MeshStandardMaterial };
+  materials: {
+    Ch38_body: MeshStandardMaterial;
+    Shirt_Material: MeshStandardMaterial;
+  };
   animations: GLTFAction[];
 };
 
