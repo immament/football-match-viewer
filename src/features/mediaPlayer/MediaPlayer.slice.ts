@@ -1,9 +1,13 @@
 import type { StateCreator } from "zustand";
 import type { AppStoreState } from "../../app/app.zu.store";
+import { MatchBestMoment } from "../match/MatchData.model";
+
+export type DisplayMoments = "best" | "all" | "goals";
 
 export interface MediaPlayerSlice {
   debug: {
     isDebug: boolean;
+    liveTime?: number;
   };
   mediaPlayer: {
     // in seconds
@@ -14,6 +18,9 @@ export interface MediaPlayerSlice {
     paused: boolean;
     playbackSpeed: number;
     commentsVisible: boolean;
+    mediaPlayerContainerId: string;
+    displayMoments: DisplayMoments;
+    currentMoment?: MatchBestMoment;
     // actions
     init(
       props: {
@@ -25,10 +32,12 @@ export interface MediaPlayerSlice {
     ): void;
     gotoPercent(percentTime: number): void;
     moveTime(deltaSeconds: number): void;
+    gotoTime(timeInSeconds: number): void;
     tooglePlay(): void;
     toogleComments(): void;
     pause(): void;
     changePlaybackSpeed(playbackSpeed: number): void;
+    changeDisplayMoments(value: DisplayMoments): void;
   };
 }
 
@@ -48,6 +57,9 @@ export const createMediaPlayerSlice: StateCreator<
     playbackSpeed: 2,
     paused: true,
     commentsVisible: true,
+    mediaPlayerContainerId: "root",
+    displayMoments: "all",
+    // actions
     init({ startTime, visibleDuration, totalDuration }, isOnline): void {
       set(({ mediaPlayer }) => {
         mediaPlayer.duration = visibleDuration;
@@ -68,10 +80,13 @@ export const createMediaPlayerSlice: StateCreator<
       get().matchTimer.updateStep(get().mediaPlayer.startTime);
     },
     moveTime(deltaSeconds: number): void {
+      get().mediaPlayer.gotoTime(get().mediaPlayer.startTime + deltaSeconds);
+    },
+    gotoTime: (timeInSeconds: number) => {
       set(({ mediaPlayer, matchTimer }) => {
         let newTime = Math.min(
           mediaPlayer.duration,
-          Math.max(0, matchTimer.time + deltaSeconds)
+          Math.max(0, timeInSeconds)
         );
 
         if (matchTimer.liveMatch && matchTimer.liveMatch.liveTime < newTime) {
@@ -101,6 +116,11 @@ export const createMediaPlayerSlice: StateCreator<
     toogleComments: () => {
       set(({ mediaPlayer }) => {
         mediaPlayer.commentsVisible = !mediaPlayer.commentsVisible;
+      });
+    },
+    changeDisplayMoments: function (value: DisplayMoments): void {
+      set(({ mediaPlayer }) => {
+        mediaPlayer.displayMoments = value;
       });
     },
   },

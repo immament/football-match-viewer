@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { DisplayMomentsButton } from "./DisplayMoments.button";
 import { FollowObjectButton } from "./FollowObject.button";
 import { FullscreenButton } from "./Fullscreen.button";
 import "./mediaPlayer.scss";
@@ -17,6 +18,7 @@ export function MediaPlayerComponent() {
       <div className="mv-buttons-line">
         <TooglePlayButton />
         <div className="mv-buttons-group">
+          <DisplayMomentsButton />
           <FollowObjectButton />
           <PlaybackSpeedButton />
           <ToogleCommentsButton />

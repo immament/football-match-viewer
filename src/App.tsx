@@ -1,10 +1,10 @@
-import { PerformanceMonitor, Stats } from "@react-three/drei";
+import { Loader, PerformanceMonitor, Stats } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Leva } from "leva";
-import { Suspense, useContext, useState } from "react";
+import { useState } from "react";
 import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from "three";
 import "./App.scss";
-import { ContainerContext } from "./app/Container.context";
+import { useAppZuStore } from "./app/app.zu.store";
 import { round } from "./app/utils";
 import { CommentsBox } from "./features/mediaPlayer/components/CommentsBox";
 import { EventInfoBox } from "./features/mediaPlayer/components/EventInfoBox";
@@ -14,46 +14,36 @@ import { World } from "./features/world/World";
 
 function App() {
   const [dpr, setDpr] = useState(1.5);
-
-  const ctx = useContext(ContainerContext);
+  const isDebug = useAppZuStore(({ debug }) => debug.isDebug);
 
   return (
     <>
-      <Suspense
-        fallback={
-          <div className="app-fallback">
-            <span>
-              <i className="bx bx-loader-alt bx-spin"></i> Loading...
-            </span>
-          </div>
-        }
+      <Canvas
+        dpr={dpr}
+        camera={{ position: [0, 30, 30], fov: 65, near: 0.01, far: 500 }}
+        gl={{
+          antialias: true,
+          toneMapping: ACESFilmicToneMapping,
+          outputColorSpace: SRGBColorSpace,
+        }}
+        shadows={{ type: PCFSoftShadowMap }}
       >
-        <Canvas
-          dpr={dpr}
-          camera={{ position: [0, 30, 30], fov: 65, near: 0.01, far: 500 }}
-          gl={{
-            antialias: true,
-            toneMapping: ACESFilmicToneMapping,
-            outputColorSpace: SRGBColorSpace,
+        <World />
+        <PerformanceMonitor
+          factor={1}
+          onChange={({ factor }) => {
+            const newDpr = round(0.9 + 1.1 * factor, 1);
+            setDpr(newDpr);
           }}
-          shadows={{ type: PCFSoftShadowMap }}
-        >
-          <World />
-          <PerformanceMonitor
-            factor={1}
-            onChange={({ factor }) => {
-              const newDpr = round(0.9 + 1.1 * factor, 1);
-              setDpr(newDpr);
-            }}
-          />
-          <Stats className="stats" />
-        </Canvas>
-      </Suspense>
+        />
+        <Stats className="stats" />{" "}
+      </Canvas>
+      <Loader />
       <MediaHeaderComponent />
       <MediaPlayerComponent />
       <EventInfoBox />
       <CommentsBox />
-      <Leva collapsed hidden={!ctx?.debugMode} />
+      <Leva collapsed hidden={!isDebug} />
     </>
   );
 }

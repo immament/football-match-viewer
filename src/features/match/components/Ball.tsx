@@ -4,7 +4,6 @@ import { useControls } from "leva";
 import {
   ForwardedRef,
   forwardRef,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -18,7 +17,6 @@ import {
 import { secondsToStep } from "../animations/positions.utils";
 import { useMatchDirector } from "./useMatchDirector";
 import { useAppZuStore } from "/app/app.zu.store";
-import { ContainerContext } from "/app/Container.context";
 
 export const BALL_RADIUS = 0.18;
 
@@ -43,10 +41,9 @@ export const Ball = forwardRef<Mesh, BallProps>(
     const playbackSpeed = useAppZuStore(
       (state) => state.mediaPlayer.playbackSpeed
     );
+    const isDebug = useAppZuStore(({ debug }) => debug.isDebug);
 
     const [mixer, setMixer] = useState<AnimationMixer>();
-
-    const ctx = useContext(ContainerContext);
 
     const controls = useControls("Ball", { labelVisible: true });
 
@@ -150,7 +147,7 @@ export const Ball = forwardRef<Mesh, BallProps>(
         castShadow={true}
         dispose={null}
       >
-        {ctx?.debugMode && controls.labelVisible && (
+        {isDebug && controls.labelVisible && (
           <Billboard>
             <Text
               color="black"

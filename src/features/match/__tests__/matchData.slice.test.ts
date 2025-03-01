@@ -128,5 +128,6 @@ function matchDataMock(): MatchData {
       createTimeEvent(105.833, "extratime2"),
       createTimeEvent(121.7, "penalties"),
     ],
+    bestMoments: [],
   };
 }

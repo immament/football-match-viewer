@@ -52,6 +52,12 @@ export const createMatchDataSlice: StateCreator<
     status: "idle",
 
     matchFetchSuccess: (aMatchData) => {
+      const debugLiveTime =
+        aMatchData.status === "offline" ? get().debug.liveTime : undefined;
+      if (debugLiveTime) {
+        aMatchData.currentTime = debugLiveTime;
+        aMatchData.status = "online";
+      }
       logger.info("matchFetchSuccess ++");
 
       get().teams.initTeams(aMatchData.teams, aMatchData.positions);

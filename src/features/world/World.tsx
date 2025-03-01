@@ -1,15 +1,15 @@
 import { Environment, Sky, useHelper } from "@react-three/drei";
 import { useControls } from "leva";
-import { MutableRefObject, useContext, useRef } from "react";
+import { MutableRefObject, Suspense, useRef } from "react";
 import { CameraHelper, DirectionalLight, OrthographicCamera } from "three";
 import { Match } from "../match/components/Match";
 import { Stadium } from "./Stadium";
-import { ContainerContext } from "/app/Container.context";
+import { useAppZuStore } from "/app/app.zu.store";
 
 export const World = () => {
   const { envCtl, dirLightCtl, ambientLightCtl, skyCtl } = useWorldCtls();
   const dirLight = useRef<DirectionalLight>(null);
-  const ctx = useContext(ContainerContext);
+  const isDebug = useAppZuStore(({ debug }) => debug.isDebug);
 
   const shadowCamera = useRef<OrthographicCamera>(null);
   useHelper(
@@ -25,8 +25,7 @@ export const World = () => {
           environmentIntensity={0}
           files={"models/potsdamer_platz_1k.hdr"}
           background={false}
-          ground={{ height: 10, radius: 260, scale: 130 }}
-          far={1000}
+          ground={{ height: 20, radius: 360, scale: 180 }}
         ></Environment>
       )}
       {/* {shadowCtl.visible && <ContactShadows {...shadowCtl} />} */}
@@ -55,9 +54,11 @@ export const World = () => {
 
       <ambientLight {...ambientLightCtl} />
       {skyCtl.visible && <Sky />}
-      <Stadium hideStadium={false} />
-      <Match />
-      {ctx?.debugMode && dirLight.current && (
+      <Suspense fallback={null}>
+        <Stadium hideStadium={false} />
+        <Match />
+      </Suspense>
+      {isDebug && dirLight.current && (
         <directionalLightHelper
           args={[dirLight.current, 2, 0xff0000]}
           visible={dirLight.current.visible && dirLightCtl.helper}

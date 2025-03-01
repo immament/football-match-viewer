@@ -52,6 +52,7 @@ div.mv-control-bar {
         width: 100%;
         transition: all 0.2s;
         background-color: #73859f80;
+        display: flex;
 
         .mv-play-progress {
           position: absolute;
@@ -61,7 +62,7 @@ div.mv-control-bar {
           width: 0;
           z-index: 1;
           border-right: 1px solid #222;
-          background-color: #bf3b4d;
+          background-color: #bf3b4dcc;
 
           .mv-time-tooltip {
             right: 0;
@@ -88,7 +89,7 @@ div.mv-control-bar {
           width: 2px;
           z-index: 2;
           pointer-events: none;
-          background-color: #ffd900;
+          background-color: #e00f0f;
           & .mv-time-tooltip {
             background-color: #943c3c;
             color: #fff;
@@ -106,6 +107,14 @@ div.mv-control-bar {
           top: -3.4em;
           visibility: hidden;
           z-index: 1;
+        }
+
+        .mv-best-moment {
+          background-color: pink;
+          pointer-events: none;
+          height: 100%;
+          position: absolute;
+          content: " ";
         }
       }
 
@@ -211,6 +220,7 @@ div.mv-control-bar {
       overflow-y: auto;
       scrollbar-color: #3d552b #122b00;
       scrollbar-width: thin;
+      z-index: 10;
     }
     .mv-menuitem {
       white-space: nowrap;

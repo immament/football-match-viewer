@@ -24,11 +24,9 @@ export type FootstarMatchData = {
     // <clr id="3" text="000000" shirt="ffffff" shorts="000000" socks="ffffff" shirt2="000000" shorts2="000000" socks2="000000" />
     // <clr id="4" text="FFFFFF" shirt="054d00" shorts="000000" socks="054d00" shirt2="000000" shorts2="000000" socks2="000000" />
   };
-  mm: { m: { _p: string; _t1: string; _t2: string }[] };
+  mm: { m: FsBestMoment[] };
   game_info: {
-    game_comments: {
-      gc: FsGameComment[];
-    };
+    game_comments: { gc: FsGameComment[] };
     home_team_name: { text: string; _id: string };
     away_team_name: { text: string; _id: string };
     local: {
@@ -180,10 +178,13 @@ export type FsTeamColorsExt = {
   _socks2: string;
 };
 
-export type FsGameComment = {
-  text: string;
-  _m: string;
-  _LANG: string;
+export type FsGameComment = { text: string; _m: string; _LANG: string };
+
+export type FsBestMoment = {
+  // priority (ignored)
+  _p: string;
+  _t1: string;
+  _t2: string;
 };
 
 // not used

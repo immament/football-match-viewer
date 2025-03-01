@@ -6,10 +6,9 @@ Files: player.glb [27.72MB] > C:\Users\immam\OneDrive\Documents\blender\characte
 */
 import { Billboard, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { RootState, useGraph } from "@react-three/fiber";
-import React, { useContext, useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
   CanvasTexture,
-  ColorRepresentation,
   Group,
   MeshPhysicalMaterial,
   RepeatWrapping,
@@ -20,37 +19,31 @@ import {
   PlayerAnimationsConfig,
   setupPlayerAnimations,
 } from "../animations/player/setupPlayer";
-import { PlayerMovement } from "../animations/playerMovement/calculataPlayerMovement";
 import { secondsToStep } from "../animations/positions.utils";
-import { MatchPlayer } from "../MatchData.model";
+import { MatchPlayer, TeamColors } from "../MatchData.model";
 import { GLTFResult } from "./playerGltf.model";
 import { useMatchDirector } from "./useMatchDirector";
 import { useMaterialClone } from "./useMaterialClone";
 import { useAppZuStore } from "/app/app.zu.store";
-import { ContainerContext } from "/app/Container.context";
 
 const MODEL_URL = "models/player-transformed.glb";
 
 export type PlayerProps = {
-  shirtColor: ColorRepresentation;
-  textColor: ColorRepresentation;
-  shortsColor: ColorRepresentation;
-  bodyColor: ColorRepresentation;
+  // bodyColor: ColorRepresentation;
+  colors: TeamColors;
   teamIdx: 0 | 1;
   playerIdx: number;
   dbgLabelVisible: boolean;
-  movements?: PlayerMovement;
+  // movements?: PlayerMovement;
   player: MatchPlayer;
 };
 
 export function Player({
-  shirtColor,
-  textColor,
-  shortsColor,
+  colors,
   teamIdx,
   playerIdx,
   dbgLabelVisible,
-  movements,
+  // movements,
   player,
   ...props
 }: PlayerProps & JSX.IntrinsicElements["group"]) {
@@ -59,13 +52,13 @@ export function Player({
     [teamIdx, playerIdx]
   );
 
+  // console.log("player movements", player);
+
   const playerRef = React.useRef<Group>(null);
   const groupRef = React.useRef<Group>(new Group());
 
   const { scene, animations } = useGLTF(MODEL_URL);
-  // console.log("animations", animations);
   const poseAnimations = useAnimations(animations, playerRef);
-  // console.log("animations", animations);
 
   const sceneClone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes, materials } = useGraph(sceneClone) as GLTFResult;
@@ -73,9 +66,8 @@ export function Player({
   const bodyMaterial = materials.Ch38_body;
   // TODO: body color is to dark;
   // const bodyMaterial = useMaterialClone(materials.Ch38_body, bodyColor);
-  const shortsMaterial = useMaterialClone(materials.Ch38_body, shortsColor);
-  const socksMaterial = useMaterialClone(materials.Ch38_body, shirtColor);
-  // const shoesMaterial = useMaterialClone(materials.Ch38_body, shortsColor);
+  const shortsMaterial = useMaterialClone(materials.Ch38_body, colors.shorts);
+  const socksMaterial = useMaterialClone(materials.Ch38_body, colors.shirt);
 
   const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
   const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
@@ -86,23 +78,24 @@ export function Player({
   const squadPlayer = useAppZuStore(
     (state) => state.teams.teamsArray[teamIdx].squadPlayers[playerIdx]
   );
+  const isDebug = useAppZuStore(({ debug }) => debug.isDebug);
 
   const config = useRef<PlayerAnimationsConfig>();
 
   useEffect(() => {
-    if (playerRef.current && !config.current && movements) {
+    if (playerRef.current && !config.current && player.movements) {
       const result = setupPlayerAnimations(
         playerId,
         playerRef.current,
         poseAnimations.actions,
-        movements
+        player.movements
       );
       config.current = result;
       result.playerPoses.forceIdle();
       result.positionAction.play();
       result.rotateAction.play();
     }
-  }, [poseAnimations.actions, playerId, movements]);
+  }, [poseAnimations.actions, playerId, player]);
 
   useEffect(() => {
     if (config.current) {
@@ -130,8 +123,6 @@ export function Player({
     if (poseAnimations.mixer)
       poseAnimations.mixer.timeScale = matchPaused ? 0 : playbackSpeed;
   }, [poseAnimations.mixer, playbackSpeed, matchPaused]);
-
-  const ctx = useContext(ContainerContext);
 
   const onFrameUpdate = useMemo(() => {
     return (_: RootState, delta: number) => {
@@ -163,62 +154,63 @@ export function Player({
   }, [config, teamIdx, playerIdx, dbgLabelVisible]);
 
   function labelVisible(visible = false) {
+    const isVisible =
+      playerSelectedRef.current || playerHoverRef.current || visible;
     if (labelRef.current) {
-      labelRef.current.visible =
-        playerSelectedRef.current || playerHoverRef.current || visible;
+      labelRef.current.visible = isVisible;
     }
+    // if (labelHtmlRef.current) {
+    //   labelHtmlRef.current.style.display = isVisible ? "block" : "none";
+    // }
   }
 
   useMatchDirector(config.current?.mixer, false, onFrameUpdate);
 
   const labelRef = useRef<Group>(null);
+  // const labelHtmlRef = useRef<HTMLDivElement>(null);
   const playerSelectedRef = useRef(false);
   const playerHoverRef = useRef(false);
   const dbgLabelRef = useRef<{ text: string }>(null);
 
-  const canvaTextureRef = useRef<CanvasTexture>(null);
+  const canvasTextureRef = useRef<CanvasTexture>(null);
   const canvasRef = useRef(document.createElement("canvas"));
   const context = useRef(canvasRef.current.getContext("2d"));
   const canvaMaterialRef = useRef<MeshPhysicalMaterial>(null);
+  canvasRef.current.width = 512;
+  canvasRef.current.height = 512;
 
   // shirt material
-  useEffect(() => {
-    if (materials.Shirt_Material?.map) {
-      canvasRef.current.width = materials.Shirt_Material.map.image.width;
-      canvasRef.current.height = materials.Shirt_Material.map.image.height;
-      if (canvaTextureRef.current) {
-        canvaTextureRef.current.wrapS = RepeatWrapping;
-        canvaTextureRef.current.wrapT = RepeatWrapping;
-        canvaTextureRef.current.flipY = false;
-      }
+  useLayoutEffect(() => {
+    if (!materials.Shirt_Material?.map) return;
+    canvasRef.current.width = materials.Shirt_Material.map.image.width;
+    canvasRef.current.height = materials.Shirt_Material.map.image.height;
+    // if (canvasTextureRef.current) canvasTextureRef.current.needsUpdate = true;
 
-      if (canvaMaterialRef.current) {
-        canvaMaterialRef.current.side = 2;
-      }
+    if (!materials.Shirt_Material?.map) return;
+    const ctx = context.current;
+    if (!ctx) return;
 
-      const ctx = context.current;
-      if (!ctx) return;
+    // ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctx.drawImage(materials.Shirt_Material.map.image, 0.0, 0.0);
+    ctx.fillStyle = colors.shirt.toString() + "f0";
+    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
-      ctx.drawImage(materials.Shirt_Material.map.image, 0.0, 0.0);
-      ctx.fillStyle = shirtColor.toString() + "f0";
-      ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.width);
-
-      // number
-      ctx.font = "bold 100px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = textColor.toString();
-      ctx.fillText(player.shirtNumber, 120, 350);
-      // name
-      ctx.font = "normal 20px Arial";
-      ctx.fillText(
-        player.name.split(" ").reverse()[0].slice(0, 20),
-        120,
-        280,
-        150
-      );
-    }
-  }, [materials.Shirt_Material, shirtColor, textColor, player]);
+    // number
+    ctx.font = "bold 100px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = colors.text.toString();
+    ctx.fillText(player.shirtNumber, 120, 350);
+    // name
+    ctx.font = "normal 20px Arial";
+    ctx.fillText(
+      player.name.split(" ").reverse()[0].slice(0, 20),
+      120,
+      280,
+      150
+    );
+    if (canvasTextureRef.current) canvasTextureRef.current.needsUpdate = true;
+  }, [materials.Shirt_Material, colors, player]);
 
   return (
     <group
@@ -229,7 +221,7 @@ export function Player({
       visible={!!config}
       raycast={() => null}
     >
-      {ctx?.debugMode && (
+      {isDebug && (
         <>
           <Billboard>
             <Text
@@ -261,6 +253,16 @@ export function Player({
           {`${squadPlayer.shirtNumber}. ${squadPlayer.name}`}
         </Text>
       </Billboard>
+
+      {/* <Html
+        style={{display: "none"}}
+        className="player-label"
+        wrapperClass="player-label-wrapper"
+        ref={labelHtmlRef}
+        position={[0, 2, 0]}
+        center
+      >{`${squadPlayer.shirtNumber}. ${squadPlayer.name}`}</Html> 
+      */}
       <mesh
         // ref={meshHelper}
         onPointerEnter={(e) => {
@@ -314,11 +316,14 @@ export function Player({
           skeleton={nodes.Ch38_Shirt.skeleton}
           raycast={() => null}
         >
-          <meshPhysicalMaterial ref={canvaMaterialRef}>
+          <meshPhysicalMaterial ref={canvaMaterialRef} side={2}>
             <canvasTexture
-              ref={canvaTextureRef}
+              ref={canvasTextureRef}
               attach="map"
               image={canvasRef.current}
+              wrapS={RepeatWrapping}
+              wrapT={RepeatWrapping}
+              flipY={false}
             />
           </meshPhysicalMaterial>
         </skinnedMesh>

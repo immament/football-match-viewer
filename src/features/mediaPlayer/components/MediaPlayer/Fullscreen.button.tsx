@@ -1,12 +1,18 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import screenfull from "screenfull";
-import { ContainerContext } from "/app/Container.context";
+import { useAppZuStore } from "/app/app.zu.store";
 
 export function FullscreenButton() {
   const [state, setState] = useState(calculatesState(screenfull.isFullscreen));
-  const ctx = useContext(ContainerContext);
+  // const ctx = useContext(ContainerContext);
 
-  const fullscreenContainer = ctx?.mediaPlayer;
+  const mediaPlayerContainerId = useAppZuStore(
+    ({ mediaPlayer }) => mediaPlayer.mediaPlayerContainerId
+  );
+
+  const fullscreenContainer = useMemo(() => {
+    return document.getElementById(mediaPlayerContainerId);
+  }, [mediaPlayerContainerId]);
 
   useEffect(() => {
     if (screenfull.isEnabled) {

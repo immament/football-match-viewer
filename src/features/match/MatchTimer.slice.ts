@@ -45,6 +45,7 @@ export interface MatchTimerSlice {
     updateComment: (newStep: number) => void;
     initLiveMatch(liveTime: number): void;
     updateLiveTime(): void;
+    checkBestMoments(newTime: number): boolean;
   };
 }
 
@@ -64,19 +65,58 @@ export const createMatchTimerSlice: StateCreator<
     updateStep: (matchTimeInSeconds: number) => {
       const newStep = secondsToStep(matchTimeInSeconds);
       let stepUpdated = false;
+
+      if (get().matchTimer.step === newStep) return;
+      if (get().mediaPlayer.displayMoments === "best") {
+        if (get().matchTimer.checkBestMoments(matchTimeInSeconds)) return;
+      }
+
       set(({ matchTimer }) => {
-        if (matchTimer.step === newStep) return;
-        const newTime = Math.floor(newStep / 2);
+        const newDisplayTime = Math.floor(newStep / 2);
 
         matchTimer.step = newStep;
         matchTimer.time = matchTimeInSeconds;
-        matchTimer.displayTime = formatTime(newTime);
+        matchTimer.displayTime = formatTime(newDisplayTime);
         stepUpdated = true;
       });
       if (stepUpdated) {
         get().matchTimer.updateNextEventStep(newStep);
         if (get().mediaPlayer.commentsVisible)
           get().matchTimer.updateComment(newStep);
+      }
+    },
+    checkBestMoments(newTime: number) {
+      const bestMoments = get().matchData.data?.bestMoments;
+      if (!bestMoments) return false;
+      if (isCurrentMomementOk()) return false;
+
+      const currentMoment = bestMoments.find(
+        (m) => m.startTime <= newTime && m.endTime > newTime
+      );
+      if (currentMoment) {
+        set(({ mediaPlayer }) => {
+          mediaPlayer.currentMoment = currentMoment;
+        });
+        return false;
+      }
+      const liveTime = get().matchTimer.liveMatch?.liveTime;
+      const nextMoment = bestMoments.find(
+        (m) => m.startTime >= newTime && (!liveTime || m.startTime < liveTime)
+      );
+      if (nextMoment !== undefined) {
+        set(({ mediaPlayer }) => {
+          mediaPlayer.currentMoment = nextMoment;
+        });
+        get().mediaPlayer.gotoTime(nextMoment.startTime);
+        return true;
+      }
+      return false;
+
+      function isCurrentMomementOk() {
+        const current = get().mediaPlayer.currentMoment;
+        return (
+          current && current.startTime <= newTime && current.endTime > newTime
+        );
       }
     },
     updateNextEventStep: (newStep: number) => {
@@ -138,6 +178,7 @@ export const createMatchTimerSlice: StateCreator<
                     ev.teamIdx
                   ].squadPlayers.map((pl) => {
                     if (pl.id !== ev.playerOutId) return pl;
+                    playerIn.movements = pl.movements;
                     return playerIn;
                   });
                 }

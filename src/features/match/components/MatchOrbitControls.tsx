@@ -1,6 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { MutableRefObject, useEffect, useRef } from "react";
-import { Group, Mesh, Object3D } from "three";
+import { Group, Mesh, Object3D, Vector3 } from "three";
 import { OrbitControls } from "three-stdlib";
 import { ViewFromTarget } from "../ViewFromTarget";
 import { useAppZuStore } from "/app/app.zu.store";
@@ -21,7 +21,7 @@ export function useMatchOrbitControls(
       ctls.listenToKeyEvents(document.body);
       ctls.maxPolarAngle = Math.PI / 2 - 0.01;
       ctls.minDistance = 0.4;
-      ctls.maxDistance = 120;
+      ctls.maxDistance = 110;
       ctls.zoomSpeed = 2;
       controls.current = ctls;
       // return ctls;
@@ -32,6 +32,7 @@ export function useMatchOrbitControls(
   const viewFromObject = useAppZuStore((st) => st.camera.viewFromObject);
   const followedObject = useRef<Object3D>();
   const viewfromTarget = useRef<ViewFromTarget>(new ViewFromTarget());
+  const tmpTargetRef = useRef(new Vector3());
 
   useEffect(() => {
     let obj = undefined;
@@ -71,10 +72,14 @@ export function useMatchOrbitControls(
           delta
         );
       } else {
-        controls.current.target.set(
+        tmpTargetRef.current.set(
           followedObject.current.position.x,
           (followedObject.current.position.y + 4) / 4,
           followedObject.current.position.z
+        );
+        controls.current.target.lerp(
+          tmpTargetRef.current,
+          Math.min(1, delta * 2)
         );
       }
     }

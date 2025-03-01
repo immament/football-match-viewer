@@ -21,7 +21,7 @@ export function PopupMenu<T extends string | number = string>({
   onBlur,
   onItemSelected,
 }: {
-  title: string;
+  title?: string;
   currentValue: T;
   items: PopupMenuItem<T>[];
   visible: boolean;
@@ -74,7 +74,7 @@ export function PopupMenu<T extends string | number = string>({
       tabIndex={-1}
       style={{ display: visible ? "block" : "none" }}
     >
-      <div className="mv-menuheader">{title}</div>
+      {title && <div className="mv-menuheader">{title}</div>}
       <div className="mv-menucontent">{menuContent}</div>
     </div>
   );

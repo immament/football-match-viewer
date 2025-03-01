@@ -2,6 +2,7 @@ import { decode } from "he";
 import { minuteToStep } from "../animations/positions.utils";
 import { formatTimeFromMinutes } from "../formatTime";
 import {
+  MatchBestMoment,
   MatchComment,
   MatchCommentsMap,
   MatchData,
@@ -14,6 +15,7 @@ import {
 } from "../MatchData.model";
 import {
   FootstarMatchData,
+  FsBestMoment,
   FsGameComment,
   FsGameEvent,
   FsSquadPlayer,
@@ -41,6 +43,7 @@ export function mapFsMatch(fsMatch: FootstarMatchData): MatchData {
     status: fsMatch.game_info.game._status,
     currentTime: Number(fsMatch.game_info.game._minuto) || 0,
     matchTimes,
+    bestMoments: mapBestMoments(fsMatch.mm.m),
   };
 
   function mapHomeTeam(): MatchTeam {
@@ -151,12 +154,12 @@ export function mapMatchEvents(
       case "extratime2":
       case "penalties":
         return {
-          ...mapTime(fsEv._m),
+          ...mapEventTime(fsEv._m),
           type: fsEv._tipo,
         };
       case "amarelo":
         return {
-          ...mapTime(fsEv._m),
+          ...mapEventTime(fsEv._m),
           type: "yellow",
           teamId: Number(fsEv._eqmarca),
           playerId: Number(fsEv._jogmarca),
@@ -168,7 +171,7 @@ export function mapMatchEvents(
           matchResult.awayGoals++;
         }
         return {
-          ...mapTime(fsEv._m),
+          ...mapEventTime(fsEv._m),
           teamId: Number(fsEv._eqmarca),
           teamIdx: teams[0].id === Number(fsEv._eqmarca) ? 0 : 1,
           playerId: Number(fsEv._jogmarca),
@@ -177,7 +180,7 @@ export function mapMatchEvents(
         };
       case "subst":
         return {
-          ...mapTime(fsEv._m),
+          ...mapEventTime(fsEv._m),
           type: "subst",
           teamIdx: teams[0].substPlayers.find((p) => p.id === fsEv._id_player1)
             ? 0
@@ -189,8 +192,8 @@ export function mapMatchEvents(
       default:
         logger.warn("unknown match event type: " + (fsEv as FsGameEvent)._tipo);
     }
-    function mapTime(time: string) {
-      const minute = Number(time.replace(",", "."));
+    function mapEventTime(time: string) {
+      const minute = mapTime(time);
       return { time: minute, timeInSeconds: minute * 60 };
     }
   }
@@ -241,4 +244,18 @@ export function createCommentsMap(comments: MatchComment[]): MatchCommentsMap {
       }
       return acc;
     }, {} as MatchCommentsMap);
+}
+
+export function mapBestMoments(bestMoments: FsBestMoment[]): MatchBestMoment[] {
+  return bestMoments.map((bm) => ({
+    startTime: mapTimeToSeconds(bm._t1),
+    endTime: mapTimeToSeconds(bm._t2),
+  }));
+}
+
+function mapTimeToSeconds(minute: string) {
+  return mapTime(minute) * 60;
+}
+function mapTime(minute: string) {
+  return Number(minute.replace(",", "."));
 }

@@ -6,6 +6,7 @@ import {
   MatchTeam,
 } from "../../MatchData.model";
 import {
+  FsBestMoment,
   FsGameComment,
   FsGameEvent,
   FsSquadPlayer,
@@ -13,6 +14,7 @@ import {
 } from "../footstar.api.model";
 import {
   createCommentsMap,
+  mapBestMoments,
   mapGameComment,
   mapGameComments,
   mapMatchEvents,
@@ -340,6 +342,33 @@ describe("footstar mapper", () => {
           text: "The game starts!\nThe sky is clear, there are no clouds in sight.\nThe wind is calm.\nDiabos takes the kick-off.\nAnatoli Atanasov tries to play at first touch...\nAnatoli Atanasov recovers the ball.\nVítor Mendes tries to go past Anatoli Atanasov\nVítor Mendes makes a dribble and moves forward\nVítor Mendes moves forward with the ball",
         },
       });
+    });
+  });
+
+  describe("map best momments", () => {
+    test("should map best momments", () => {
+      const comments: FsBestMoment[] = [
+        { _p: "1", _t1: "1,969", _t2: "2,476" },
+        { _p: "1", _t1: "3,935", _t2: "4,908" },
+        { _p: "2", _t1: "5,784", _t2: "7,89" },
+      ];
+
+      const result = mapBestMoments(comments);
+
+      expect(result).toMatchObject([
+        {
+          startTime: expect.closeTo(1.969 * 60),
+          endTime: expect.closeTo(2.476 * 60),
+        },
+        {
+          startTime: expect.closeTo(3.935 * 60),
+          endTime: expect.closeTo(4.908 * 60),
+        },
+        {
+          startTime: expect.closeTo(5.784 * 60),
+          endTime: expect.closeTo(7.89 * 60),
+        },
+      ]);
     });
   });
 });

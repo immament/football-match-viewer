@@ -16,9 +16,26 @@ export function ProgressHolderComponent() {
   const time = useAppZuStore((state) => state.matchTimer.time);
   const displayTime = useAppZuStore((state) => state.matchTimer.displayTime);
   const liveTime = useAppZuStore(
-    (state) => state.matchTimer.liveMatch?.liveTime ?? 0
+    (state) => state.matchTimer.liveMatch?.liveTime ?? -1
   );
   const gotoPercent = useAppZuStore((state) => state.mediaPlayer.gotoPercent);
+  const bestMomentsRaw = useAppZuStore(
+    ({ matchData }) => matchData.data?.bestMoments
+  );
+
+  const bestMoments = useMemo(() => {
+    if (!bestMomentsRaw || !duration) return;
+    return bestMomentsRaw
+      ?.filter(
+        (bm) =>
+          bm.startTime < duration && (liveTime < 0 || bm.startTime < liveTime)
+      )
+      .map((bm) => ({
+        start: ((bm.startTime / duration) * 100).toFixed(2) + "%",
+        duration:
+          (((bm.endTime - bm.startTime) / duration) * 100).toFixed(2) + "%",
+      }));
+  }, [bestMomentsRaw, duration, liveTime]);
 
   const playProgressRef = useRef<HTMLDivElement>(null);
   const timeTooltipRef = useRef<HTMLDivElement>(null);
@@ -100,6 +117,20 @@ export function ProgressHolderComponent() {
         onClick={progressControlClick}
       >
         <div className="mv-progress-holder" ref={progressHolderRef}>
+          {bestMoments?.map((bm, index) => (
+            <div
+              className="mv-best-moment"
+              key={`bm-${index}`}
+              style={{
+                width: bm.duration,
+                left: bm.start,
+                position: "absolute",
+              }}
+            />
+          ))}
+          {/* <div className="mv-best-moment" style={{ width: "10%" }}></div>
+          <div className="mv-gap" style={{ width: "50px" }}></div>
+          <div className="mv-best-moment" style={{ width: "4%" }}></div> */}
           <div
             className="mv-play-progress"
             ref={playProgressRef}

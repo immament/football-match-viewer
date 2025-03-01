@@ -1,12 +1,9 @@
-import { useControls } from "leva";
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { Group, Mesh } from "three";
-import { TeamState } from "../../../app/teams.slice";
-import { TeamIdx } from "../MatchData.model";
 import { FetchSource } from "../fsApi/footstar.api";
 import { Ball } from "./Ball";
 import { useMatchOrbitControls } from "./MatchOrbitControls";
-import { Player } from "./Player";
+import { Team } from "./Team";
 import { useAppZuStore } from "/app/app.zu.store";
 import { logger } from "/app/logger";
 
@@ -46,36 +43,12 @@ export const Match = () => {
 
   return (
     <group ref={matchRef} dispose={null}>
-      <Ball ref={ballRef} key="ball" />
-      {teams.map((team) => (
-        <Players team={team} teamIdx={team.teamIdx} key={team.teamIdx} />
-      ))}
+      <Suspense fallback={null}>
+        <Ball ref={ballRef} key="ball" />
+        {teams.map((team) => (
+          <Team team={team} teamIdx={team.teamIdx} key={team.teamIdx} />
+        ))}
+      </Suspense>
     </group>
   );
 };
-
-function Players({ team, teamIdx }: { team: TeamState; teamIdx: TeamIdx }) {
-  const { dbgLabelVisible } = useControls("Players", {
-    dbgLabelVisible: false,
-  });
-  return (
-    team.squadPlayers
-      // .filter((_, idx) => idx === 10 && teamIdx === 0)
-      .map((player, playerIdx) => {
-        return (
-          <Player
-            key={`${team.id}-${playerIdx}`}
-            teamIdx={teamIdx}
-            player={player}
-            playerIdx={playerIdx}
-            shirtColor={team.colors.shirt}
-            shortsColor={team.colors.shorts}
-            textColor={team.colors.text}
-            bodyColor={player.skinColor}
-            dbgLabelVisible={dbgLabelVisible}
-            movements={player.movements}
-          />
-        );
-      })
-  );
-}

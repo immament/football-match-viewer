@@ -5,6 +5,7 @@ export interface MatchData {
   positions: MatchMovement;
   teams: [MatchTeam, MatchTeam];
   eventsMap: MatchEventsMap;
+  bestMoments: MatchBestMoment[];
   matchTimes: MatchEvent[];
   commentsMap: MatchCommentsMap;
   status: "offline" | "online";
@@ -90,3 +91,8 @@ export type MatchComment = {
   text: string;
 };
 export type TeamIdx = 0 | 1;
+
+export type MatchBestMoment = {
+  startTime: number; // _t1
+  endTime: number; // _t2
+};
