@@ -34,52 +34,82 @@ const MODEL_URL = "models/stadium-transformed.glb";
 export function Stadium(
   props: { hideStadium?: boolean } & JSX.IntrinsicElements["group"]
 ) {
-  const { nodes, materials } = useGLTF(MODEL_URL) as GLTFResult;
-
+  const { nodes, materials } = useGLTF(MODEL_URL, true) as GLTFResult;
   const controls = useControls("Stadium", {
-    "Stands Visible": false,
+    "Stands Visible": true,
   });
 
   return (
     <group {...props} position={[0, -0.01, 0]} dispose={null}>
+      {/* Pitch */}
       <mesh
         geometry={nodes.Pitch.geometry}
-        material={materials.Pitch}
+        // material={materials.Pitch}
         receiveShadow
-      />
+      >
+        <primitive
+          attach="material"
+          object={materials.Pitch}
+          metalness={0.2}
+          roughness={1}
+          // color={"#00cc00"}
+          side={0}
+        />
+      </mesh>
+      {/* Floor */}
       <mesh
         geometry={nodes.Plane002.geometry}
         material={materials["Material.003"]}
       />
+      {/* Stands */}
       <mesh
         visible={controls["Stands Visible"]}
         geometry={nodes.BannerNorthCore.geometry}
-        material={materials.PaletteMaterial001}
-      />
+        // material={materials.PaletteMaterial001}
+      >
+        <meshStandardMaterial attach="material" color={"#2f6599"} side={0} />
+      </mesh>
+      {/* Goals + Towers Parts */}
       <mesh
+        visible={true}
         geometry={nodes.GoalFrameWest.geometry}
         material={materials.PaletteMaterial002}
       />
+      {/* Banner top */}
       <mesh
         geometry={nodes.Cube083_Cube099.geometry}
-        material={materials["Material.050"]}
-      />
-      <mesh
-        geometry={nodes.Tower001.geometry}
-        material={materials["Material.040"]}
-      />
+        // material={materials["Material.050"]}
+      >
+        <primitive
+          attach="material"
+          object={materials["Material.050"]}
+          side={0}
+        />
+      </mesh>
+      {/* Towers */}
+      <mesh geometry={nodes.Tower001.geometry}>
+        <primitive
+          attach="material"
+          object={materials["Material.040"]}
+          side={0}
+        />
+      </mesh>
+      {/* Bench 1 */}
       <mesh
         geometry={nodes.Cylinder020_Cylinder023.geometry}
         material={materials["Material.056"]}
       />
+      {/* Bench 2 */}
       <mesh
         geometry={nodes.Cylinder019_Cylinder022.geometry}
         material={materials["Material.055"]}
-      />
+      ></mesh>
       <mesh
         geometry={nodes.BannerNorthText.geometry}
-        material={materials["Material.045"]}
-      />
+        // material={materials["Material.045"]}
+      >
+        <meshStandardMaterial attach="material" color={"red"} side={1} />
+      </mesh>
     </group>
   );
 }
