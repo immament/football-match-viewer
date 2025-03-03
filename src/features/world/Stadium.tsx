@@ -84,7 +84,7 @@ export function Stadium(props: JSX.IntrinsicElements["group"]) {
   const { nodes, materials } = useGLTF(MODEL_URL) as GLTFResult;
   useEffect(() => {
     if (materials["standings.material"].map) {
-      materials["standings.material"].map.repeat = new THREE.Vector2(1, 4);
+      materials["standings.material"].map.repeat = new THREE.Vector2(2, 3.8);
       materials["standings.material"].side = 0;
       materials["Material.Pitch"].side = 0;
     }
