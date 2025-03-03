@@ -55,7 +55,7 @@ export const World = () => {
       <ambientLight {...ambientLightCtl} />
       {skyCtl.visible && <Sky />}
       <Suspense fallback={null}>
-        <Stadium hideStadium={false} />
+        <Stadium />
         <Match />
       </Suspense>
       {isDebug && dirLight.current && (
