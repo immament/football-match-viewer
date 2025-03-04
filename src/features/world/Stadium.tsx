@@ -41,7 +41,7 @@ export function Stadium(props: JSX.IntrinsicElements["group"]) {
       materials.Material_Standings.side = 0;
       materials.Material_Pitch.side = 0;
       materials.PaletteMaterial001.side = 0;
-      materials.PaletteMaterial002.side = 0;
+      // materials.PaletteMaterial002.side = 0;
     }
   }, [materials]);
 

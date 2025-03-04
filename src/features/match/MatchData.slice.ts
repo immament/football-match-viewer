@@ -74,7 +74,7 @@ export const createMatchDataSlice: StateCreator<
       if (aMatchData.status === "online") {
         get().matchTimer.initLiveMatch(matchTimes.startTime);
       }
-      logger.debug("matchFetchSuccess --");
+      logger.info("matchFetchSuccess --");
       return;
 
       function ballData(): {

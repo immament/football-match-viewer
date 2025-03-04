@@ -1,7 +1,7 @@
 import { Loader, PerformanceMonitor, Stats } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Leva } from "leva";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from "three";
 import "./App.scss";
 import { useAppZuStore } from "./app/app.zu.store";
@@ -15,6 +15,19 @@ import { World } from "./features/world/World";
 function App() {
   const [dpr, setDpr] = useState(1.5);
   const isDebug = useAppZuStore(({ debug }) => debug.isDebug);
+
+  const matchFetch = useAppZuStore((state) => state.matchData.matchFetch);
+  const matchStatus = useAppZuStore((state) => state.matchData.status);
+
+  useEffect(() => {
+    if (matchStatus === "idle") {
+      const urlParams = new URLSearchParams(window.location.search);
+      matchFetch(
+        Number(urlParams.get("id")),
+        urlParams.has("dev") ? "devFs" : "fs"
+      );
+    }
+  }, [matchStatus, matchFetch]);
 
   return (
     <>
@@ -33,6 +46,7 @@ function App() {
           factor={1}
           onChange={({ factor }) => {
             const newDpr = round(0.9 + 1.1 * factor, 1);
+            console.log("new", newDpr, factor);
             setDpr(newDpr);
           }}
         />

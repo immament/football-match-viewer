@@ -17,6 +17,7 @@ import {
 import { secondsToStep } from "../animations/positions.utils";
 import { useMatchDirector } from "./useMatchDirector";
 import { useAppZuStore } from "/app/app.zu.store";
+import { logger } from "/app/logger";
 
 export const BALL_RADIUS = 0.18;
 
@@ -58,7 +59,13 @@ export const Ball = forwardRef<Mesh, BallProps>(
     }, [mixer, startTime, positionAnimationRef]);
 
     useEffect(() => {
-      if (ballRef.current && !positionAnimationRef.current && ballData) {
+      if (
+        !mixer &&
+        ballRef.current &&
+        !positionAnimationRef.current &&
+        ballData
+      ) {
+        logger.debug("useEffect ball");
         const _mixer = new AnimationMixer(ballRef.current);
         const positionAction = createBallPositionAction(
           _mixer,
@@ -70,7 +77,7 @@ export const Ball = forwardRef<Mesh, BallProps>(
         positionAnimationRef.current = positionAction;
         // ballStatesRef.current = ballData.directions;
       }
-    }, [positionAnimationRef, ballData]);
+    }, [positionAnimationRef, ballData, mixer]);
 
     useEffect(() => {
       if (mixer) {

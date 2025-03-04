@@ -12,6 +12,7 @@ import { PlayerId } from "../PlayerId";
 import { PlayerMesh, PlayerProps } from "./PlayerMesh";
 import { useMatchDirector } from "./useMatchDirector";
 import { useAppZuStore } from "/app/app.zu.store";
+import { logger } from "/app/logger";
 
 const MODEL_URL = "models/player-transformed.glb";
 
@@ -58,7 +59,8 @@ export function Player({
 
   useEffect(() => {
     if (config.current) return;
-    if (playerRef.current && !config.current && player.movements) {
+    if (playerRef.current && player.movements) {
+      if (!playerId.playerIdx) logger.debug("useEffect player");
       const result = setupPlayerAnimations(
         playerId,
         playerRef.current,
@@ -120,7 +122,7 @@ export function Player({
       ref={playerRef}
       {...props}
       dispose={null}
-      visible={!!config}
+      visible={!!modelClone}
       raycast={() => null}
       {...props}
     >
