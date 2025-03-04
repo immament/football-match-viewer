@@ -72,7 +72,7 @@ function useWorldCtls() {
   const dirLightCtl = useControls("Directional Light", {
     visible: true,
     position: { x: 0, y: 20, z: -2 },
-    intensity: 1.2,
+    intensity: 1.8,
     helper: false,
     castShadow: true,
     shadowCameraHelper: false,

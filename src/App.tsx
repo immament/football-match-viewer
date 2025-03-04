@@ -46,7 +46,7 @@ function App() {
           factor={1}
           onChange={({ factor }) => {
             const newDpr = round(0.9 + 1.1 * factor, 1);
-            console.log("new", newDpr, factor);
+            // console.log("new", newDpr, factor);
             setDpr(newDpr);
           }}
         />
