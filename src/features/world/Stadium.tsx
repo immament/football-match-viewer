@@ -26,7 +26,7 @@ type GLTFResult = GLTF & {
     Material_Standings: THREE.MeshStandardMaterial;
     PaletteMaterial001: THREE.MeshStandardMaterial;
     Material_Bench: THREE.MeshStandardMaterial;
-    Material_Pitch: THREE.MeshStandardMaterial;
+    Material_Pitch_002: THREE.MeshStandardMaterial;
     Material_Banner_Top: THREE.MeshStandardMaterial;
     PaletteMaterial002: THREE.MeshStandardMaterial;
     Material_Ads: THREE.MeshStandardMaterial;
@@ -39,7 +39,9 @@ export function Stadium(props: JSX.IntrinsicElements["group"]) {
     if (materials.Material_Standings.map) {
       materials.Material_Standings.map.repeat = new THREE.Vector2(2, 3.8);
       materials.Material_Standings.side = 0;
-      materials.Material_Pitch.side = 0;
+      materials.Material_Pitch_002.side = 0;
+      materials.Material_Pitch_002.roughness = 0.8;
+      materials.Material_Pitch_002.metalness = 0.1;
       materials.PaletteMaterial001.side = 0;
       // materials.PaletteMaterial002.side = 0;
     }
@@ -61,7 +63,7 @@ export function Stadium(props: JSX.IntrinsicElements["group"]) {
       />
       <mesh
         geometry={nodes.Pitch.geometry}
-        material={materials.Material_Pitch}
+        material={materials.Material_Pitch_002}
       />
       <mesh
         geometry={nodes.bannerETop.geometry}
