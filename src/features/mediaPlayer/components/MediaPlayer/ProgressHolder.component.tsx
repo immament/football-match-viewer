@@ -1,4 +1,4 @@
-import React, {
+import {
   MouseEventHandler,
   useCallback,
   useEffect,
@@ -10,6 +10,9 @@ import React, {
 import { formatTime } from "../../../match/formatTime";
 import { useAppZuStore } from "/app/app.zu.store";
 import { debounce } from "/app/utils";
+import { MatchBestMoment } from "/src/features/match/MatchData.model";
+
+type BestMoment = { start: string; duration: string };
 
 export function ProgressHolderComponent() {
   const duration = useAppZuStore((state) => state.mediaPlayer.duration);
@@ -23,18 +26,9 @@ export function ProgressHolderComponent() {
     ({ matchData }) => matchData.data?.bestMoments
   );
 
-  const bestMoments = useMemo(() => {
+  const bestMoments: BestMoment[] | undefined = useMemo(() => {
     if (!bestMomentsRaw || !duration) return;
-    return bestMomentsRaw
-      ?.filter(
-        (bm) =>
-          bm.startTime < duration && (liveTime < 0 || bm.startTime < liveTime)
-      )
-      .map((bm) => ({
-        start: ((bm.startTime / duration) * 100).toFixed(2) + "%",
-        duration:
-          (((bm.endTime - bm.startTime) / duration) * 100).toFixed(2) + "%",
-      }));
+    return bestMomentsToView(bestMomentsRaw, duration, liveTime);
   }, [bestMomentsRaw, duration, liveTime]);
 
   const playProgressRef = useRef<HTMLDivElement>(null);
@@ -48,19 +42,20 @@ export function ProgressHolderComponent() {
     text?: string;
   }>({ visibility: "hidden" });
 
-  const [hoverTooltipOffsetX, setHoverTooltipOffsetX] = useState<string>();
-  const [timeTooltipOffsetX, setTimeTooltipOffsetX] = useState<string>();
+  // const [timeTooltipOffsetX, setTimeTooltipOffsetX] = useState<string>();
 
   useLayoutEffect(() => {
+    if (!hoverTooltipRef.current) return;
     const offsetX = fixTooltipPosition2(hoverTooltipRef.current);
-    if (offsetX) setHoverTooltipOffsetX(`${offsetX}px`);
+    hoverTooltipRef.current.style.right = `${offsetX}px`;
+    // if (offsetX) setHoverTooltipOffsetX(`${offsetX}px`);
   }, [hoverTooltip.x]);
 
   const onProgressResize: ResizeObserverCallback = useCallback(() => {
     if (!timeTooltipRef.current) return;
     const offsetX = fixTooltipPosition2(timeTooltipRef.current);
     if (offsetX === undefined) return;
-    setTimeTooltipOffsetX(`${offsetX}px`);
+    timeTooltipRef.current.style.right = `${offsetX}px`;
   }, []);
 
   const resizer = useMemo(() => {
@@ -78,34 +73,40 @@ export function ProgressHolderComponent() {
     gotoPercent((ev.nativeEvent.offsetX / ev.currentTarget.offsetWidth) * 100);
   };
 
-  const onMouseMoveOverProgressControl = debounce(
-    (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      const progressWidth = progressHolderRef.current?.clientWidth;
-      if (progressWidth) {
-        const offsetX = ev.nativeEvent.offsetX;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const onMouseMoveOverProgressControl = useCallback(
+    debounce(
+      (
+        ev: React.MouseEvent<HTMLDivElement, MouseEvent>,
+        aLiveTime: number,
+        aDuration: number
+      ): void => {
+        if (!hoverTooltipRef.current?.parentElement) return;
+        const progressWidth = progressHolderRef.current?.clientWidth;
+        if (progressWidth) {
+          const offsetX = ev.nativeEvent.offsetX;
 
-        if (offsetX >= 0 && offsetX <= progressWidth) {
-          const hoverTime = (offsetX / progressWidth) * duration;
-          if (liveTime > 0 && hoverTime > liveTime) {
-            setHoverTooltip({ visibility: "hidden" });
-            return;
-            // hoverTime = liveTime;
-            // offsetX = (liveTime / duration) * progressWidth;
-          }
-          const displayTime = formatTime(hoverTime);
-          if (displayTime) {
-            setHoverTooltip({
-              visibility: "visible",
-              x: `${offsetX.toFixed()}px`,
-              text: displayTime,
-            });
-            return;
+          if (offsetX >= 0 && offsetX <= progressWidth) {
+            const hoverTime = (offsetX / progressWidth) * aDuration;
+            if (aLiveTime > 0 && hoverTime > aLiveTime) {
+              hoverTooltipRef.current.style.visibility = "hidden";
+              return;
+            }
+            const displayTime = formatTime(hoverTime);
+            if (displayTime) {
+              hoverTooltipRef.current.style.visibility = "visible";
+              hoverTooltipRef.current.parentElement.style.left = `${offsetX.toFixed()}px`;
+              hoverTooltipRef.current.textContent = displayTime;
+              return;
+            }
           }
         }
-      }
-      setHoverTooltip({ visibility: "hidden" });
-    },
-    100
+        setHoverTooltip({ visibility: "hidden" });
+        hoverTooltipRef.current.style.visibility = "hidden";
+      },
+      100
+    ),
+    []
   );
 
   const result = (
@@ -113,45 +114,27 @@ export function ProgressHolderComponent() {
       <div className="mv-time">{displayTime}</div>
       <div
         className="mv-progress-control"
-        onMouseMove={onMouseMoveOverProgressControl}
+        onMouseMove={(ev) =>
+          onMouseMoveOverProgressControl(ev, liveTime, duration)
+        }
         onClick={progressControlClick}
       >
         <div className="mv-progress-holder" ref={progressHolderRef}>
-          {bestMoments?.map((bm, index) => (
-            <div
-              className="mv-best-moment"
-              key={`bm-${index}`}
-              style={{
-                width: bm.duration,
-                left: bm.start,
-                position: "absolute",
-              }}
-            />
-          ))}
-          {/* <div className="mv-best-moment" style={{ width: "10%" }}></div>
-          <div className="mv-gap" style={{ width: "50px" }}></div>
-          <div className="mv-best-moment" style={{ width: "4%" }}></div> */}
+          {bestMoments && <BestMoments bestMoments={bestMoments} />}
+
           <div
             className="mv-play-progress"
             ref={playProgressRef}
             style={{ width: duration ? `${(time / duration) * 100}%` : 0 }}
           >
-            <div
-              className="mv-time-tooltip"
-              ref={timeTooltipRef}
-              style={{ right: timeTooltipOffsetX }}
-            >
+            <div className="mv-time-tooltip" ref={timeTooltipRef}>
               {displayTime}
             </div>
           </div>
-          <div className="mv-hover-display" style={{ left: hoverTooltip.x }}>
+          <div className="mv-hover-display">
             <div
               className="mv-time-tooltip"
               aria-hidden="true"
-              style={{
-                visibility: hoverTooltip.visibility,
-                right: hoverTooltipOffsetX,
-              }}
               ref={hoverTooltipRef}
             >
               {hoverTooltip.text}
@@ -166,7 +149,6 @@ export function ProgressHolderComponent() {
                 className="mv-time-tooltip"
                 aria-hidden="true"
                 style={{ transform: "translateX(-50%)" }}
-                // ref={hoverTooltipRef}
               >
                 {formatTime(liveTime)}
               </div>
@@ -210,4 +192,35 @@ export function ProgressHolderComponent() {
       return tooltipHalf;
     }
   }
+}
+
+function BestMoments({ bestMoments }: { bestMoments: BestMoment[] }) {
+  return bestMoments.map((bm, index) => (
+    <div
+      className="mv-best-moment"
+      key={`bm-${index}`}
+      style={{
+        width: bm.duration,
+        left: bm.start,
+        position: "absolute",
+      }}
+    />
+  ));
+}
+
+function bestMomentsToView(
+  bestMomentsRaw: MatchBestMoment[],
+  duration: number,
+  liveTime: number
+): { start: string; duration: string }[] | undefined {
+  return bestMomentsRaw
+    ?.filter(
+      (bm) =>
+        bm.startTime < duration && (liveTime < 0 || bm.startTime < liveTime)
+    )
+    .map((bm) => ({
+      start: ((bm.startTime / duration) * 100).toFixed(2) + "%",
+      duration:
+        (((bm.endTime - bm.startTime) / duration) * 100).toFixed(2) + "%",
+    }));
 }

@@ -34,14 +34,19 @@ export function PlayerMesh({
 
   const bodyMaterial = materials.Ch38_body;
   const shortsMaterial = useMaterialClone(materials.Ch38_body, colors.shorts);
-  const socksMaterial = useMaterialClone(materials.Ch38_body, colors.shirt);
+  const socksMaterial = useMaterialClone(materials.Ch38_body, colors.socks);
 
   const canvasTextureRef = useRef<CanvasTexture>(null);
-  const canvasRef = useRef(document.createElement("canvas"));
+  const canvasRef = useRef(
+    (() => {
+      const c = document.createElement("canvas");
+      c.width = 512;
+      c.height = 512;
+      return c;
+    })()
+  );
   const canvasCtx = useRef(canvasRef.current.getContext("2d"));
   const canvaMaterialRef = useRef<MeshPhysicalMaterial>(null);
-  canvasRef.current.width = 512;
-  canvasRef.current.height = 512;
 
   // shirt material
   useLayoutEffect(() => {
@@ -72,11 +77,16 @@ export function PlayerMesh({
         material={bodyMaterial}
         skeleton={nodes.Ch38_Body.skeleton}
         raycast={() => null}
-      ></skinnedMesh>
+      >
+        {/* <meshPhysicalMaterial
+          side={0}
+          color={player.skinColor}
+          map={bodyMaterial.map}
+        /> */}
+      </skinnedMesh>
       <skinnedMesh
         name="Ch38_Shirt"
         geometry={nodes.Ch38_Shirt.geometry}
-        // material={shirtMaterial}
         skeleton={nodes.Ch38_Shirt.skeleton}
         raycast={() => null}
       >

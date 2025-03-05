@@ -124,6 +124,7 @@ export function Player({
       dispose={null}
       visible={!!modelClone}
       raycast={() => null}
+      position-x={(teamIdx ? 1.1 : -1.1) * (2 + playerIdx)}
       {...props}
     >
       <PlayerMesh

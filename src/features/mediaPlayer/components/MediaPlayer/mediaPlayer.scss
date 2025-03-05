@@ -115,6 +115,7 @@ div.mv-control-bar {
           height: 100%;
           position: absolute;
           content: " ";
+          display: none;
         }
       }
 
@@ -144,6 +145,9 @@ div.mv-control-bar {
         }
         .mv-live-time {
           visibility: visible;
+        }
+        .mv-best-moment {
+          display: block;
         }
       }
     }

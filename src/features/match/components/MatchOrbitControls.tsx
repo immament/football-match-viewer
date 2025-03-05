@@ -35,19 +35,26 @@ export function useMatchOrbitControls(
   const tmpTargetRef = useRef(new Vector3());
 
   useEffect(() => {
-    let obj = undefined;
-    if (followedObjectId === FOLLOW_BALL_IDX) {
-      obj = ballRef.current;
-    } else if (
-      matchRef.current &&
-      followedObjectId >= 1 &&
-      followedObjectId <= 22
-    ) {
-      obj = matchRef.current.getObjectByName(
-        toPlayerObjectName(followedObjectId - 1)
-      )?.parent;
+    setFollowedObject();
+
+    function setFollowedObject() {
+      let obj = undefined;
+      if (followedObjectId === FOLLOW_BALL_IDX) {
+        obj = ballRef.current;
+        if (!obj) {
+          setTimeout(() => setFollowedObject(), 200);
+        }
+      } else if (
+        matchRef.current &&
+        followedObjectId >= 1 &&
+        followedObjectId <= 22
+      ) {
+        obj = matchRef.current.getObjectByName(
+          toPlayerObjectName(followedObjectId - 1)
+        )?.parent;
+      }
+      followedObject.current = obj ?? undefined;
     }
-    followedObject.current = obj ?? undefined;
   }, [followedObjectId, ballRef, matchRef]);
 
   useEffect(() => {

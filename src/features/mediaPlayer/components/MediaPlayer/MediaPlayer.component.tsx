@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { DisplayMomentsButton } from "./DisplayMoments.button";
 import { FollowObjectButton } from "./FollowObject.button";
 import { FullscreenButton } from "./Fullscreen.button";
@@ -12,19 +12,28 @@ import { useAppZuStore } from "/app/app.zu.store";
 export function MediaPlayerComponent() {
   useKeyboard();
 
-  const result = (
-    <div className="mv-control-bar">
-      <ProgressHolderComponent />
+  const buttonsLine = useMemo(() => {
+    return (
       <div className="mv-buttons-line">
         <TooglePlayButton />
         <div className="mv-buttons-group">
           <DisplayMomentsButton />
-          <FollowObjectButton />
+          <FollowObjectButton key="follow-object" />
           <PlaybackSpeedButton />
           <ToogleCommentsButton />
           <FullscreenButton />
         </div>
       </div>
+    );
+  }, []);
+  const progressHolderComponent = useMemo(() => {
+    return <ProgressHolderComponent />;
+  }, []);
+
+  const result = (
+    <div className="mv-control-bar">
+      {progressHolderComponent}
+      {buttonsLine}
     </div>
   );
 

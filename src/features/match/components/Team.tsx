@@ -19,9 +19,7 @@ export function Team({ team, teamIdx }: { team: TeamState; teamIdx: TeamIdx }) {
             player={player}
             playerIdx={playerIdx}
             colors={team.colors}
-            // bodyColor={player.skinColor}
             dbgLabelVisible={dbgLabelVisible}
-            // movements={player.movements}
           />
         );
       })
