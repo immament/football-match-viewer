@@ -40,7 +40,7 @@ export const World = () => {
           ]}
           castShadow={dirLightCtl.castShadow}
           intensity={dirLightCtl.intensity}
-          shadow-mapSize={[512, 512]}
+          // shadow-mapSize={[512, 512]}
         >
           <orthographicCamera
             ref={shadowCamera}
