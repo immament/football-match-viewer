@@ -14,7 +14,7 @@ import { useMatchDirector } from "./useMatchDirector";
 import { useAppZuStore } from "/app/app.zu.store";
 import { logger } from "/app/logger";
 
-const MODEL_URL = "models/player-transformed.glb";
+export const PLAYER_MODEL_URL = "models/player-transformed.glb";
 
 export function Player({
   player,
@@ -22,17 +22,18 @@ export function Player({
   playerIdx,
   dbgLabelVisible,
   colors,
+  materials,
   ...props
 }: PlayerProps & {
   dbgLabelVisible?: boolean;
 } & JSX.IntrinsicElements["group"]) {
   const playerId: PlayerId = useMemo(
-    () => ({ teamIdx, playerIdx }),
+    () => new PlayerId(teamIdx, playerIdx),
     [teamIdx, playerIdx]
   );
 
   const playerRef = React.useRef<Group>(null);
-  const { scene: model, animations } = useGLTF(MODEL_URL);
+  const { scene: model, animations } = useGLTF(PLAYER_MODEL_URL);
   const modelClone = React.useMemo(() => SkeletonUtils.clone(model), [model]);
   const poseAnimations = useAnimations(animations, playerRef);
 
@@ -133,6 +134,7 @@ export function Player({
         player={player}
         playerIdx={playerIdx}
         teamIdx={teamIdx}
+        materials={materials}
       />
 
       <Billboard visible={false} ref={labelRef}>
@@ -205,7 +207,7 @@ export function Player({
   );
 }
 
-useGLTF.preload(MODEL_URL);
+useGLTF.preload(PLAYER_MODEL_URL);
 
 function updateDbgLabel(
   dbgLabel: { text: string } | null,

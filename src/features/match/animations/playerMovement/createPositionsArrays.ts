@@ -6,6 +6,7 @@ import {
   xToPitch,
   zToPitch,
 } from "../positions.utils";
+import { logger } from "/app/logger";
 
 export function createPositionsArrays(
   { px, pz }: PlayerPositions,
@@ -31,7 +32,15 @@ export function createPositionsArrays(
     positions[index * 3 + 2] = zToPitch(pz[index]);
   });
   fixLastRecords(positions, 3);
-  traceResult();
+
+  if (!positions[0] && !positions[0]) {
+    positions[0] = playerId.teamIdx === 0 ? 0.35 : -0.35;
+    positions[2] = -0.35;
+  }
+
+  if (logger.getLevel() == 0) {
+    traceResult();
+  }
 
   if (times.length * 3 !== positions.length) {
     throw new Error(

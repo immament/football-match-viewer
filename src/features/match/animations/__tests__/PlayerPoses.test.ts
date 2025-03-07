@@ -11,7 +11,7 @@ vi.mock(import("three"));
 const PlayerActions = vi.fn();
 
 describe("PlayerPoses", () => {
-  const defaultPlayerId: Readonly<PlayerId> = { teamIdx: 1, playerIdx: 2 };
+  const defaultPlayerId = new PlayerId(1, 2);
   let playerPoses: PlayerPoses;
 
   describe("simple properties", () => {

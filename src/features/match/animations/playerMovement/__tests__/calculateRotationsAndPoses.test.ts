@@ -7,7 +7,7 @@ import { BallPositionsConfig } from "../../positions.utils";
 import { calculateRotationsAndPoses } from "../calculateRotationsAndPoses";
 
 describe("calculateRotationsAndPoses", () => {
-  const playerId: PlayerId = { teamIdx: 0, playerIdx: 1 };
+  const playerId = new PlayerId(0, 1);
   const positions = [0, 0, 1, 0, 0, 1, 0, 0, 1];
   const times: ReadonlyArray<number> = [0, 1, 2];
   const ballPositions: BallPositionsConfig = {

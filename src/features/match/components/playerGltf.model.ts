@@ -22,19 +22,26 @@ type ActionName =
 interface GLTFAction extends AnimationClip {
   name: ActionName;
 }
-export type GLTFResult = GLTF & {
+export type PlayerGLTFResult = GLTF & {
   nodes: {
     Ch38_Body: SkinnedMesh;
     Ch38_Shirt: SkinnedMesh;
     Ch38_Shoes: SkinnedMesh;
     Ch38_Shorts: SkinnedMesh;
     Ch38_Socks: SkinnedMesh;
+    Ch38_Hair: SkinnedMesh;
     mixamorig5Hips: Bone;
   };
+
   materials: {
-    Ch38_body: MeshStandardMaterial;
+    Body_Material: MeshStandardMaterial;
     Shirt_Material: MeshStandardMaterial;
+    Shoes_Material: MeshStandardMaterial;
+    Shorts_Material: MeshStandardMaterial;
+    Socks_Material: MeshStandardMaterial;
+    Ch38_hair: MeshStandardMaterial;
   };
+
   animations: GLTFAction[];
 };
 

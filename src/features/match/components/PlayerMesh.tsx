@@ -4,23 +4,43 @@ Command: npx gltfjsx@6.5.3 player.glb -TtjM
 Command args: --types --transform --keepmeshes --keepmaterials
 Files: player.glb [27.72MB] > C:\Users\immam\OneDrive\Documents\blender\character\player-transformed.glb [645.56KB] (98%)
 */
+import { useTexture } from "@react-three/drei";
 import { useGraph } from "@react-three/fiber";
 import { useLayoutEffect, useRef } from "react";
 import {
   CanvasTexture,
+  Color,
+  FrontSide,
   MeshPhysicalMaterial,
+  MeshStandardMaterial,
   Object3D,
-  RepeatWrapping,
 } from "three";
 import { MatchPlayer, TeamColors } from "../MatchData.model";
-import { GLTFResult } from "./playerGltf.model";
+import { PlayerGLTFResult } from "./playerGltf.model";
 import { useMaterialClone } from "./useMaterialClone";
+
+const HAIR_BALD_TYPE_ID = "15";
+const CANVAS_SIZE = 512;
+const BODY_TEXTURES_PATHS = [
+  "models/textures/Body.Image.Bald-BW.512.png",
+  "models/textures/Body.Image.Details.without-mouth.512.png",
+];
+
+export type PlayerMaterials = {
+  shorts: MeshStandardMaterial;
+  socks: MeshStandardMaterial;
+  shirt: MeshStandardMaterial;
+  body: MeshStandardMaterial;
+  shoes: MeshStandardMaterial;
+  hair: MeshStandardMaterial;
+};
 
 export type PlayerProps = {
   colors: TeamColors;
   teamIdx: 0 | 1;
   playerIdx: number;
   player: MatchPlayer;
+  materials: PlayerMaterials;
 };
 
 export function PlayerMesh({
@@ -29,119 +49,180 @@ export function PlayerMesh({
   playerIdx,
   player,
   model,
+  materials,
 }: { model: Object3D } & PlayerProps) {
-  const { nodes, materials } = useGraph(model) as GLTFResult;
+  const { nodes } = useGraph(model) as PlayerGLTFResult;
 
-  const bodyMaterial = materials.Ch38_body;
-  const shortsMaterial = useMaterialClone(materials.Ch38_body, colors.shorts);
-  const socksMaterial = useMaterialClone(materials.Ch38_body, colors.socks);
+  const [bodyBaldTexture, bodyDetailsTexture] = useTexture(BODY_TEXTURES_PATHS);
 
-  const canvasTextureRef = useRef<CanvasTexture>(null);
-  const canvasRef = useRef(
+  const shirtCanvasTextureRef = useRef<CanvasTexture>(null);
+  const shirtCanvasRef = useRef(
     (() => {
       const c = document.createElement("canvas");
-      c.width = 512;
-      c.height = 512;
+      c.width = CANVAS_SIZE;
+      c.height = CANVAS_SIZE;
       return c;
     })()
   );
-  const canvasCtx = useRef(canvasRef.current.getContext("2d"));
-  const canvaMaterialRef = useRef<MeshPhysicalMaterial>(null);
+  const shirtCanvasCtx = useRef(shirtCanvasRef.current.getContext("2d"));
+  const shirtCanvasMaterialRef = useRef<MeshPhysicalMaterial>(null);
+
+  const bodyCanvasTextureRef = useRef<CanvasTexture>(null);
+  const bodyCanvasRef = useRef(
+    (() => {
+      const c = document.createElement("canvas");
+      // c.width = 512;
+      // c.height = 512;
+      return c;
+    })()
+  );
+  const bodyCanvasCtx = useRef(bodyCanvasRef.current.getContext("2d"));
+  const bodyCanvasMaterialRef = useRef<MeshPhysicalMaterial>(null);
+
+  const hairMaterial = useMaterialClone(
+    player.hairType !== HAIR_BALD_TYPE_ID ? materials.hair : undefined,
+    undefined,
+    player.hairColor
+  );
 
   // shirt material
   useLayoutEffect(() => {
-    if (!materials.Shirt_Material?.map?.image) return;
-    if (!canvasCtx.current) return;
-    paintOnCanvas(
-      materials.Shirt_Material.map.image,
-      canvasRef.current,
-      canvasCtx.current,
+    if (!materials.shirt?.map?.image) return;
+    if (!shirtCanvasCtx.current) return;
+    paintOnShirtCanvas(
+      materials.shirt.map.image,
+      shirtCanvasRef.current,
+      shirtCanvasCtx.current,
       colors,
       player
     );
-    if (canvasTextureRef.current) canvasTextureRef.current.needsUpdate = true;
-  }, [materials.Shirt_Material, colors, player]);
+    if (shirtCanvasTextureRef.current)
+      shirtCanvasTextureRef.current.needsUpdate = true;
+  }, [materials.shirt, colors, player]);
+
+  // body material
+  useLayoutEffect(() => {
+    if (!bodyCanvasCtx.current) return;
+
+    const bodyTexture =
+      player.hairType === HAIR_BALD_TYPE_ID
+        ? bodyBaldTexture
+        : materials.body.map;
+
+    if (!bodyTexture) return;
+
+    paintOnBodyCanvas(
+      bodyTexture.image,
+      bodyDetailsTexture.image,
+      bodyCanvasRef.current,
+      bodyCanvasCtx.current,
+      player.skinColor
+    );
+    if (bodyCanvasTextureRef.current)
+      bodyCanvasTextureRef.current.needsUpdate = true;
+  }, [player, bodyBaldTexture, bodyDetailsTexture, materials.body]);
 
   return (
     <group
       name={`Player-${teamIdx}-${playerIdx}`}
-      rotation={[Math.PI / 2, 0, 0]}
       scale={0.01}
       dispose={null}
       raycast={() => null}
     >
       <primitive object={nodes.mixamorig5Hips} />
+
       <skinnedMesh
         name="Ch38_Body"
         geometry={nodes.Ch38_Body.geometry}
-        material={bodyMaterial}
         skeleton={nodes.Ch38_Body.skeleton}
         raycast={() => null}
       >
-        {/* <meshPhysicalMaterial
-          side={0}
-          color={player.skinColor}
-          map={bodyMaterial.map}
-        /> */}
+        <meshPhysicalMaterial
+          ref={bodyCanvasMaterialRef}
+          side={FrontSide}
+          roughness={0.5}
+          metalness={0.02}
+        >
+          <canvasTexture
+            ref={bodyCanvasTextureRef}
+            attach="map"
+            image={bodyCanvasRef.current}
+            flipY={false}
+          />
+        </meshPhysicalMaterial>
       </skinnedMesh>
+
+      {hairMaterial && (
+        <skinnedMesh
+          name="Ch38_Hair"
+          geometry={nodes.Ch38_Hair.geometry}
+          skeleton={nodes.Ch38_Hair.skeleton}
+        >
+          <primitive
+            object={hairMaterial}
+            emissiveIntensity={0.3}
+            roughness={0.8}
+            metalness={0}
+          />
+        </skinnedMesh>
+      )}
+
       <skinnedMesh
         name="Ch38_Shirt"
         geometry={nodes.Ch38_Shirt.geometry}
         skeleton={nodes.Ch38_Shirt.skeleton}
         raycast={() => null}
       >
-        <meshPhysicalMaterial ref={canvaMaterialRef} side={0}>
+        <meshPhysicalMaterial ref={shirtCanvasMaterialRef} side={FrontSide}>
           <canvasTexture
-            ref={canvasTextureRef}
+            ref={shirtCanvasTextureRef}
             attach="map"
-            image={canvasRef.current}
-            wrapS={RepeatWrapping}
-            wrapT={RepeatWrapping}
+            image={shirtCanvasRef.current}
             flipY={false}
           />
         </meshPhysicalMaterial>
       </skinnedMesh>
-
       <skinnedMesh
         name="Ch38_Shorts"
         geometry={nodes.Ch38_Shorts.geometry}
-        material={shortsMaterial}
         skeleton={nodes.Ch38_Shorts.skeleton}
+        material={materials.shorts}
         raycast={() => null}
         castShadow
-      />
+      ></skinnedMesh>
       <skinnedMesh
         name="Ch38_Socks"
         geometry={nodes.Ch38_Socks.geometry}
-        material={socksMaterial}
+        material={materials.socks}
         skeleton={nodes.Ch38_Socks.skeleton}
         raycast={() => null}
       />
       <skinnedMesh
         name="Ch38_Shoes"
         geometry={nodes.Ch38_Shoes.geometry}
-        material={bodyMaterial}
+        material={materials.shoes}
         skeleton={nodes.Ch38_Shoes.skeleton}
         raycast={() => null}
       />
     </group>
   );
 }
-function paintOnCanvas(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  srcImg: any,
+
+function paintOnShirtCanvas(
+  srcImg: ImageBitmap,
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
   colors: TeamColors,
   player: MatchPlayer
+  // shirtTexture: Texture
 ) {
   canvas.width = srcImg.width;
   canvas.height = srcImg.height;
 
-  // ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(srcImg, 0.0, 0.0);
   ctx.fillStyle = colors.shirt.toString() + "f0";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.drawImage(srcImg, 0.0, 0.0);
 
   // number
   ctx.font = "bold 100px Arial";
@@ -149,7 +230,40 @@ function paintOnCanvas(
   ctx.textBaseline = "middle";
   ctx.fillStyle = colors.text.toString();
   ctx.fillText(player.shirtNumber, 120, 350);
+
+  ctx.font = "bold 24px Arial";
+  ctx.fillText(player.shirtNumber, 295, 140);
   // name
   ctx.font = "normal 20px Arial";
   ctx.fillText(player.name.split(" ").reverse()[0].slice(0, 20), 120, 280, 150);
 }
+
+function paintOnBodyCanvas(
+  grayImg: ImageBitmap,
+  detailsImg: ImageBitmap,
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  skinColor: string
+  // shirtTexture: Texture
+) {
+  canvas.width = CANVAS_SIZE;
+  canvas.height = CANVAS_SIZE;
+
+  ctx.drawImage(grayImg, 0.0, 0.0, canvas.width, canvas.height);
+
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const color = new Color(skinColor);
+
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    imageData.data[i + 0] *= color.r;
+    imageData.data[i + 1] *= color.g;
+    imageData.data[i + 2] *= color.b;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  ctx.globalAlpha = 9;
+  if (detailsImg)
+    ctx.drawImage(detailsImg, 0.0, 0.0, canvas.width, canvas.height);
+}
+
+useTexture.preload(BODY_TEXTURES_PATHS);

@@ -24,7 +24,7 @@ const PoseActionMock = vi.fn((isMove: boolean) => {
 });
 
 describe("PlayerActions", () => {
-  const _playerId: PlayerId = { teamIdx: 0, playerIdx: 1 };
+  const _playerId = new PlayerId(0, 1);
   let _positionAction: AnimationAction;
   let _rotateAction: AnimationAction;
   let _poseActions: Record<PoseTypes, IPoseAction>;

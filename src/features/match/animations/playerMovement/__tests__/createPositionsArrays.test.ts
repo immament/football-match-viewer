@@ -6,7 +6,7 @@ import { PlayerPositions } from "../../positions.utils";
 import { createPositionsArrays } from "../createPositionsArrays";
 
 describe("createPositionsArrays", () => {
-  const playerId: PlayerId = { teamIdx: 0, playerIdx: 1 };
+  const playerId = new PlayerId(0, 1);
   // const px = [1, 2, 3, 4, 5];
   // const pz = [6, 7, 8, 9, 10];
   const px = [6650, 6650 + 61, 6650 + 61, 6650 - 61 * 2, 6650];
@@ -37,7 +37,7 @@ describe("createPositionsArrays", () => {
   it("should calculate positions array correctly", () => {
     const result = createPositionsArrays(playerPositions, playerId);
     expect(result.positions).toMatchObject([
-      0, 0, 0, 1, 0, 2, 1, 0, 2, -2, 0, 5, -2, 0, 5,
+      0.35, 0, -0.35, 1, 0, 2, 1, 0, 2, -2, 0, 5, -2, 0, 5,
     ]);
   });
 });

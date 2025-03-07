@@ -5,6 +5,7 @@ import { RawPoseEvents } from "../player/Pose.model";
 import { PoseBuilder } from "../player/PoseBuilder";
 import { PoseBuilderContext } from "../player/PoseBuilderContext";
 import { BallPositionsConfig } from "../positions.utils";
+import { logger } from "/app/logger";
 
 export function calculateRotationsAndPoses(
   // [x, y, z, x, y, z, ...]
@@ -35,8 +36,9 @@ function createRotateActionInternal(
     rawPoses,
     ballPositions
   );
-
-  traceResult();
+  if (logger.getLevel() == 0) {
+    traceResult();
+  }
 
   return { rotateValues, poses };
 

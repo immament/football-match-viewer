@@ -8,6 +8,7 @@ import {
   TeamColors,
   TeamIdx,
 } from "../features/match/MatchData.model";
+import { PlayerId } from "../features/match/PlayerId";
 import { AppStoreState } from "./app.zu.store";
 
 export interface TeamsSlice {
@@ -77,7 +78,7 @@ function mapTeamToState(
 ): TeamState {
   team.squadPlayers.forEach((player, playerIdx) => {
     player.movements = calculataPlayerMovement(
-      { playerIdx, teamIdx: team.teamIdx },
+      new PlayerId(team.teamIdx, playerIdx),
       matchMovement
     );
   });

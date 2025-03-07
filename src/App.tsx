@@ -50,7 +50,7 @@ function App() {
             setDpr(newDpr);
           }}
         />
-        <Stats className="stats" />{" "}
+        <Stats className="stats" />
       </Canvas>
       <Loader />
       <MediaHeaderComponent />
