@@ -9,6 +9,7 @@ export function useMatchDirector(
   isMain = false,
   onFrame?: (state: RootState, delta: number) => void
 ) {
+  // console.log("aaa");
   const liveTime = useRef<number>();
   useEffect(
     () =>

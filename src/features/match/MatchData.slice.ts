@@ -127,6 +127,14 @@ export const createMatchDataSlice: StateCreator<
 
       if (DEBUG_MATCHES_IDS.includes(matchId)) srcType = "local";
 
+      // fetchFootstarMatchReport(matchId, srcType)
+      //   .then((report) => {
+      //     console.log("match report:", report);
+      //   })
+      //   .catch((error) => {
+      //     console.warn("match report error:", error);
+      //   });
+
       try {
         const fsMatch = await fetchFootstarMatchData(matchId, srcType);
         const matchData = mapFsMatch(fsMatch);

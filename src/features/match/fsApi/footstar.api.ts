@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-import { getMatchData } from "./__mocks__/match.1663808.data";
+import { getMatchData } from "./__mocks__/match.data";
 import { FootstarMatchData, FootstarMatchResponse } from "./footstar.api.model";
 import { logger } from "/app/logger";
 

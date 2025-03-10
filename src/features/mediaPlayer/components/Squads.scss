@@ -1,0 +1,24 @@
+.mv-squads {
+  width: 90%;
+  height: 60px;
+  left: 5%;
+  top: 70px;
+  background: white;
+  border-radius: 4px;
+  opacity: 0;
+  box-shadow: 0 5px 15px rgba(black, 0.2);
+  position: absolute;
+  z-index: 10;
+
+  transform: translateX(-130%);
+  transition-timing-function: ease-in;
+  transition: 0.2s;
+
+  &.alert-is-shown {
+    transition: 0.25s;
+    transition-timing-function: ease-out;
+
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

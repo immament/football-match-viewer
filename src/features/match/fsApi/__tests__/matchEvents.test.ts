@@ -4,7 +4,7 @@ import { MatchEvent } from "../../MatchData.model";
 import { createEventsMap } from "../footstar.mapper";
 import { createTimeEventObj } from "./matchEventTest.utils";
 
-describe.skip("create match events map", () => {
+describe("create match events map", () => {
   const rawEvents: MatchEvent[] = [
     {
       time: 0,
@@ -46,7 +46,9 @@ describe.skip("create match events map", () => {
     it.each(rawEvents)("should create map with $type event", (ev) => {
       const result = createEventsMap([ev]);
 
-      const expected = { [minuteToStep(ev.time)]: { events: [{ ...ev }] } };
+      const expected = {
+        [minuteToStep(ev.time)]: { events: [{ ...ev }], nextEventStep: -1 },
+      };
 
       expect(result).toEqual(expected);
     });
@@ -57,11 +59,17 @@ describe.skip("create match events map", () => {
       createTimeEventObj({ time: 45.62341, type: "halftime" }),
       createTimeEventObj({ time: 90.235, type: "extratime1" }),
     ];
-    const result = createEventsMap(events);
+    const result = createEventsMap([...events]);
 
     const expected = {
-      [minuteToStep(45.62341)]: { events: [{ ...events[0] }] },
-      [minuteToStep(90.235)]: { events: [{ ...events[1] }] },
+      [minuteToStep(45.62341)]: {
+        events: [{ ...events[0] }],
+        nextEventStep: 10828,
+      },
+      [minuteToStep(90.235)]: {
+        events: [{ ...events[1] }],
+        nextEventStep: -1,
+      },
     };
 
     expect(result).toEqual(expected);
@@ -78,10 +86,13 @@ describe.skip("create match events map", () => {
       },
       { time: 45.101, timeInSeconds: 45.101 * 60, type: "halftime" },
     ];
-    const result = createEventsMap(events);
+    const result = createEventsMap([...events]);
 
     const expected = {
-      [minuteToStep(45.101)]: { events: [...events.map((ev) => ({ ...ev }))] },
+      [minuteToStep(45.101)]: {
+        events: [...events.map((ev) => ({ ...ev }))],
+        nextEventStep: -1,
+      },
     };
 
     expect(result).toEqual(expected);

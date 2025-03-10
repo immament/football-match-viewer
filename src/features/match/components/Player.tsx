@@ -49,7 +49,6 @@ export function Player({
     (state) => state.teams.teamsArray[teamIdx].squadPlayers[playerIdx]
   );
   const isDebug = useAppZuStore(({ debug }) => debug.isDebug);
-
   useEffect(() => {
     config.current?.gotoTime(startTime);
   }, [startTime]);
@@ -107,7 +106,7 @@ export function Player({
     //   labelHtmlRef.current.style.display = isVisible ? "block" : "none";
     // }
   }
-
+  // console.log("aa");
   useMatchDirector(config.current?.get_mixer, false, onFrameUpdate);
 
   const labelRef = useRef<Group>(null);
@@ -121,7 +120,6 @@ export function Player({
       name={`Player`}
       key={`${teamIdx}-${playerIdx}`}
       ref={playerRef}
-      {...props}
       dispose={null}
       visible={!!modelClone}
       raycast={() => null}

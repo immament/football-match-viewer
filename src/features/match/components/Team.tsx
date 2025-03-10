@@ -14,7 +14,7 @@ export function Team({ team, teamIdx }: { team: TeamState; teamIdx: TeamIdx }) {
     dbgLabelVisible: false,
   });
 
-  const { scene: model, ...gltfRest } = useGLTF(PLAYER_MODEL_URL);
+  const { scene: model } = useGLTF(PLAYER_MODEL_URL);
   const { materials: modelMaterials } = useGraph(model) as PlayerGLTFResult;
 
   const shortsMaterial = useMaterialClone(
@@ -43,7 +43,7 @@ export function Team({ team, teamIdx }: { team: TeamState; teamIdx: TeamIdx }) {
       });
     }
     prepareMaterials();
-  }, [modelMaterials, shortsMaterial, socksMaterial, gltfRest, model]);
+  }, [modelMaterials, shortsMaterial, socksMaterial, model]);
 
   if (!materials) return <></>;
   return (
