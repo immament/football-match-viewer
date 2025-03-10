@@ -150,8 +150,8 @@ export function Player({
 
       {/* <Html
         style={{display: "none"}}
-        className="player-label"
-        wrapperClass="player-label-wrapper"
+        className="mv-player-label"
+        wrapperClass="mv-player-label-wrapper"
         ref={labelHtmlRef}
         position={[0, 2, 0]}
         center

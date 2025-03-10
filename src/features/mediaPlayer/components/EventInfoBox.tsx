@@ -20,14 +20,14 @@ export function EventInfoBox() {
 
   if (!eventToDisplay) return;
   return (
-    <div className="info-box" style={{ visibility }}>
-      <div className="info-box-header" style={eventToDisplay.style}>
+    <div className="mv-info-box" style={{ visibility }}>
+      <div className="mv-info-box-header" style={eventToDisplay.style}>
         <div>{eventToDisplay.header}</div>
-        <div className="info-box-time">
+        <div className="mv-info-box-time">
           <div>{eventToDisplay.time}</div>
         </div>
       </div>
-      <div className="info-box-content">
+      <div className="mv-info-box-content">
         <div>
           <i className={eventToDisplay.iconCss} />
         </div>

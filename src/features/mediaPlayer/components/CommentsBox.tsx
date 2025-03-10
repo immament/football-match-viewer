@@ -44,11 +44,11 @@ export function CommentsBox() {
 
   return (
     <div
-      className="comment-box"
+      className="mv-comment-box"
       style={{ visibility: comments.length ? "visible" : "hidden" }}
     >
       {comments.map((comment) => (
-        <div className="comment-box-content" key={comment.step}>
+        <div className="mv-comment-box-content" key={comment.step}>
           <div>{comment.displayTime}</div>
           <div>{comment.content}</div>
         </div>

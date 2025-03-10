@@ -1,24 +1,9 @@
-.mv-container {
+div#mv-container {
   width: 100%;
   height: 100%;
 }
 
-.app-fallback {
-  background-color: #122b00;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: large;
-}
-
-.stats-gl {
-  position: absolute;
-  top: 100px;
-  left: 0;
-}
-
-.info-box {
+.mv-info-box {
   position: absolute;
   font-size: 14px;
   left: 50%;
@@ -31,7 +16,7 @@
   background-color: #212529d9;
   width: calc(min(90%, 350px));
 
-  .info-box-header {
+  .mv-info-box-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -43,7 +28,7 @@
     border-top-right-radius: 5px;
   }
 
-  .info-box-content {
+  .mv-info-box-content {
     display: flex;
     column-gap: 1em;
     padding: 0.5em 1em;
@@ -52,23 +37,23 @@
   }
 }
 
-.comment-box {
+.mv-comment-box {
   position: absolute;
   font-size: 14px;
   left: 50%;
-  bottom: 70px;
+  bottom: 20px;
   transform: translateX(-50%);
   border-radius: 6px;
-  color: #010a13;
+  color: #000;
   min-width: 100px;
   max-width: 95%;
   width: max-content;
   border: 1px solid #ffffff26;
-  background-color: #adb1b455;
+  background-color: #adb1b4dd;
   padding: 0.3em 0;
   // width: calc(min(90%, 350px));
 
-  .comment-box-content {
+  .mv-comment-box-content {
     display: flex;
     column-gap: 1em;
     padding: 0.2em 1em;
@@ -77,6 +62,15 @@
   }
 }
 
-.player-label {
-  color: black;
+.mv-user-is-active {
+  .mv-comment-box {
+    bottom: 70px;
+  }
+}
+
+/// Other
+.stats-gl {
+  position: absolute;
+  top: 100px;
+  left: 0;
 }

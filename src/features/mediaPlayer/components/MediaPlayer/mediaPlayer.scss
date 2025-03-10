@@ -13,12 +13,9 @@ div.mv-control-bar {
   display: flex;
   flex-direction: column;
 
-  & {
-    // visible
-    opacity: 1;
-    transition: visibility 0.1s, opacity 0.1s;
-    visibility: visible;
-  }
+  opacity: 0;
+  transition: visibility 0.25s, opacity 0.2s;
+  visibility: hidden;
 
   .mv-progress-line {
     display: flex;
@@ -244,5 +241,13 @@ div.mv-control-bar {
     .mv-menuitem-separator {
       border-bottom: 1px solid #ffffff20;
     }
+  }
+}
+
+.mv-user-is-active {
+  .mv-control-bar {
+    opacity: 1;
+    transition: visibility 0.1s, opacity 0.1s;
+    visibility: visible;
   }
 }
