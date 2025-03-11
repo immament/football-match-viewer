@@ -1,4 +1,4 @@
-import { Loader, PerformanceMonitor, Stats } from "@react-three/drei";
+import { Loader, PerformanceMonitor, Stats, StatsGl } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Leva } from "leva";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -10,13 +10,18 @@ import { CommentsBox } from "./features/mediaPlayer/components/CommentsBox";
 import { EventInfoBox } from "./features/mediaPlayer/components/EventInfoBox";
 import { MediaHeaderComponent } from "./features/mediaPlayer/components/MediaHeader/MediaHeader.component";
 import { MediaPlayerComponent } from "./features/mediaPlayer/components/MediaPlayer/MediaPlayer.component";
+import { Squads } from "./features/mediaPlayer/components/Squads";
 import { World } from "./features/world/World";
+
+const urlParams = new URLSearchParams(window.location.search);
 
 function App() {
   const [dpr, setDpr] = useState(1.5);
   const isDebug = useAppZuStore(({ debug }) => debug.isDebug);
+  const displayStats = useRef(urlParams.has("stats"));
+  const displayStatsGl = useRef(urlParams.has("stats-gl"));
 
-  const userActivityRef = useRef(false);
+  const userActivityRef = useRef(true);
   const userIsActiveRef = useRef(false);
   const inactivityTimeout = useRef<number>();
   const mvContainerRef = useRef<HTMLDivElement>(null);
@@ -26,7 +31,6 @@ function App() {
 
   useEffect(() => {
     if (matchStatus === "idle") {
-      const urlParams = new URLSearchParams(window.location.search);
       matchFetch(
         Number(urlParams.get("id")),
         urlParams.has("dev") ? "devFs" : "fs"
@@ -64,6 +68,7 @@ function App() {
     <div
       id="mv-container"
       onMouseMove={() => reportUserActivity()}
+      onTouchStart={() => reportUserActivity()}
       ref={mvContainerRef}
     >
       <Canvas
@@ -75,6 +80,7 @@ function App() {
           outputColorSpace: SRGBColorSpace,
         }}
         shadows={{ type: PCFSoftShadowMap }}
+        frameloop={urlParams.has("demand") ? "demand" : "always"}
       >
         <World />
         <PerformanceMonitor
@@ -85,13 +91,17 @@ function App() {
             setDpr(newDpr);
           }}
         />
-        <Stats className="stats" />
+        {(isDebug || displayStats.current) && <Stats className="mv-stats" />}
+        {displayStatsGl.current && (
+          <StatsGl className="mv-stats-gl" trackGPU={true} />
+        )}
       </Canvas>
       <Loader />
       <MediaHeaderComponent />
       <MediaPlayerComponent />
       <EventInfoBox />
       <CommentsBox />
+      <Squads />
       <Leva collapsed hidden={!isDebug} />
     </div>
   );
