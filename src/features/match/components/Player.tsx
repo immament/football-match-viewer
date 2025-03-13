@@ -1,18 +1,16 @@
 import { Billboard, Text, useAnimations, useGLTF } from "@react-three/drei";
 import { RootState } from "@react-three/fiber";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import { Group } from "three";
 import { SkeletonUtils } from "three-stdlib";
+import { PlayerAnimationsConfig } from "../animations/player/PlayerAnimationsConfig";
 import { PoseRecord } from "../animations/player/PoseAction.model";
-import {
-  PlayerAnimationsConfig,
-  setupPlayerAnimations,
-} from "../animations/player/setupPlayer";
+import { setupPlayerAnimations } from "../animations/player/setupPlayer";
 import { PlayerId } from "../PlayerId";
 import { PlayerMesh, PlayerProps } from "./PlayerMesh";
 import { useMatchDirector } from "./useMatchDirector";
 import { useAppZuStore } from "/app/app.zu.store";
-import { logger } from "/app/logger";
+import { useRandomTraceId } from "/app/utils";
 
 export const PLAYER_MODEL_URL = "models/player-transformed.glb";
 
@@ -23,13 +21,14 @@ export function Player({
   dbgLabelVisible,
   colors,
   materials,
-  ...props
 }: PlayerProps & {
   dbgLabelVisible?: boolean;
 } & JSX.IntrinsicElements["group"]) {
-  const playerId: PlayerId = useMemo(
-    () => new PlayerId(teamIdx, playerIdx),
-    [teamIdx, playerIdx]
+  const playerId = useRef(new PlayerId(teamIdx, playerIdx));
+
+  useRandomTraceId(
+    `Player-${teamIdx}-${playerIdx}`,
+    playerId.current.isDebugPlayer
   );
 
   const playerRef = React.useRef<Group>(null);
@@ -60,15 +59,14 @@ export function Player({
   useEffect(() => {
     if (config.current) return;
     if (playerRef.current && player.movements) {
-      if (!playerId.playerIdx) logger.debug("useEffect player");
-      const result = setupPlayerAnimations(
-        playerId,
+      config.current = setupPlayerAnimations(
+        playerId.current,
         playerRef.current,
         poseAnimations.actions,
         player.movements
       );
-      config.current = result;
-      result.startMatch(startTime, playbackSpeed);
+
+      config.current.startMatch(startTime, playbackSpeed);
     }
   }, [poseAnimations.actions, playerId, player, startTime, playbackSpeed]);
 
@@ -91,7 +89,7 @@ export function Player({
         pose,
         lastRawPoseRef,
         config.current,
-        playerId
+        playerId.current
       );
     };
   }, [config, playerId, dbgLabelVisible]);
@@ -124,7 +122,6 @@ export function Player({
       visible={!!modelClone}
       raycast={() => null}
       position-x={(teamIdx ? 1.1 : -1.1) * (2 + playerIdx)}
-      {...props}
     >
       <PlayerMesh
         model={modelClone}
@@ -136,16 +133,18 @@ export function Player({
       />
 
       <Billboard visible={false} ref={labelRef}>
-        <Text
-          color="black"
-          anchorX="center"
-          anchorY="bottom"
-          textAlign="center"
-          position={[0, 2, 0]}
-          fontSize={0.3}
-        >
-          {`${squadPlayer.shirtNumber}. ${squadPlayer.name}`}
-        </Text>
+        <Suspense>
+          <Text
+            color="black"
+            anchorX="center"
+            anchorY="bottom"
+            textAlign="center"
+            position={[0, 2, 0]}
+            fontSize={0.3}
+          >
+            {`${squadPlayer.shirtNumber}. ${squadPlayer.name}`}
+          </Text>
+        </Suspense>
       </Billboard>
 
       {/* <Html
@@ -187,18 +186,20 @@ export function Player({
       </mesh>
       {isDebug && (
         <Billboard>
-          <Text
-            color="#505050"
-            anchorX="center"
-            anchorY="bottom"
-            textAlign="center"
-            position={[0, 2.3, 0]}
-            fontSize={0.3}
-            ref={dbgLabelRef}
-            visible={dbgLabelVisible}
-          >
-            {" "}
-          </Text>
+          <Suspense>
+            <Text
+              color="#505050"
+              anchorX="center"
+              anchorY="bottom"
+              textAlign="center"
+              position={[0, 2.3, 0]}
+              fontSize={0.3}
+              ref={dbgLabelRef}
+              visible={dbgLabelVisible}
+            >
+              {" "}
+            </Text>
+          </Suspense>
         </Billboard>
       )}
     </group>

@@ -8,13 +8,17 @@ import { PlayerGLTFResult } from "./playerGltf.model";
 import { PlayerMaterials } from "./PlayerMesh";
 import { useMaterialClone } from "./useMaterialClone";
 import { TeamState } from "/app/teams.slice";
+import { useRandomTraceId } from "/app/utils";
 
 export function Team({ team, teamIdx }: { team: TeamState; teamIdx: TeamIdx }) {
+  const { scene: model } = useGLTF(PLAYER_MODEL_URL);
+
+  useRandomTraceId(`Team-${teamIdx}`, teamIdx === 0);
+
   const { dbgLabelVisible } = useControls("Players", {
     dbgLabelVisible: false,
   });
 
-  const { scene: model } = useGLTF(PLAYER_MODEL_URL);
   const { materials: modelMaterials } = useGraph(model) as PlayerGLTFResult;
 
   const shortsMaterial = useMaterialClone(
@@ -23,9 +27,7 @@ export function Team({ team, teamIdx }: { team: TeamState; teamIdx: TeamIdx }) {
   );
   const socksMaterial = useMaterialClone(
     modelMaterials.Socks_Material,
-    team.colors.socks,
-    undefined,
-    "socks"
+    team.colors.socks
   );
 
   const [materials, setMaterials] = useState<PlayerMaterials>();
@@ -46,21 +48,24 @@ export function Team({ team, teamIdx }: { team: TeamState; teamIdx: TeamIdx }) {
   }, [modelMaterials, shortsMaterial, socksMaterial, model]);
 
   if (!materials) return <></>;
+
   return (
-    team.squadPlayers
-      // .filter((_, idx) => idx === 10 && teamIdx === 0)
-      .map((player, playerIdx) => {
-        return (
-          <Player
-            key={`${team.id}-${playerIdx}`}
-            teamIdx={teamIdx}
-            player={player}
-            playerIdx={playerIdx}
-            colors={team.colors}
-            dbgLabelVisible={dbgLabelVisible}
-            materials={materials}
-          />
-        );
-      })
+    <>
+      {team.squadPlayers
+        // .filter((_, idx) => idx === 7 && teamIdx === 0)
+        .map((player, playerIdx) => {
+          return (
+            <Player
+              key={`player-${teamIdx}-${playerIdx}`}
+              teamIdx={teamIdx}
+              player={player}
+              playerIdx={playerIdx}
+              colors={team.colors}
+              dbgLabelVisible={dbgLabelVisible}
+              materials={materials}
+            />
+          );
+        })}
+    </>
   );
 }

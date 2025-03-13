@@ -1,5 +1,5 @@
 import { useFrame, useThree } from "@react-three/fiber";
-import { MutableRefObject, useEffect, useRef } from "react";
+import { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import { Group, Mesh, Object3D, Vector3 } from "three";
 import { OrbitControls } from "three-stdlib";
 import { ViewFromTarget } from "../ViewFromTarget";
@@ -14,6 +14,11 @@ export function useMatchOrbitControls(
   const defaultCamera = useThree((state) => state.camera);
 
   const controls = useRef<OrbitControls>();
+  const isPaused = useAppZuStore((a) => a.mediaPlayer.paused);
+  const invalidate = useThree((s) => s.invalidate);
+
+  const threeInvalidate = useCallback(() => invalidate(), [invalidate]);
+
   useEffect(() => {
     if (defaultCamera && domElement && !controls.current) {
       const ctls = new OrbitControls(defaultCamera, domElement);
@@ -24,9 +29,17 @@ export function useMatchOrbitControls(
       ctls.maxDistance = 110;
       ctls.zoomSpeed = 2;
       controls.current = ctls;
-      // return ctls;
     }
   }, [defaultCamera, domElement]);
+
+  useEffect(() => {
+    if (controls.current && isPaused) {
+      controls.current.addEventListener("change", threeInvalidate);
+      return () => {
+        controls.current?.removeEventListener("change", threeInvalidate);
+      };
+    }
+  }, [isPaused, threeInvalidate]);
 
   const followedObjectId = useAppZuStore((st) => st.camera.followedObjectId);
   const viewFromObject = useAppZuStore((st) => st.camera.viewFromObject);
