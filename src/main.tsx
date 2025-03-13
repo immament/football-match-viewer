@@ -1,7 +1,7 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 
+import { useAppZuStore } from "./app/app.zu.store.ts";
 import { initDev } from "./dev.ts";
 import "./index.scss";
 
@@ -9,14 +9,16 @@ main();
 
 function main() {
   initDev();
+  loadMatch();
+
   const MEDIA_PLAYER_CONTAINER_ID = "root";
 
   const mediaPlayerElem = getContainer(MEDIA_PLAYER_CONTAINER_ID);
 
   createRoot(mediaPlayerElem).render(
-    <StrictMode>
-      <App />
-    </StrictMode>
+    // <StrictMode>
+    <App />
+    // </StrictMode>
   );
 }
 
@@ -29,6 +31,18 @@ function getContainer(elementId: string): HTMLElement {
     );
   }
   return container;
+}
+
+function loadMatch() {
+  const { matchFetch, status } = useAppZuStore.getState().matchData;
+
+  if (status === "idle") {
+    const urlParams = new URLSearchParams(window.location.search);
+    matchFetch(
+      Number(urlParams.get("id")),
+      urlParams.has("dev") ? "devFs" : "fs"
+    );
+  }
 }
 
 // async function enableMocking() {

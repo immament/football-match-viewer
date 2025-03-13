@@ -1,12 +1,14 @@
 import { Environment, Sky, useHelper } from "@react-three/drei";
 import { useControls } from "leva";
-import { MutableRefObject, Suspense, useRef } from "react";
+import { Fragment, MutableRefObject, Suspense, useRef } from "react";
 import { CameraHelper, DirectionalLight, OrthographicCamera } from "three";
 import { Match } from "../match/components/Match";
 import { Stadium } from "./Stadium";
 import { useAppZuStore } from "/app/app.zu.store";
 
 export const World = () => {
+  // useRandomTraceId("World");
+
   const { envCtl, dirLightCtl, ambientLightCtl, skyCtl } = useWorldCtls();
   const dirLight = useRef<DirectionalLight>(null);
   const isDebug = useAppZuStore(({ debug }) => debug.isDebug);
@@ -19,14 +21,16 @@ export const World = () => {
   );
 
   return (
-    <>
+    <Fragment key={"world"}>
       {envCtl.visible && (
-        <Environment
-          environmentIntensity={0}
-          files={"models/potsdamer_platz_1k.hdr"}
-          background={false}
-          ground={{ height: 20, radius: 360, scale: 180 }}
-        ></Environment>
+        <Suspense fallback={null}>
+          <Environment
+            environmentIntensity={0}
+            files={"models/potsdamer_platz_1k.hdr"}
+            background={false}
+            ground={{ height: 20, radius: 360, scale: 180 }}
+          ></Environment>
+        </Suspense>
       )}
       {/* {shadowCtl.visible && <ContactShadows {...shadowCtl} />} */}
       {(dirLightCtl.visible || dirLight.current) && (
@@ -56,15 +60,16 @@ export const World = () => {
       {skyCtl.visible && <Sky />}
       <Suspense fallback={null}>
         <Stadium />
-        <Match />
       </Suspense>
+      <Match />
+
       {isDebug && dirLight.current && (
         <directionalLightHelper
           args={[dirLight.current, 2, 0xff0000]}
           visible={dirLight.current.visible && dirLightCtl.helper}
         />
       )}
-    </>
+    </Fragment>
   );
 };
 

@@ -5,7 +5,7 @@ Files: stadium.glb [21.97MB] > C:\Users\immam\dev\projects\football-match-viewer
 */
 
 import { useGLTF } from "@react-three/drei";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import * as THREE from "three";
 import { GLTF } from "three-stdlib";
 
@@ -33,8 +33,11 @@ type GLTFResult = GLTF & {
   };
 };
 
-export function Stadium(props: JSX.IntrinsicElements["group"]) {
+export function Stadium() {
   const { nodes, materials } = useGLTF(MODEL_URL) as GLTFResult;
+
+  // useRandomTraceId("Stadium");
+
   useEffect(() => {
     if (materials.Material_Standings.map) {
       materials.Material_Standings.map.repeat = new THREE.Vector2(2, 3.8);
@@ -48,41 +51,43 @@ export function Stadium(props: JSX.IntrinsicElements["group"]) {
   }, [materials]);
 
   return (
-    <group {...props} dispose={null}>
-      <mesh
-        geometry={nodes.standsN.geometry}
-        material={materials.Material_Standings}
-      />
-      <mesh
-        geometry={nodes.EnterStairs.geometry}
-        material={materials.PaletteMaterial001}
-      />
-      <mesh
-        geometry={nodes.EnterRoof.geometry}
-        material={materials.Material_Bench}
-      />
-      <mesh
-        geometry={nodes.Pitch.geometry}
-        material={materials.Material_Pitch_002}
-        receiveShadow={true}
-      />
-      <mesh
-        geometry={nodes.bannerETop.geometry}
-        material={materials.Material_Banner_Top}
-      />
-      <mesh
-        geometry={nodes.GoalFrameWest.geometry}
-        material={materials.PaletteMaterial002}
-      />
-      <mesh
-        geometry={nodes.bannerNPitch.geometry}
-        material={materials.Material_Ads}
-      />
-      <mesh
-        geometry={nodes.bannerWPitch.geometry}
-        material={materials.Material_Ads}
-      />
-    </group>
+    <Suspense fallback={null}>
+      <group dispose={null}>
+        <mesh
+          geometry={nodes.standsN.geometry}
+          material={materials.Material_Standings}
+        />
+        <mesh
+          geometry={nodes.EnterStairs.geometry}
+          material={materials.PaletteMaterial001}
+        />
+        <mesh
+          geometry={nodes.EnterRoof.geometry}
+          material={materials.Material_Bench}
+        />
+        <mesh
+          geometry={nodes.Pitch.geometry}
+          material={materials.Material_Pitch_002}
+          receiveShadow={true}
+        />
+        <mesh
+          geometry={nodes.bannerETop.geometry}
+          material={materials.Material_Banner_Top}
+        />
+        <mesh
+          geometry={nodes.GoalFrameWest.geometry}
+          material={materials.PaletteMaterial002}
+        />
+        <mesh
+          geometry={nodes.bannerNPitch.geometry}
+          material={materials.Material_Ads}
+        />
+        <mesh
+          geometry={nodes.bannerWPitch.geometry}
+          material={materials.Material_Ads}
+        />
+      </group>
+    </Suspense>
   );
 }
 

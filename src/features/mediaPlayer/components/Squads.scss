@@ -1,24 +1,122 @@
 .mv-squads {
   width: 90%;
-  height: 60px;
+  height: 800px;
+  max-height: 80%;
   left: 5%;
-  top: 70px;
-  background: white;
+  top: 50px;
   border-radius: 4px;
-  opacity: 0;
   box-shadow: 0 5px 15px rgba(black, 0.2);
   position: absolute;
   z-index: 10;
 
+  color: black;
+  padding: 20px;
+
+  opacity: 0;
+  transition: 0.3s;
   transform: translateX(-130%);
   transition-timing-function: ease-in;
-  transition: 0.2s;
 
-  &.alert-is-shown {
-    transition: 0.25s;
-    transition-timing-function: ease-out;
-
-    transform: translateX(0);
+  &.mv-squads-visible {
     opacity: 1;
+    transition: 0.3s;
+    transition-timing-function: ease-out;
+    transform: translateX(0);
   }
+  .mv-squad-teams {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 20px;
+    height: 100%;
+  }
+  .mv-squad-team {
+    flex: 1 1 400px;
+  }
+
+  .mv-squad-team-name {
+    font-size: 40px;
+    text-align: center;
+    color: #fff;
+  }
+  .mv-squad-field {
+    height: 100%;
+    background-image: url("/images/pitch-3d.small.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    .mr-position {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      .mr-shirt {
+        position: relative;
+        mask-image: url("/images/shirt-mask.png");
+        mask-repeat: no-repeat;
+        mask-size: 100% 100%;
+        background-color: #00f;
+
+        img {
+          width: 40px;
+          height: 40px;
+        }
+
+        .mr-shirt-number {
+          position: absolute;
+          left: 11px;
+          top: 11px;
+          width: 16px;
+          font-size: 10px;
+          font-weight: 700;
+          text-align: center;
+          color: #fff;
+        }
+      }
+
+      // .mr-player-name {
+      //   max-height: 22px;
+      // }
+
+      .mr-player-name {
+        top: 40px;
+        position: absolute;
+        max-width: 100%;
+        max-height: 32px;
+        padding: 2px;
+        margin-right: 1px;
+        font-size: 10px;
+        overflow-y: hidden;
+        background-color: #f8f9fa;
+        white-space: normal;
+        font-weight: 400;
+
+        a {
+          color: #212529;
+        }
+      }
+      .badge {
+        border-radius: 0.375rem;
+        color: #fff;
+        display: inline-block;
+        font-size: 0.75em;
+        font-weight: 700;
+        line-height: 1;
+        padding: 0.35em 0.65em;
+        text-align: center;
+        vertical-align: baseline;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+.stripe-1 {
+  // color: white;
+  background: repeating-linear-gradient(
+    45deg,
+    #0b3300,
+    #0b3300 5px,
+    #052702 5px,
+    #052702 10px
+  );
 }

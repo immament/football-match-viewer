@@ -18,6 +18,7 @@ import { secondsToStep } from "../animations/positions.utils";
 import { useMatchDirector } from "./useMatchDirector";
 import { useAppZuStore } from "/app/app.zu.store";
 import { logger } from "/app/logger";
+import { useRandomTraceId } from "/app/utils";
 
 export const BALL_RADIUS = 0.18;
 
@@ -25,19 +26,16 @@ type BallProps = unknown;
 
 export const Ball = forwardRef<Mesh, BallProps>(
   (_: BallProps, ref: ForwardedRef<Mesh>) => {
+    const texture = useTexture("models/ball.jpg");
+
+    useRandomTraceId("Ball");
+
     const ballRef = useRef<Mesh | null>(null);
     const dbgLabelRef = useRef<{ text: string }>(null);
 
-    const texture = useTexture("models/ball.jpg");
-
     const positionAnimationRef = useRef<AnimationAction>();
-    // const ballStatesRef = useRef<BallStates>();
 
-    // const ballPositions = useAppZuStore(
-    //   (state) => state.matchData.data?.positions.ball
-    // );
     const ballData = useAppZuStore((state) => state.matchData.ball);
-    // const matchPaused = useAppZuStore((state) => state.mediaPlayer.paused);
     const startTime = useAppZuStore((state) => state.mediaPlayer.startTime);
     const playbackSpeed = useAppZuStore(
       (state) => state.mediaPlayer.playbackSpeed

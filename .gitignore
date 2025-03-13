@@ -36,4 +36,6 @@ test-runner-profile
 
 public/models/stadium.glb
 public/models/Stadium.tsx
+public/models/player.glb
+public/models/Player.tsx
 public/models/export/

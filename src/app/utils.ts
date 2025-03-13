@@ -52,3 +52,10 @@ export function debounce<T extends (...args: Parameters<T>) => void>(
     }, delay);
   }) as T;
 }
+
+export function useRandomTraceId(_name: string, _toConsole = true) {
+  return;
+  // const dbg_randId = useRef(Math.round(Math.random() * 100000));
+  // if (toConsole) logger.info("traceId:", name, dbg_randId.current);
+  // return dbg_randId;
+}

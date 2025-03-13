@@ -10,15 +10,15 @@ export function useMaterialClone<
 >(
   material?: T,
   color?: ColorRepresentation,
-  emissive?: ColorRepresentation,
-  tag?: string
+  emissive?: ColorRepresentation
+  // tag?: string
 ): T {
   return useMemo(() => {
-    if (tag === "log") console.log("socks", material, color);
+    // if (tag === "log") console.log("socks", material, color);
     if (material == undefined) return material as T;
     const result = material.clone();
     if (color) result.color.set(color);
     if (emissive) result.emissive.set(emissive);
     return result as T;
-  }, [material, color, emissive, tag]);
+  }, [material, color, emissive]);
 }
