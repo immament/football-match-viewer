@@ -1,50 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Football Match Viewer</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css"
-    />
-    <meta
-      name="google-site-verification"
-      content="lbV92AehFo2c_7cFVKyik8jIOhffk67rrmVW_zanzvE"
-    />
-  </head>
-  <body style="background-color: #25292a">
-    <header class="container">
-      <div class="head-title">
-        <h2>Match Viewer</h2>
-        <a href="https://www.footstar.org">www.footstar.org</a>
-      </div>
-      <div class="debug-options">
-        <a href="?dbg" class="debug-mode">Debug</a>
-      </div>
-    </header>
-    <article id="main" class="container">
-      <div id="root">&nbsp;</div>
-    </article>
 
-    <footer class="container">
-      <div>Rotate camera - Left Mouse Button</div>
-      <div>Zoom - Mouse Scroll Wheel</div>
-      <div>
-        Move camera (not work in follow object mode) - Right Mouse Button / Ctrl
-        + Left Mouse Button
-      </div>
-      <div class="github">
-        <a
-          href="https://github.com/immament/football-match-viewer"
-          target="_blank"
-        >
-          <i class="bx bxl-github"></i>
-          https://github.com/immament/football-match-viewer
-        </a>
-      </div>
-    </footer>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-59H7VEQV71"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-59H7VEQV71');
+  </script>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Football Match Viewer</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" />
+  <meta name="google-site-verification" content="lbV92AehFo2c_7cFVKyik8jIOhffk67rrmVW_zanzvE" />
+</head>
+
+<body style="background-color: #25292a">
+  <header class="container">
+    <div class="head-title">
+      <h2>Match Viewer</h2>
+      <a href="https://www.footstar.org">www.footstar.org</a>
+    </div>
+    <div class="debug-options">
+      <a href="?dbg" class="debug-mode">Debug</a>
+    </div>
+  </header>
+  <article id="main" class="container">
+    <div id="root">&nbsp;</div>
+  </article>
+
+  <footer class="container">
+    <div>Rotate camera - Left Mouse Button</div>
+    <div>Zoom - Mouse Scroll Wheel</div>
+    <div>
+      Move camera (not work in follow object mode) - Right Mouse Button / Ctrl
+      + Left Mouse Button
+    </div>
+    <div class="github">
+      <a href="https://github.com/immament/football-match-viewer" target="_blank">
+        <i class="bx bxl-github"></i>
+        https://github.com/immament/football-match-viewer
+      </a>
+    </div>
+  </footer>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

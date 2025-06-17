@@ -161,11 +161,7 @@ export const createMatchDataSlice: StateCreator<
         const fsMatch = parseFsXml(matchXml);
         fsMatch.matchId = matchId;
         const matchData = mapFsMatch(fsMatch);
-        // if (matchData.status === "offline") {
         get().matchData.matchFetchSuccess(matchData);
-        // } else {
-        //   logger.error("loadMatchFromXml error:", "live matches not supported");
-        // }
       } catch (error) {
         logger.error("loadMatchFromXml error:", error);
         get().matchData.matchFetchError(String(error));
