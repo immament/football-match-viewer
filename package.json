@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest --project unit",
-    "test:browser": "vitest --workspace=vitest.workspace.ts --project browser",
+    "test:browser": "vitest --project browser",
     "coverage": "vitest run --coverage",
     "depc": "depcruise src --ts-config tsconfig.app.json"
   },
@@ -41,7 +41,8 @@
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.172.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/browser": "^3.0.5",
+    "@vitest/browser": "~4.1.12",
+    "@vitest/browser-playwright": "~4.1.12",
     "boxicons": "^2.1.4",
     "dependency-cruiser": "^16.9.0",
     "eslint": "^9.17.0",
@@ -49,18 +50,21 @@
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "msw": "^2.7.0",
-    "playwright": "^1.50.1",
+    "playwright": "^1.64.1",
     "sass-embedded": "^1.83.4",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.2",
-    "vite": "^6.0.11",
-    "vitest": "^3.0.5",
-    "vitest-browser-react": "^0.0.4",
-    "vitest-mock-extended": "^2.0.2"
+    "vite": "~6.4.5",
+    "vitest": "~4.1.12",
+    "vitest-browser-react": "^2.3.0",
+    "vitest-mock-extended": "^5.1.1"
   },
   "msw": {
     "workerDirectory": [
       "public"
     ]
+  },
+  "resolutions": {
+    "vite": "~6.4.5"
   }
 }

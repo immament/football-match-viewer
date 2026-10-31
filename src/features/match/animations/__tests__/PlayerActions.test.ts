@@ -11,7 +11,7 @@ import { PoseTypes } from "../player/Pose.model";
 import { IPoseAction } from "../player/PoseAction.model";
 
 vi.mock("three");
-const PoseActionMock = vi.fn((isMove: boolean) => {
+const PoseActionMock = vi.fn(function (isMove: boolean) {
   return {
     isMove,
     play: vi.fn(),

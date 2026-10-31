@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import "@vitest/browser/providers/playwright";
+import type {} from "@vitest/browser-playwright";
 import { describe, expect, test } from "vitest";
 import { MediaHeaderComponent } from "../MediaHeader.component";
 import { useAppZuStore } from "/app/app.zu.store";
